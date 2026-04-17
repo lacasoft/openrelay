@@ -1,0 +1,750 @@
+openapi: 3.0.3
+info:
+  title: OpenRelay API
+  description: |
+    The OpenRelay merchant gateway API. Create payment intents, manage webhooks,
+    verify x402 payments, and query node status.
+  version: 0.0.1
+  contact:
+    url: https://openrelay.dev
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  - url: https://api.openrelay.dev/v1
+    description: Production
+  - url: http://localhost:3000/v1
+    description: Local development
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Payment Intents
+    description: Create and manage payment intents
+  - name: Webhooks
+    description: Register and manage webhook endpoints
+  - name: x402
+    description: Verify x402 protocol payments
+  - name: Nodes
+    description: Query relay node status
+  - name: Internal
+    description: Node-to-API callbacks (not for merchant use)
+  - name: Health
+    description: Service health checks
+
+paths:
+  /payment_intents:
+    post:
+      tags: [Payment Intents]
+      summary: Create a payment intent
+      operationId: createPaymentIntent
+      security:
+        - BearerAuth: []
+      description: |
+        Creates a new payment intent. Requires a secret key (sk_).
+        The intent is asynchronously routed to a relay node.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentIntentRequest'
+      responses:
+        '201':
+          description: Payment intent created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentIntent'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    get:
+      tags: [Payment Intents]
+      summary: List payment intents
+      operationId: listPaymentIntents
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Number of intents to return (max 100)
+        - name: starting_after
+          in: query
+          schema:
+            type: string
+          description: Cursor for pagination (intent ID)
+      responses:
+        '200':
+          description: List of payment intents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentIntentList'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /payment_intents/{id}:
+    get:
+      tags: [Payment Intents]
+      summary: Retrieve a payment intent
+      operationId: getPaymentIntent
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^pi_[A-Za-z0-9_-]{24}$'
+          description: Payment intent ID (e.g. pi_abc123...)
+      responses:
+        '200':
+          description: Payment intent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentIntent'
+        '404':
+          description: Intent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /payment_intents/{id}/cancel:
+    post:
+      tags: [Payment Intents]
+      summary: Cancel a payment intent
+      operationId: cancelPaymentIntent
+      security:
+        - BearerAuth: []
+      description: |
+        Cancels an intent in `created`, `routing`, or `pending_payment` status.
+        Requires a secret key (sk_).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^pi_[A-Za-z0-9_-]{24}$'
+      responses:
+        '200':
+          description: Intent cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentIntent'
+        '404':
+          description: Intent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: Intent cannot be cancelled (already settled/failed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /webhooks:
+    post:
+      tags: [Webhooks]
+      summary: Register a webhook endpoint
+      operationId: createWebhook
+      security:
+        - BearerAuth: []
+      description: |
+        Registers a URL to receive webhook events. The signing secret is returned
+        only once in the response. Requires a secret key (sk_).
+        URLs pointing to private/internal IPs are rejected (SSRF protection).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhookRequest'
+      responses:
+        '201':
+          description: Webhook endpoint created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookEndpointWithSecret'
+        '400':
+          description: Validation error (e.g. private URL)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    get:
+      tags: [Webhooks]
+      summary: List webhook endpoints
+      operationId: listWebhooks
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of webhook endpoints
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookEndpointList'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /webhooks/{id}:
+    delete:
+      tags: [Webhooks]
+      summary: Delete a webhook endpoint
+      operationId: deleteWebhook
+      security:
+        - BearerAuth: []
+      description: Soft-deletes the webhook endpoint. Requires a secret key (sk_).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^we_[A-Za-z0-9_-]{16}$'
+          description: Webhook endpoint ID
+      responses:
+        '204':
+          description: Webhook deleted
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /x402/verify:
+    post:
+      tags: [x402]
+      summary: Verify an x402 payment
+      operationId: verifyX402Payment
+      security:
+        - BearerAuth: []
+      description: |
+        Verifies that an x402 payment has been made on-chain.
+        Called by the SDK middleware after receiving the X-PAYMENT header.
+        Implements replay protection via atomic tx_hash uniqueness checks.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/X402VerifyRequest'
+      responses:
+        '200':
+          description: Payment verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/X402VerifyResponse'
+        '400':
+          description: Invalid payment payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: invalid_payment_payload
+        '402':
+          description: Payment verification failed, insufficient, or already used
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/X402ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /nodes:
+    get:
+      tags: [Nodes]
+      summary: List active relay nodes
+      operationId: listNodes
+      security:
+        - BearerAuth: []
+      description: |
+        Returns active nodes with their current scores.
+        Phase 1 reads bootstrap nodes from env. Phase 2 reads from NodeRegistry.sol.
+      responses:
+        '200':
+          description: List of active nodes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeList'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /nodes/{operator}:
+    get:
+      tags: [Nodes]
+      summary: Get node details by operator address
+      operationId: getNode
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: operator
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Node operator address
+      responses:
+        '200':
+          description: Node details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+        '404':
+          description: Node not registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /internal/settle/{intentId}:
+    post:
+      tags: [Internal]
+      summary: Settle a payment intent
+      operationId: settlePaymentIntent
+      description: |
+        Called by the node watcher when a USDC transfer is confirmed on-chain.
+        Updates intent status to SETTLED and fires merchant webhooks.
+        Authenticated via X-Internal-Secret header (shared HMAC secret), not API keys.
+      security: []
+      parameters:
+        - name: intentId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^pi_[A-Za-z0-9_-]{24}$'
+        - name: X-Internal-Secret
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Shared HMAC secret for node-to-API authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettleRequest'
+      responses:
+        '200':
+          description: Settlement recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettleResponse'
+        '403':
+          description: Forbidden (invalid or missing secret)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: forbidden
+        '404':
+          description: Intent not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: intent_not_found
+
+  /health:
+    servers:
+      - url: http://localhost:3000
+        description: Health endpoint is not under /v1 prefix
+    get:
+      tags: [Health]
+      summary: Service health check
+      operationId: healthCheck
+      security: []
+      description: Returns health status of the API and its dependencies (Postgres, Redis).
+      responses:
+        '200':
+          description: Health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Use a publishable key (pk_live_... or pk_test_...) for read-only endpoints.
+        Use a secret key (sk_live_... or sk_test_...) for write endpoints (create, cancel, webhooks).
+
+  schemas:
+    CreatePaymentIntentRequest:
+      type: object
+      required: [amount, currency, chain]
+      properties:
+        amount:
+          type: integer
+          minimum: 1
+          description: Amount in smallest currency unit (e.g. USDC cents = 6 decimals)
+          example: 1000000
+        currency:
+          type: string
+          enum: [usdc, btc]
+          example: usdc
+        chain:
+          type: string
+          enum: [base, lightning, polygon, auto]
+          example: base
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: Arbitrary key-value metadata attached to the intent
+          example: { "order_id": "ord_123" }
+        expires_in:
+          type: integer
+          minimum: 1
+          description: Time-to-live in seconds (defaults to protocol constant)
+          example: 3600
+
+    PaymentIntent:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^pi_[A-Za-z0-9_-]{24}$'
+          example: pi_abc123def456ghi789jkl012
+        merchant_id:
+          type: string
+        amount:
+          type: integer
+          example: 1000000
+        currency:
+          type: string
+          enum: [usdc, btc]
+        chain:
+          type: string
+          enum: [base, lightning, polygon, auto]
+        status:
+          type: string
+          enum: [created, routing, pending_payment, confirming, settled, failed, expired, cancelled]
+        node_operator:
+          type: string
+          nullable: true
+        payer_address:
+          type: string
+          nullable: true
+          description: On-chain address the payer should send funds to
+        tx_hash:
+          type: string
+          nullable: true
+        fee_amount:
+          type: integer
+          description: Protocol fee in smallest currency unit
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+        created_at:
+          type: integer
+          description: Unix timestamp
+        expires_at:
+          type: integer
+          description: Unix timestamp
+        settled_at:
+          type: integer
+          nullable: true
+          description: Unix timestamp
+
+    PaymentIntentList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentIntent'
+        has_more:
+          type: boolean
+
+    CreateWebhookRequest:
+      type: object
+      required: [url, events]
+      properties:
+        url:
+          type: string
+          format: uri
+          description: HTTPS URL to receive webhook events (private IPs are blocked)
+          example: https://example.com/webhooks/openrelay
+        events:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum:
+              - payment_intent.created
+              - payment_intent.pending
+              - payment_intent.confirming
+              - payment_intent.settled
+              - payment_intent.failed
+              - payment_intent.expired
+              - payment_intent.cancelled
+              - dispute.opened
+              - dispute.resolved
+          example: [payment_intent.settled, payment_intent.failed]
+
+    WebhookEndpointWithSecret:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^we_[A-Za-z0-9_-]{16}$'
+          example: we_abc123def456gh
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+        secret:
+          type: string
+          description: Signing secret (returned only at creation time, store it securely)
+          example: whsec_abc123...
+        created_at:
+          type: integer
+
+    WebhookEndpoint:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: integer
+
+    WebhookEndpointList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebhookEndpoint'
+        has_more:
+          type: boolean
+
+    X402VerifyRequest:
+      type: object
+      required: [payment, amount, chain]
+      properties:
+        payment:
+          type: string
+          minLength: 1
+          description: Base64-encoded payment payload from X-PAYMENT header
+        amount:
+          type: integer
+          minimum: 1
+          description: Expected payment amount in smallest unit
+        chain:
+          type: string
+          enum: [base, lightning]
+
+    X402VerifyResponse:
+      type: object
+      properties:
+        verified:
+          type: boolean
+          example: true
+        tx_hash:
+          type: string
+          example: '0xabc123...'
+        amount_received:
+          type: integer
+          example: 1000000
+
+    X402ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          enum: [chain_verification_failed, insufficient_payment, payment_already_used]
+        reason:
+          type: string
+          description: Present when error is chain_verification_failed
+        required:
+          type: integer
+          description: Present when error is insufficient_payment
+        received:
+          type: integer
+          description: Present when error is insufficient_payment
+
+    Node:
+      type: object
+      properties:
+        endpoint:
+          type: string
+          format: uri
+        score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        is_bootstrap:
+          type: boolean
+
+    NodeList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Node'
+        total:
+          type: integer
+
+    SettleRequest:
+      type: object
+      required: [tx_hash, block_number, settled_at]
+      properties:
+        tx_hash:
+          type: string
+          minLength: 1
+          example: '0xdef456...'
+        block_number:
+          type: integer
+          minimum: 0
+        settled_at:
+          type: integer
+          minimum: 1
+          description: Unix timestamp of settlement
+
+    SettleResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: true
+        already_settled:
+          type: boolean
+          description: Present and true if the intent was already settled (idempotent)
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        version:
+          type: string
+          example: '0.1.0'
+        services:
+          type: object
+          properties:
+            postgres:
+              type: boolean
+            redis:
+              type: boolean
+
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: intent_not_found
+            message:
+              type: string
+              description: Human-readable error message
+              example: No payment intent found with id pi_abc123.
+            param:
+              type: string
+              nullable: true
+              description: The parameter that caused the error
+            doc_url:
+              type: string
+              format: uri
+              description: Link to relevant documentation

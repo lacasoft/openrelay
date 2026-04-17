@@ -1,0 +1,17 @@
+{
+  "name": "@openrelay/protocol",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Shared types, interfaces, and constants for the OpenRelay protocol",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

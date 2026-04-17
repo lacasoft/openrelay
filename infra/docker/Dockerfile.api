@@ -1,0 +1,51 @@
+# ── Build stage ────────────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+RUN corepack enable && corepack prepare pnpm@9 --activate
+
+WORKDIR /app
+
+# Copy workspace files
+COPY package.json pnpm-workspace.yaml turbo.json tsconfig.json biome.json ./
+
+# Copy package manifests first (layer cache optimization)
+COPY packages/protocol/package.json  ./packages/protocol/
+COPY packages/api/package.json       ./packages/api/
+
+# Install dependencies
+# Use --no-frozen-lockfile to work without a lockfile during initial setup
+RUN pnpm install --no-frozen-lockfile
+
+# Copy source
+COPY packages/protocol  ./packages/protocol
+COPY packages/api       ./packages/api
+
+# Build
+RUN pnpm --filter @openrelay/protocol build
+RUN pnpm --filter @openrelay/api build
+
+# ── Production stage ───────────────────────────────────────────
+FROM node:20-alpine AS runner
+
+RUN corepack enable && corepack prepare pnpm@9 --activate
+
+WORKDIR /app
+
+COPY package.json pnpm-workspace.yaml ./
+COPY packages/protocol/package.json  ./packages/protocol/
+COPY packages/api/package.json       ./packages/api/
+
+RUN pnpm install --no-frozen-lockfile --prod
+
+COPY --from=builder /app/packages/protocol/dist ./packages/protocol/dist
+COPY --from=builder /app/packages/api/dist      ./packages/api/dist
+
+# Health check dependency
+RUN apk add --no-cache wget
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
+EXPOSE 3000
+
+CMD ["node", "packages/api/dist/index.js"]

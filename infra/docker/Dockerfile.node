@@ -1,0 +1,51 @@
+# ── Build stage ────────────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+# better-sqlite3 requires native compilation
+RUN apk add --no-cache python3 make g++
+
+RUN corepack enable && corepack prepare pnpm@9 --activate
+
+WORKDIR /app
+
+COPY package.json pnpm-workspace.yaml turbo.json tsconfig.json ./
+COPY packages/protocol/package.json ./packages/protocol/
+COPY packages/node/package.json     ./packages/node/
+
+RUN pnpm install --no-frozen-lockfile
+
+COPY packages/protocol ./packages/protocol
+COPY packages/node     ./packages/node
+
+RUN pnpm --filter @openrelay/protocol build
+RUN pnpm --filter @openrelay/node build
+
+# ── Production stage ───────────────────────────────────────────
+FROM node:20-alpine AS runner
+
+# Runtime deps for native modules + health check
+RUN apk add --no-cache python3 make g++ wget
+
+RUN corepack enable && corepack prepare pnpm@9 --activate
+
+WORKDIR /app
+
+COPY package.json pnpm-workspace.yaml ./
+COPY packages/protocol/package.json ./packages/protocol/
+COPY packages/node/package.json     ./packages/node/
+
+RUN pnpm install --no-frozen-lockfile --prod
+
+COPY --from=builder /app/packages/protocol/dist ./packages/protocol/dist
+COPY --from=builder /app/packages/node/dist     ./packages/node/dist
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN mkdir -p /data && chown appuser:appgroup /data
+USER appuser
+
+# Persistent volume for SQLite database
+VOLUME ["/data"]
+
+EXPOSE 4000
+
+CMD ["node", "packages/node/dist/index.js"]
