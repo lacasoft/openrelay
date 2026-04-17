@@ -112,5 +112,7 @@ desktop.ini
 # ============================================================
 # Claude Code (local tooling, not part of project)
 # ============================================================
+CLAUDE.md
 .claude/
 .claude-flow/
+.mcp.json
