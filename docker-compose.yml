@@ -1,0 +1,175 @@
+version: "3.9"
+
+# OpenRelay — Stack completo autoalojado
+# ─────────────────────────────────────────────────────────────
+# Uso básico:
+#   docker compose up -d && make seed
+#
+# Con dashboard:
+#   docker compose --profile dashboard up -d
+#
+# Ver logs:
+#   docker compose logs -f
+# ─────────────────────────────────────────────────────────────
+
+services:
+
+  # ── PostgreSQL ─────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     openrelay
+      POSTGRES_PASSWORD: openrelay
+      POSTGRES_DB:       openrelay
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./packages/api/src/lib/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openrelay -d openrelay"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ── Redis ──────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── OpenRelay API ──────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Server
+      API_PORT:     3000
+      LOG_LEVEL:    ${LOG_LEVEL:-info}
+      NODE_ENV:     ${NODE_ENV:-production}
+
+      # Database
+      DATABASE_URL: postgresql://openrelay:openrelay@postgres:5432/openrelay
+      REDIS_URL:    redis://redis:6379
+
+      # Security — override in production
+      API_SECRET:   ${API_SECRET:-openrelay-dev-secret-change-in-production-min-32-chars}
+
+      # Blockchain
+      BASE_RPC_URL: ${BASE_RPC_URL:-https://sepolia.base.org}
+      USDC_ADDRESS: ${USDC_ADDRESS:-0x036CbD53842c5426634e7929541eC2318f3dCF7e}
+
+      # Contract addresses (set after: make deploy-testnet)
+      NODE_REGISTRY_ADDRESS:    ${NODE_REGISTRY_ADDRESS:-0x0000000000000000000000000000000000000000}
+      STAKE_MANAGER_ADDRESS:    ${STAKE_MANAGER_ADDRESS:-0x0000000000000000000000000000000000000000}
+      DISPUTE_RESOLVER_ADDRESS: ${DISPUTE_RESOLVER_ADDRESS:-0x0000000000000000000000000000000000000000}
+
+      # Node communication — shared secret for internal API calls
+      NODE_HMAC_SECRET:           ${NODE_HMAC_SECRET:-openrelay-node-hmac-secret-change-in-production-32chars}
+      BOOTSTRAP_NODE_ENDPOINT:    http://node:4000
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health | grep -q '\"ok\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── OpenRelay Node Daemon ──────────────────────────────────
+  node:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.node
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      # Server
+      PORT:      4000
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      NODE_ENV:  ${NODE_ENV:-production}
+
+      # Operator wallet — set your real wallet in .env for testnet/mainnet
+      NODE_OPERATOR_ADDRESS:     ${NODE_OPERATOR_ADDRESS:-0x0000000000000000000000000000000000000000}
+      NODE_OPERATOR_PRIVATE_KEY: ${NODE_OPERATOR_PRIVATE_KEY:-0x0000000000000000000000000000000000000000000000000000000000000000}
+
+      # This node's public endpoint — must be reachable from internet in production
+      # In dev: use ngrok (ngrok http 4000) and set NODE_ENDPOINT=https://xxxx.ngrok.io
+      NODE_ENDPOINT: ${NODE_ENDPOINT:-http://node:4000}
+
+      # Shared secrets — must match API values
+      NODE_HMAC_SECRET: ${NODE_HMAC_SECRET:-openrelay-node-hmac-secret-change-in-production-32chars}
+
+      # SQLite database path — persisted via Docker volume
+      DB_PATH: /data/node.db
+
+      # Internal API URL — how the node calls back to the API after detecting settlements
+      API_INTERNAL_URL: http://api:3000
+
+      # Blockchain
+      BASE_RPC_URL: ${BASE_RPC_URL:-https://sepolia.base.org}
+      USDC_ADDRESS: ${USDC_ADDRESS:-0x036CbD53842c5426634e7929541eC2318f3dCF7e}
+
+      # Contract addresses
+      NODE_REGISTRY_ADDRESS: ${NODE_REGISTRY_ADDRESS:-0x0000000000000000000000000000000000000000}
+      STAKE_MANAGER_ADDRESS: ${STAKE_MANAGER_ADDRESS:-0x0000000000000000000000000000000000000000}
+    volumes:
+      - node_data:/data
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:4000/health | grep -q '\"ok\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ── Dashboard (opt-in con --profile dashboard) ─────────────
+  dashboard:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.dashboard
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001 | grep -q 'OpenRelay'"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    profiles:
+      - dashboard
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  node_data:
+    driver: local
