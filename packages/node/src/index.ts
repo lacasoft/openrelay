@@ -9,12 +9,13 @@ import { startChainWatcher }      from './services/watcher'
 const config = loadConfig()
 const store  = initStore(config.dbPath)
 
+const isDev = process.env['NODE_ENV'] !== 'production'
 const app = Fastify({
   logger: {
     level: process.env['LOG_LEVEL'] ?? 'info',
-    transport: process.env['NODE_ENV'] !== 'production'
-      ? { target: 'pino-pretty', options: { colorize: true } }
-      : undefined,
+    ...(isDev && {
+      transport: { target: 'pino-pretty', options: { colorize: true } },
+    }),
   },
 })
 

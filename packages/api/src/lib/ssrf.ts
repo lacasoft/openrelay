@@ -46,7 +46,9 @@ function isPrivateIPv4(ip: string): boolean {
   const parts = ip.split('.').map(Number)
   if (parts.length !== 4) return true
 
-  const [a, b] = parts
+  const a = parts[0]
+  const b = parts[1]
+  if (a === undefined || b === undefined) return true
 
   // 127.0.0.0/8 — loopback
   if (a === 127) return true

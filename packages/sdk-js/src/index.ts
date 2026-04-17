@@ -17,7 +17,7 @@ export class OpenRelay {
       baseUrl: config.baseUrl ?? 'https://api.openrelay.dev',
       apiKey: config.apiKey,
       timeout: config.timeout ?? 30_000,
-      merchantWallet: config.merchantWallet,
+      ...(config.merchantWallet !== undefined && { merchantWallet: config.merchantWallet }),
     }
 
     this.paymentIntents = new PaymentIntents(this.config)

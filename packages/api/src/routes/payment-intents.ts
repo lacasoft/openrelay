@@ -164,7 +164,7 @@ async function triggerRouting(
 
     await updatePaymentIntentStatus(db, intent.id, 'pending_payment', {
       node_operator: bootstrapNode,
-      payer_address: assignment.payment_address,
+      ...(assignment.payment_address !== undefined && { payer_address: assignment.payment_address }),
     })
 
     app.log.info({ intent_id: intent.id, payment_address: assignment.payment_address }, 'Intent routed')

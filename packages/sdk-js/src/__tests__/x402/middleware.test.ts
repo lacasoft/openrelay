@@ -53,17 +53,14 @@ describe('X402 middleware', () => {
     expect(result).toBeInstanceOf(Response)
     expect(result!.status).toBe(402)
 
-    const body = await result!.json()
+    const body = await result!.json() as any
     expect(body.x402Version).toBe(1)
     expect(body.accepts).toHaveLength(1)
     expect(body.accepts[0].scheme).toBe('exact')
     expect(body.accepts[0].network).toBe('base')
     expect(body.accepts[0].maxAmountRequired).toBe('5000')
     expect(body.accepts[0].description).toBe('Premium API access')
-    // NOTE: The OpenRelay constructor does not forward merchantWallet to this.config,
-    // so payTo falls back to '' even when merchantWallet is provided. This is a known
-    // bug in the SDK source (index.ts constructor).
-    expect(body.accepts[0].payTo).toBe('')
+    expect(body.accepts[0].payTo).toBe('0xMerchantWallet123')
     expect(body.accepts[0].asset).toBe(USDC_BASE_ADDRESS)
     expect(body.accepts[0].maxTimeoutSeconds).toBe(300)
     expect(body.accepts[0].mimeType).toBe('application/json')
@@ -81,7 +78,7 @@ describe('X402 middleware', () => {
     })
 
     const result = await mw(mockReq, undefined as any)
-    const body = await result!.json()
+    const body = await result!.json() as any
 
     expect(body.accepts[0].description).toBe('API access')
   })
@@ -151,7 +148,7 @@ describe('X402 middleware', () => {
 
     expect(result).toBeInstanceOf(Response)
     expect(result!.status).toBe(402)
-    const body = await result!.json()
+    const body = await result!.json() as any
     expect(body.error).toBe('Payment verification failed')
   })
 
@@ -175,14 +172,16 @@ describe('X402 middleware', () => {
     expect(result!.status).toBe(402)
   })
 
-  it('should always return 402 with standard Web Request even when x-payment header is set', async () => {
-    // This documents a bug: the middleware casts req.headers to Record<string, string>
-    // but Web API Request.headers is a Headers object. Bracket access returns undefined.
+  it('should detect x-payment header from standard Web Request via Headers.get()', async () => {
+    // Regression test: the middleware now correctly handles Web API Request objects
+    // by calling headers.get() when headers is a Headers instance.
     const mw = client.x402.middleware({
       price: 1000,
       currency: 'usdc',
       chain: 'base',
     })
+
+    mockFetch.mockResolvedValueOnce(mockFetchResponse({ verified: true, tx_hash: '0xAbc' }))
 
     const webReq = new Request('https://api.example.com/protected', {
       method: 'GET',
@@ -191,10 +190,9 @@ describe('X402 middleware', () => {
 
     const result = await mw(webReq, undefined as any)
 
-    // Bug: the payment header is not detected via bracket notation on Headers object
-    expect(result).toBeInstanceOf(Response)
-    expect(result!.status).toBe(402)
-    expect(mockFetch).not.toHaveBeenCalled()
+    // Header detected → verify was called → pass-through (undefined)
+    expect(result).toBeUndefined()
+    expect(mockFetch).toHaveBeenCalledTimes(1)
   })
 })
 
@@ -223,7 +221,7 @@ describe('X402 handler', () => {
     const result = await handler(req)
 
     expect(result.status).toBe(402)
-    const body = await result.json()
+    const body = await result.json() as any
     expect(body.x402Version).toBe(1)
     expect(body.accepts[0].maxAmountRequired).toBe('2000')
     expect(body.accepts[0].description).toBe('Data endpoint')
@@ -254,7 +252,7 @@ describe('X402 handler', () => {
 
     expect(innerHandler).toHaveBeenCalledTimes(1)
     expect(result.status).toBe(200)
-    const body = await result.json()
+    const body = await result.json() as any
     expect(body.data).toBe('secret_data')
   })
 
@@ -295,7 +293,7 @@ describe('X402 handler', () => {
     const req = new Request('https://api.example.com/v1/resource/123', { method: 'GET' })
     const result = await handler(req)
 
-    const body = await result.json()
+    const body = await result.json() as any
     expect(body.accepts[0].resource).toBe('https://api.example.com/v1/resource/123')
   })
 
@@ -314,7 +312,7 @@ describe('X402 handler', () => {
 
     const req = new Request('https://api.example.com/resource', { method: 'GET' })
     const result = await handler(req)
-    const body = await result.json()
+    const body = await result.json() as any
 
     expect(body.accepts[0].payTo).toBe('')
   })

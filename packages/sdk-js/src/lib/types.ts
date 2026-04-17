@@ -24,11 +24,11 @@ export async function request<T>(config: OpenRelayConfig, opts: RequestOptions):
       'Content-Type': 'application/json',
       'OpenRelay-Version': '0.1',
     },
-    body: opts.body ? JSON.stringify(opts.body) : undefined,
+    ...(opts.body !== undefined && { body: JSON.stringify(opts.body) }),
     signal: controller.signal,
   }).finally(() => clearTimeout(timer))
 
-  const data = await res.json()
+  const data = (await res.json()) as { error?: unknown } & Record<string, unknown>
 
   if (!res.ok) {
     // Server returns { error: OpenRelayError }

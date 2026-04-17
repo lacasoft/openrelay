@@ -44,4 +44,5 @@ export function requireSecretKey(req: FastifyRequest, reply: FastifyReply) {
       'This action requires a secret API key (sk_live_xxx).'
     ))
   }
+  return
 }

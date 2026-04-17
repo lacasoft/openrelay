@@ -18,10 +18,29 @@ import { getActiveWebhooksForEvent } from '../../lib/repository.js'
 
 const mockedGetWebhooks = vi.mocked(getActiveWebhooksForEvent)
 
+// In-memory queue simulating Redis lpush/rpop for tests
+function createMockRedis() {
+  const queue: string[] = []
+  return {
+    lpush: vi.fn().mockImplementation(async (_key: string, value: string) => {
+      queue.unshift(value)
+      return queue.length
+    }),
+    rpop: vi.fn().mockImplementation(async () => queue.pop() ?? null),
+    zadd:          vi.fn().mockResolvedValue(1),
+    zrangebyscore: vi.fn().mockResolvedValue([]),
+    zrem:          vi.fn().mockResolvedValue(1),
+  } as any
+}
+
+let mockRedis: ReturnType<typeof createMockRedis>
+
 describe('deliverWebhook', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockFetch.mockReset()  // also clears queued mockResolvedValueOnce / mockRejectedValueOnce
     vi.useFakeTimers()
+    mockRedis = createMockRedis()
   })
 
   afterEach(() => {
@@ -33,6 +52,7 @@ describe('deliverWebhook', () => {
 
     await deliverWebhook({
       db: {} as any,
+      redis: mockRedis,
       intentId: 'pi_test123',
       eventType: 'payment_intent.settled',
       merchantId: 'merchant_001',
@@ -51,6 +71,7 @@ describe('deliverWebhook', () => {
 
     await deliverWebhook({
       db: {} as any,
+      redis: mockRedis,
       intentId: 'pi_test456',
       eventType: 'payment_intent.created',
       merchantId: 'merchant_001',
@@ -85,6 +106,7 @@ describe('deliverWebhook', () => {
 
     await deliverWebhook({
       db: {} as any,
+      redis: mockRedis,
       intentId: 'pi_sig_test',
       eventType: 'payment_intent.settled',
       merchantId: 'merchant_001',
@@ -99,7 +121,7 @@ describe('deliverWebhook', () => {
     const body = callArgs[1].body as string
 
     // Verify signature format: t=<timestamp>,v1=<hmac>
-    const sigHeader = headers['OpenRelay-Signature']
+    const sigHeader = headers['OpenRelay-Signature']!
     expect(sigHeader).toMatch(/^t=\d+,v1=[a-f0-9]{64}$/)
 
     // Extract and verify the HMAC
@@ -126,6 +148,7 @@ describe('deliverWebhook', () => {
     const intentData = { id: 'pi_payload_test', status: 'settled', amount: 1000 }
     await deliverWebhook({
       db: {} as any,
+      redis: mockRedis,
       intentId: 'pi_payload_test',
       eventType: 'payment_intent.settled',
       merchantId: 'merchant_001',
@@ -148,26 +171,27 @@ describe('deliverWebhook', () => {
       { id: 'we_retry', url: 'https://example.com/hook', secret_hash: 'secret' },
     ])
 
-    // First attempt fails, second succeeds
-    mockFetch
-      .mockResolvedValueOnce({ ok: false, status: 500 })
-      .mockResolvedValueOnce({ ok: true })
+    // First (and only) attempt fails — retry is scheduled via Redis sorted set,
+    // processed later by startWebhookWorker (tested separately).
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 500 })
 
     await deliverWebhook({
       db: {} as any,
+      redis: mockRedis,
       intentId: 'pi_retry_test',
       eventType: 'payment_intent.settled',
       merchantId: 'merchant_001',
       data: { id: 'pi_retry_test' } as any,
     })
 
-    // First attempt (delay=0)
-    await vi.advanceTimersByTimeAsync(0)
+    // First attempt ran during processPendingQueue (fails with 500)
     expect(mockFetch).toHaveBeenCalledTimes(1)
-
-    // Second attempt (delay=30_000ms)
-    await vi.advanceTimersByTimeAsync(30_000)
-    expect(mockFetch).toHaveBeenCalledTimes(2)
+    // Failed delivery scheduled for retry via Redis sorted set
+    expect(mockRedis.zadd).toHaveBeenCalledWith(
+      'webhook:retry',
+      expect.any(Number),
+      expect.stringContaining('"attempt":1'),
+    )
   })
 
   it('should retry on fetch error (network failure)', async () => {
@@ -175,23 +199,25 @@ describe('deliverWebhook', () => {
       { id: 'we_err', url: 'https://example.com/hook', secret_hash: 'secret' },
     ])
 
-    mockFetch
-      .mockRejectedValueOnce(new Error('Network error'))
-      .mockResolvedValueOnce({ ok: true })
+    mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
     await deliverWebhook({
       db: {} as any,
+      redis: mockRedis,
       intentId: 'pi_net_err',
       eventType: 'payment_intent.settled',
       merchantId: 'merchant_001',
       data: { id: 'pi_net_err' } as any,
     })
 
-    await vi.advanceTimersByTimeAsync(0)
+    // First attempt failed with network error
     expect(mockFetch).toHaveBeenCalledTimes(1)
-
-    await vi.advanceTimersByTimeAsync(30_000)
-    expect(mockFetch).toHaveBeenCalledTimes(2)
+    // Scheduled for retry in Redis sorted set
+    expect(mockRedis.zadd).toHaveBeenCalledWith(
+      'webhook:retry',
+      expect.any(Number),
+      expect.stringContaining('"attempt":1'),
+    )
   })
 
   it('should deliver to multiple endpoints', async () => {
@@ -204,6 +230,7 @@ describe('deliverWebhook', () => {
 
     await deliverWebhook({
       db: {} as any,
+      redis: mockRedis,
       intentId: 'pi_multi',
       eventType: 'payment_intent.settled',
       merchantId: 'merchant_001',

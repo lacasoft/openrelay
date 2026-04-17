@@ -232,7 +232,7 @@ describe('Settlement notification flow', () => {
 // ── Health check ──────────────────────────────────────────────────
 
 describe('Health check returns proper data', () => {
-  it('should return status ok with operator and chains', async () => {
+  it('/health returns status ok (public, reduced for Docker healthcheck)', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/health',
@@ -242,11 +242,11 @@ describe('Health check returns proper data', () => {
     const body = res.json()
     expect(body.status).toBe('ok')
     expect(body.version).toBe('0.1.0')
-    expect(body.operator).toBe(mockConfig.operatorAddress)
-    expect(body.chains).toContain('base')
+    // Operator details are NOT exposed on public /health — see /info with HMAC
+    expect(body.operator).toBeUndefined()
   })
 
-  it('should return info endpoint with stats', async () => {
+  it('/info returns reduced response without HMAC auth', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/info',
@@ -254,11 +254,11 @@ describe('Health check returns proper data', () => {
 
     expect(res.statusCode).toBe(200)
     const body = res.json()
-    expect(body.operator).toBe(mockConfig.operatorAddress)
-    expect(body.total_settled).toBeTypeOf('number')
-    expect(body.avg_settlement_ms).toBeTypeOf('number')
-    expect(body.uptime_30d).toBeGreaterThanOrEqual(0)
-    expect(body.uptime_30d).toBeLessThanOrEqual(1)
+    expect(body.status).toBe('ok')
+    expect(body.version).toBe('0.1.0')
+    // Full stats only returned when authenticated — see dedicated health route tests
+    expect(body.operator).toBeUndefined()
+    expect(body.total_settled).toBeUndefined()
   })
 })
 

@@ -1,4 +1,4 @@
-import type { Config } from './config'
+import type { Config } from '../lib/config'
 
 /**
  * Verifies the node is registered on-chain in NodeRegistry.sol.
