@@ -1,0 +1,116 @@
+# ============================================================
+# Dependencies
+# ============================================================
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+
+# PHP SDK
+packages/sdk-php/vendor/
+composer.phar
+
+# Python SDK
+packages/sdk-python/**/__pycache__/
+packages/sdk-python/**/*.py[cod]
+packages/sdk-python/**/*.egg-info/
+packages/sdk-python/.pytest_cache/
+packages/sdk-python/.mypy_cache/
+packages/sdk-python/.ruff_cache/
+packages/sdk-python/.venv/
+packages/sdk-python/venv/
+packages/sdk-python/env/
+
+# ============================================================
+# Build outputs
+# ============================================================
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+
+# Next.js (dashboard)
+packages/dashboard/.next/
+packages/dashboard/out/
+
+# SDK-JS dual build
+packages/sdk-js/dist/
+
+# ============================================================
+# Smart contracts (Foundry)
+# ============================================================
+packages/contracts/out/
+packages/contracts/cache/
+packages/contracts/broadcast/
+packages/contracts/.gas-snapshot
+
+# ============================================================
+# Node daemon runtime data
+# ============================================================
+packages/node/data/
+*.sqlite
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+*.db
+
+# ============================================================
+# Environment & secrets
+# ============================================================
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*.local
+*.pem
+*.key
+
+# ============================================================
+# Testing & coverage
+# ============================================================
+coverage/
+lcov.info
+.nyc_output/
+test-results/
+playwright-report/
+.phpunit.result.cache
+
+# ============================================================
+# Logs
+# ============================================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ============================================================
+# Editor / IDE
+# ============================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.history/
+
+# ============================================================
+# OS
+# ============================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+*.orig
+
+# ============================================================
+# Temp files
+# ============================================================
+*.tmp
+*.temp
+*.bak
+
+# ============================================================
+# Claude Code (local tooling, not part of project)
+# ============================================================
+.claude/
+.claude-flow/

@@ -1,0 +1,28 @@
+{
+  "name": "openrelay",
+  "version": "0.0.1",
+  "private": true,
+  "description": "The open payment network. No fees. No gatekeepers.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lacasoft/openrelay"
+  },
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0"
+  }
+}
