@@ -57,8 +57,8 @@ export async function deliverWebhook(opts: DeliveryOptions): Promise<void> {
     await redis.lpush(PENDING_KEY, JSON.stringify(job))
   }
 
-  // Process pending jobs immediately (best-effort, non-blocking)
-  void processPendingQueue(redis)
+  // Process pending jobs immediately (callers use `void deliverWebhook(...)` to avoid blocking)
+  await processPendingQueue(redis)
 }
 
 /**

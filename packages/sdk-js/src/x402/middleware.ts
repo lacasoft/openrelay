@@ -16,8 +16,8 @@ export class X402 {
    *   chain: 'base',
    * }))
    */
-  middleware(opts: X402MiddlewareOptions) {
-    return async (req: Request, reply: Response) => {
+  middleware(opts: X402MiddlewareOptions): (req: Request, reply: Response) => Promise<Response | undefined> {
+    return async (req: Request, _reply: Response): Promise<Response | undefined> => {
       const paymentHeader = req.headers instanceof Headers
         ? req.headers.get('x-payment')
         : (req.headers as Record<string, string>)['x-payment']
@@ -37,6 +37,9 @@ export class X402 {
           headers: { 'Content-Type': 'application/json' },
         })
       }
+
+      // Payment verified — request continues (middleware returns undefined)
+      return undefined
     }
   }
 

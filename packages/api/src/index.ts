@@ -18,12 +18,13 @@ const config = loadConfig()
 const db     = buildDb(config.databaseUrl)
 const redis  = buildRedis(config.redisUrl)
 
+const isDev = process.env['NODE_ENV'] !== 'production'
 const app = Fastify({
   logger: {
     level: process.env['LOG_LEVEL'] ?? 'info',
-    transport: process.env['NODE_ENV'] !== 'production'
-      ? { target: 'pino-pretty', options: { colorize: true } }
-      : undefined,
+    ...(isDev && {
+      transport: { target: 'pino-pretty', options: { colorize: true } },
+    }),
   },
 })
 
@@ -32,69 +33,71 @@ app.decorate('db', db)
 app.decorate('redis', redis)
 app.decorate('config', config)
 
-// ── Plugins ───────────────────────────────────────────────────
-await app.register(cors, { origin: config.corsOrigin })
+async function main() {
+  // ── Plugins ───────────────────────────────────────────────────
+  await app.register(cors, { origin: config.corsOrigin })
 
-await app.register(rateLimit, {
-  redis,
-  max: RATE_LIMIT_MAX,
-  timeWindow: RATE_LIMIT_WINDOW,
-  keyGenerator: (req) => {
-    const auth = req.headers['authorization'] ?? ''
-    return auth.slice(7, 23) // use key prefix for rate limiting, not full key
-  },
-})
+  await app.register(rateLimit, {
+    redis,
+    max: RATE_LIMIT_MAX,
+    timeWindow: RATE_LIMIT_WINDOW,
+    keyGenerator: (req) => {
+      const auth = req.headers['authorization'] ?? ''
+      return auth.slice(7, 23) // use key prefix for rate limiting, not full key
+    },
+  })
 
-// ── Routes ────────────────────────────────────────────────────
-app.register(paymentIntentsRoute, { prefix: '/v1' })
-app.register(webhooksRoute,       { prefix: '/v1' })
-app.register(x402Route,           { prefix: '/v1' })
-app.register(nodesRoute,          { prefix: '/v1' })
-app.register(internalRoute,       { prefix: '/v1' })   // node → API callbacks
+  // ── Routes ────────────────────────────────────────────────────
+  app.register(paymentIntentsRoute, { prefix: '/v1' })
+  app.register(webhooksRoute,       { prefix: '/v1' })
+  app.register(x402Route,           { prefix: '/v1' })
+  app.register(nodesRoute,          { prefix: '/v1' })
+  app.register(internalRoute,       { prefix: '/v1' })   // node → API callbacks
 
-// ── Health ────────────────────────────────────────────────────
-app.get('/health', async () => {
-  let dbOk    = false
-  let redisOk = false
+  // ── Health ────────────────────────────────────────────────────
+  app.get('/health', async () => {
+    let dbOk    = false
+    let redisOk = false
 
-  try {
-    await db`SELECT 1`
-    dbOk = true
-  } catch (err) { app.log.debug({ err }, 'health check: db unreachable') }
+    try {
+      await db`SELECT 1`
+      dbOk = true
+    } catch (err) { app.log.debug({ err }, 'health check: db unreachable') }
 
-  try {
-    await redis.ping()
-    redisOk = true
-  } catch (err) { app.log.debug({ err }, 'health check: redis unreachable') }
+    try {
+      await redis.ping()
+      redisOk = true
+    } catch (err) { app.log.debug({ err }, 'health check: redis unreachable') }
 
-  return {
-    status:   dbOk && redisOk ? 'ok' : 'degraded',
-    version:  '0.1.0',
-    services: { postgres: dbOk, redis: redisOk },
+    return {
+      status:   dbOk && redisOk ? 'ok' : 'degraded',
+      version:  '0.1.0',
+      services: { postgres: dbOk, redis: redisOk },
+    }
+  })
+
+  // ── Webhook retry worker ─────────────────────────────────────
+  const webhookWorker = startWebhookWorker(redis, db)
+
+  // ── Graceful shutdown ─────────────────────────────────────────
+  const shutdown = async () => {
+    app.log.info('Shutting down...')
+    webhookWorker.stop()
+    await app.close()
+    await db.end()
+    await redis.quit()
+    process.exit(0)
   }
-})
 
-// ── Webhook retry worker ─────────────────────────────────────
-const webhookWorker = startWebhookWorker(redis, db)
+  process.on('SIGTERM', shutdown)
+  process.on('SIGINT',  shutdown)
 
-// ── Graceful shutdown ─────────────────────────────────────────
-const shutdown = async () => {
-  app.log.info('Shutting down...')
-  webhookWorker.stop()
-  await app.close()
-  await db.end()
-  await redis.quit()
-  process.exit(0)
-}
-
-process.on('SIGTERM', shutdown)
-process.on('SIGINT',  shutdown)
-
-// ── Start ─────────────────────────────────────────────────────
-try {
+  // ── Start ─────────────────────────────────────────────────────
   await app.listen({ port: config.port, host: '0.0.0.0' })
   app.log.info(`OpenRelay API v0.1.0 — port ${config.port}`)
-} catch (err) {
+}
+
+main().catch((err) => {
   app.log.error(err)
   process.exit(1)
-}
+})

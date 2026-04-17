@@ -7,7 +7,7 @@ import { apiError } from '../lib/errors'
 
 const SettleSchema = z.object({
   tx_hash:     z.string().min(1),
-  block_number: z.number().int().nonneg(),
+  block_number: z.number().int().nonnegative(),
   settled_at:  z.number().int().positive(),
 })
 
@@ -49,14 +49,13 @@ export async function internalRoute(app: FastifyInstance) {
       SELECT * FROM payment_intents WHERE id = ${intentId} LIMIT 1
     `
 
-    if (rows.length === 0) {
+    const intentRow = rows[0]
+    if (!intentRow) {
       return reply.status(404).send(apiError('intent_not_found', `No payment intent found with id ${intentId}.`, 'intentId'))
     }
 
-    const intentRow = rows[0]
-
     // Idempotency: ignore if already settled
-    if (intentRow.status === 'settled') {
+    if (intentRow['status'] === 'settled') {
       return reply.send({ ok: true, already_settled: true })
     }
 
@@ -73,14 +72,15 @@ export async function internalRoute(app: FastifyInstance) {
     }, 'Intent settled — firing webhooks')
 
     // Build full intent for webhook payload
+    const rawMetadata = intentRow['metadata']
     const settledIntent = {
       ...intentRow,
       status:     'settled',
       tx_hash:    params.tx_hash,
       settled_at: params.settled_at,
-      metadata:   typeof intentRow.metadata === 'string'
-        ? JSON.parse(intentRow.metadata)
-        : intentRow.metadata,
+      metadata:   typeof rawMetadata === 'string'
+        ? JSON.parse(rawMetadata)
+        : rawMetadata,
     }
 
     // Fire webhooks async — don't block the response
@@ -89,7 +89,7 @@ export async function internalRoute(app: FastifyInstance) {
       redis: req.server.redis,
       intentId,
       eventType:  'payment_intent.settled',
-      merchantId: intentRow.merchant_id,
+      merchantId: intentRow['merchant_id'] as string,
       data:       settledIntent,
     })
 

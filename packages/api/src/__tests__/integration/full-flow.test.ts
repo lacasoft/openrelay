@@ -117,10 +117,11 @@ const mockConfig = {
 }
 
 const mockRedis = {
-  ping: vi.fn().mockResolvedValue('PONG'),
+  ping:   vi.fn().mockResolvedValue('PONG'),
   exists: vi.fn().mockResolvedValue(0),
-  setex: vi.fn().mockResolvedValue('OK'),
-  quit: vi.fn(),
+  setex:  vi.fn().mockResolvedValue('OK'),
+  set:    vi.fn().mockResolvedValue('OK'), // default: not-already-used (SET NX returns 'OK' on success)
+  quit:   vi.fn(),
 }
 
 beforeAll(async () => {
@@ -386,7 +387,7 @@ describe('x402 payment flow', () => {
 
     expect(res.statusCode).toBe(400)
     const body = res.json()
-    expect(body.error).toBe('invalid_payment_payload')
+    expect(body.error.code).toBe('invalid_payment_payload')
   })
 
   it('should reject insufficient payment', async () => {
@@ -410,7 +411,7 @@ describe('x402 payment flow', () => {
 
     expect(res.statusCode).toBe(402)
     const body = res.json()
-    expect(body.error).toBe('insufficient_payment')
+    expect(body.error.code).toBe('insufficient_payment')
   })
 
   it('should reject already-used payment via Redis', async () => {
@@ -421,7 +422,8 @@ describe('x402 payment flow', () => {
       network: 'base',
     })).toString('base64')
 
-    mockRedis.exists.mockResolvedValueOnce(1) // already in Redis
+    // Atomic SET NX returns null if key already exists — simulates replay
+    mockRedis.set.mockResolvedValueOnce(null)
 
     const res = await app.inject({
       method: 'POST',
@@ -434,9 +436,9 @@ describe('x402 payment flow', () => {
       },
     })
 
-    expect(res.statusCode).toBe(402)
+    expect(res.statusCode).toBe(409)
     const body = res.json()
-    expect(body.error).toBe('payment_already_used')
+    expect(body.error.code).toBe('x402_replay')
   })
 })
 
@@ -456,7 +458,7 @@ describe('Internal settlement endpoint', () => {
 
     expect(res.statusCode).toBe(403)
     const body = res.json()
-    expect(body.error).toBe('forbidden')
+    expect(body.error.code).toBe('forbidden')
   })
 })
 

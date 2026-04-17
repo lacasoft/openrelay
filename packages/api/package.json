@@ -20,6 +20,7 @@
     "fastify": "^4.28.0",
     "ioredis": "^5.4.1",
     "nanoid": "^5.0.7",
+    "pino": "^9.0.0",
     "pino-pretty": "^11.2.0",
     "postgres": "^3.4.4",
     "viem": "^2.17.0",
