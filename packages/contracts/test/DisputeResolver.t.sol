@@ -41,11 +41,16 @@ contract DisputeResolverTest is Test {
         arbiters[3] = arbiter4;
         arbiters[4] = arbiter5;
 
-        // Deploy StakeManager with placeholder resolver (circular dep)
-        address placeholderResolver = makeAddr("placeholderResolver");
-        stakeManager = new StakeManager(address(usdc), placeholderResolver, nodeRegistry, guardian);
+        // Deploy StakeManager first, then wire up real resolver/registry
+        // addresses via initialize(). This test uses a mock `nodeRegistry`
+        // address so it can call depositFor() directly without deploying
+        // the full NodeRegistry contract.
+        stakeManager = new StakeManager(address(usdc), guardian);
 
         resolver = new DisputeResolver(address(stakeManager), treasury, arbiters, guardian);
+
+        vm.prank(guardian);
+        stakeManager.initialize(address(resolver), nodeRegistry);
 
         // Stake the node operator
         usdc.mint(nodeOperator, STAKE);

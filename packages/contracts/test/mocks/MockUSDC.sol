@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.25;
 
-import {IERC20} from "../src/interfaces/IERC20.sol";
+import {IERC20} from "../../src/interfaces/IERC20.sol";
 
 /// @dev Minimal ERC-20 mock for testing — no real token logic, just controlled balances
 contract MockUSDC is IERC20 {

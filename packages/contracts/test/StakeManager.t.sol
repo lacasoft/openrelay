@@ -21,7 +21,10 @@ contract StakeManagerTest is Test {
 
     function setUp() public {
         usdc         = new MockUSDC();
-        stakeManager = new StakeManager(address(usdc), disputeResolver, nodeRegistry, guardian);
+        stakeManager = new StakeManager(address(usdc), guardian);
+
+        vm.prank(guardian);
+        stakeManager.initialize(disputeResolver, nodeRegistry);
 
         usdc.mint(operator, 10_000 * 1e6); // 10,000 USDC
     }
@@ -260,7 +263,18 @@ contract StakeManagerTest is Test {
         stakeManager.slash(operator, slashAmount, keccak256("fuzz-dispute"));
 
         StakeManager.StakeInfo memory info = stakeManager.getStakeInfo(operator);
-        assertEq(info.staked + info.pendingWithdrawal, 0); // all gone if slash >= stake
+        uint256 remaining = info.staked + info.pendingWithdrawal;
+
+        // Invariant 1: slash never takes more than what was available
+        assertLe(remaining, stakeAmount);
+
+        // Invariant 2: if slashAmount >= stakeAmount, everything is gone
+        if (slashAmount >= stakeAmount) {
+            assertEq(remaining, 0);
+        } else {
+            // Otherwise, exactly slashAmount was taken
+            assertEq(remaining, stakeAmount - slashAmount);
+        }
     }
 
     // ── Pausable ──────────────────────────────────────────────
