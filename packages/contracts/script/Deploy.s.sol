@@ -33,29 +33,24 @@ contract Deploy is Script {
 
         vm.startBroadcast(deployerKey);
 
-        // ── Step 1: StakeManager (needs placeholder resolver + registry) ──
-        // We deploy with address(0) placeholders and accept the initial limitation.
-        // The real addresses will be set via a re-deploy or by using a factory
-        // pattern in Phase 2. For Phase 1 (testnet), this is acceptable.
-        //
-        // Actual circular dependency resolution:
-        // - StakeManager.slash() is called only by DisputeResolver
-        // - StakeManager.depositFor() is called only by NodeRegistry
-        // - Both are enforced via immutable address checks
-        //
-        // Solution: Deploy StakeManager with deployer as temporary placeholder,
-        // then deploy DisputeResolver and NodeRegistry with real StakeManager address.
-        // The deployer address will never be able to call slash() or depositFor()
-        // maliciously because it is not the DisputeResolver or NodeRegistry.
-        //
-        // A proper factory pattern is tracked as Phase 2 work.
+        // ── Circular dependency resolution ─────────────────────
+        // StakeManager, DisputeResolver, and NodeRegistry have a circular
+        // dependency:
+        //   - NodeRegistry.register() calls StakeManager.depositFor()
+        //   - DisputeResolver.vote() calls StakeManager.slash()
+        // StakeManager gates those calls on msg.sender == nodeRegistry /
+        // disputeResolver. We break the cycle with an initialization pattern:
+        //   1. Deploy StakeManager with only (usdc, guardian)
+        //   2. Deploy DisputeResolver and NodeRegistry pointing at StakeManager
+        //   3. Call stakeManager.initialize(disputeResolver, nodeRegistry)
+        // After initialization, the links are locked in (initialize reverts
+        // with AlreadyInitialized on any subsequent call).
 
         address deployer = vm.addr(deployerKey);
 
+        // ── Step 1: StakeManager ───────────────────────────────
         StakeManager stakeManager = new StakeManager(
             usdc,
-            deployer, // placeholder for disputeResolver — replaced after deployment
-            deployer, // placeholder for nodeRegistry — replaced after deployment
             deployer  // guardian for Pausable
         );
 
@@ -79,6 +74,11 @@ contract Deploy is Script {
         );
 
         console.log("NodeRegistry deployed at:", address(nodeRegistry));
+
+        // ── Step 4: Wire StakeManager to the real addresses ───
+        stakeManager.initialize(address(disputeResolver), address(nodeRegistry));
+
+        console.log("StakeManager initialized with resolver + registry");
 
         vm.stopBroadcast();
 

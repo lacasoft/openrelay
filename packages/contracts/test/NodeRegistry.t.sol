@@ -27,28 +27,25 @@ contract NodeRegistryTest is Test {
     function setUp() public {
         usdc = new MockUSDC();
 
-        // Deploy DisputeResolver first (needed by StakeManager)
+        // Circular dependency: StakeManager needs to know about the resolver
+        // and registry, but those contracts need StakeManager's address at
+        // construction. Resolved with an initialize() call after all three
+        // contracts exist.
+        stakeManager = new StakeManager(address(usdc), guardian);
+
         address[] memory arbiters = new address[](3);
         arbiters[0] = arbiter1;
         arbiters[1] = arbiter2;
         arbiters[2] = arbiter3;
 
-        // Use placeholder addresses for circular dependency resolution
-        address placeholderStake    = makeAddr("placeholderStake");
-        address placeholderRegistry = makeAddr("placeholderRegistry");
-
         DisputeResolver resolver = new DisputeResolver(
-            placeholderStake, treasury, arbiters, guardian
-        );
-
-        stakeManager = new StakeManager(
-            address(usdc),
-            address(resolver),
-            placeholderRegistry, // will be replaced by registry address
-            guardian
+            address(stakeManager), treasury, arbiters, guardian
         );
 
         registry = new NodeRegistry(address(usdc), address(stakeManager), guardian);
+
+        vm.prank(guardian);
+        stakeManager.initialize(address(resolver), address(registry));
 
         // Fund operator
         usdc.mint(operator,  10 * MIN_STAKE);

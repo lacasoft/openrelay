@@ -14,8 +14,9 @@ contract StakeManager is Pausable {
     // ── State ─────────────────────────────────────────────────
 
     IERC20 public immutable usdc;
-    address public immutable disputeResolver;
-    address public immutable nodeRegistry;
+    address public disputeResolver;
+    address public nodeRegistry;
+    bool private _initialized;
 
     struct StakeInfo {
         uint256 staked;
@@ -31,6 +32,7 @@ contract StakeManager is Pausable {
     event WithdrawalRequested(address indexed operator, uint256 amount, uint256 unlockAt);
     event WithdrawalExecuted(address indexed operator, uint256 amount);
     event Slashed(address indexed operator, uint256 amount, bytes32 disputeId);
+    event Initialized(address disputeResolver, address nodeRegistry);
 
     // ── Errors ───────────────────────────────────────────────
 
@@ -40,13 +42,23 @@ contract StakeManager is Pausable {
     error TimelockNotExpired(uint256 unlockAt);
     error NoPendingWithdrawal();
     error TransferFailed();
+    error AlreadyInitialized();
 
     // ── Constructor ──────────────────────────────────────────
 
-    constructor(address _usdc, address _disputeResolver, address _nodeRegistry, address _guardian) Pausable(_guardian) {
+    constructor(address _usdc, address _guardian) Pausable(_guardian) {
         usdc = IERC20(_usdc);
+    }
+
+    /// @notice Wire up the DisputeResolver and NodeRegistry addresses after
+    ///         deployment. Resolves the circular dependency between the three
+    ///         contracts. Can only be called once by the guardian.
+    function initialize(address _disputeResolver, address _nodeRegistry) external onlyGuardian {
+        if (_initialized) revert AlreadyInitialized();
+        _initialized = true;
         disputeResolver = _disputeResolver;
         nodeRegistry = _nodeRegistry;
+        emit Initialized(_disputeResolver, _nodeRegistry);
     }
 
     // ── External ─────────────────────────────────────────────
