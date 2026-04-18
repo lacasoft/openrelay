@@ -35,9 +35,12 @@ This guide covers the full process for deploying the OpenRelay contracts
 ### Funds
 
 - An account with **Sepolia ETH** for gas. ~0.05 ETH is enough for the full
-  3-contract deploy. Recommended faucets:
-  - **Coinbase Wallet Faucet** — https://www.coinbase.com/faucets/base-ethereum-sepolia-faucet (0.1 ETH/day)
-  - **Alchemy Faucet** — https://www.alchemy.com/faucets/base-sepolia
+  3-contract deploy. Recommended faucets (verified):
+  - **Alchemy** — https://www.alchemy.com/faucets/base-sepolia (0.1 ETH/day, requires free account)
+  - **QuickNode** — https://faucet.quicknode.com/base/sepolia (0.025 ETH/day)
+  - **Chainstack** — https://faucet.chainstack.com/base-sepolia-faucet
+  - **Superchain (Optimism)** — https://app.optimism.io/faucet (supports Base Sepolia, requires wallet connect)
+  - Always up-to-date official list: https://docs.base.org/chain/network-faucets
 
 - **Base Sepolia USDC** (only if you'll test the full payment flow afterwards).
   Circle's official faucet:
