@@ -10,10 +10,14 @@
 # make clean     → elimina volúmenes y empieza desde cero
 # make test      → corre todos los tests
 # make contracts → compila y testea contratos Solidity
-# make deploy-testnet → deploy en Base Sepolia
+# make check-deploy-env   → valida vars de deploy en .env
+# make check-sepolia-balance → verifica balance del deployer
+# make deploy-sepolia     → deploy en Base Sepolia (con verify opcional)
+# make deploy-addresses   → muestra direcciones del último deploy
+# make verify-sepolia     → verifica manualmente en Basescan
 # make status    → muestra el estado de todos los servicios
 
-.PHONY: up down seed logs logs-api logs-node restart clean test contracts deploy-testnet status help
+.PHONY: up down seed logs logs-api logs-node restart clean test contracts check-deploy-env check-sepolia-balance deploy-sepolia deploy-addresses verify-sepolia status help
 
 # Colores para output
 GREEN  := \033[0;32m
@@ -124,8 +128,9 @@ contracts-fmt: ## Formatea el código Solidity
 
 contracts: contracts-build contracts-test ## Build + test de contratos
 
-deploy-testnet: ## Deploy en Base Sepolia (requiere .env configurado)
-	@echo "$(CYAN)Verificando variables de entorno...$(RESET)"
+# ── Deploy & verificación (Base Sepolia) ──────────────────────
+
+check-deploy-env: ## Verifica que el .env tenga todas las vars para deploy
 	@test -n "$$DEPLOYER_PRIVATE_KEY" || (echo "$(YELLOW)Error: DEPLOYER_PRIVATE_KEY no está definido$(RESET)" && exit 1)
 	@test -n "$$BASE_SEPOLIA_RPC_URL" || (echo "$(YELLOW)Error: BASE_SEPOLIA_RPC_URL no está definido$(RESET)" && exit 1)
 	@test -n "$$USDC_ADDRESS" || (echo "$(YELLOW)Error: USDC_ADDRESS no está definido$(RESET)" && exit 1)
@@ -133,12 +138,51 @@ deploy-testnet: ## Deploy en Base Sepolia (requiere .env configurado)
 	@test -n "$$ARBITER_1" || (echo "$(YELLOW)Error: ARBITER_1 no está definido$(RESET)" && exit 1)
 	@test -n "$$ARBITER_2" || (echo "$(YELLOW)Error: ARBITER_2 no está definido$(RESET)" && exit 1)
 	@test -n "$$ARBITER_3" || (echo "$(YELLOW)Error: ARBITER_3 no está definido$(RESET)" && exit 1)
+	@echo "$(GREEN)Todas las variables de deploy están configuradas.$(RESET)"
+
+check-sepolia-balance: ## Verifica que el deployer tenga Sepolia ETH suficiente
+	@echo "$(CYAN)Verificando balance del deployer...$(RESET)"
+	@cd packages/contracts && forge script script/Deploy.s.sol --rpc-url $$BASE_SEPOLIA_RPC_URL --private-key $$DEPLOYER_PRIVATE_KEY --dry-run 2>&1 | grep -E "gas|balance" || echo "Balance check requires full dry-run — usa 'cast balance <addr> --rpc-url \$$BASE_SEPOLIA_RPC_URL'"
+
+deploy-sepolia: check-deploy-env ## Deploy contratos a Base Sepolia (con verify si BASESCAN_API_KEY está seteado)
 	@echo "$(CYAN)Desplegando contratos en Base Sepolia...$(RESET)"
-	@cd packages/contracts && forge script script/Deploy.s.sol \
-		--rpc-url $$BASE_SEPOLIA_RPC_URL \
-		--broadcast \
-		--verify
-	@echo "$(GREEN)Deploy completado. Copia las direcciones al .env$(RESET)"
+	@if [ -n "$$BASESCAN_API_KEY" ]; then \
+		cd packages/contracts && forge script script/Deploy.s.sol \
+			--rpc-url $$BASE_SEPOLIA_RPC_URL \
+			--private-key $$DEPLOYER_PRIVATE_KEY \
+			--broadcast \
+			--verify \
+			--etherscan-api-key $$BASESCAN_API_KEY; \
+	else \
+		echo "$(YELLOW)⚠️  BASESCAN_API_KEY no seteado — deploy sin verificación$(RESET)"; \
+		cd packages/contracts && forge script script/Deploy.s.sol \
+			--rpc-url $$BASE_SEPOLIA_RPC_URL \
+			--private-key $$DEPLOYER_PRIVATE_KEY \
+			--broadcast; \
+	fi
+	@echo ""
+	@echo "$(GREEN)✓ Deploy completo.$(RESET)"
+	@echo "$(CYAN)→ Copia las direcciones de arriba a tu .env$(RESET)"
+	@echo "$(CYAN)→ Corre 'make deploy-addresses' para verlas después$(RESET)"
+
+deploy-addresses: ## Muestra las direcciones del último deploy en Base Sepolia
+	@echo "$(CYAN)Direcciones del último deploy en Base Sepolia (chain 84532):$(RESET)"
+	@cat packages/contracts/broadcast/Deploy.s.sol/84532/run-latest.json 2>/dev/null | \
+		python3 -c "import json,sys; data=json.load(sys.stdin); [print(f\"  {t['contractName']:20s} {t['contractAddress']}\") for t in data.get('transactions',[]) if t.get('contractName')]" \
+		|| echo "$(YELLOW)No se encontró deploy previo. Corre 'make deploy-sepolia' primero.$(RESET)"
+
+verify-sepolia: ## Verifica manualmente los contratos en Basescan (si el deploy no los verificó)
+	@test -n "$$BASESCAN_API_KEY" || (echo "$(YELLOW)Error: BASESCAN_API_KEY no está definido$(RESET)" && exit 1)
+	@test -n "$$STAKE_MANAGER_ADDRESS" || (echo "$(YELLOW)Error: STAKE_MANAGER_ADDRESS no está definido en .env$(RESET)" && exit 1)
+	@test -n "$$DISPUTE_RESOLVER_ADDRESS" || (echo "$(YELLOW)Error: DISPUTE_RESOLVER_ADDRESS no está definido en .env$(RESET)" && exit 1)
+	@test -n "$$NODE_REGISTRY_ADDRESS" || (echo "$(YELLOW)Error: NODE_REGISTRY_ADDRESS no está definido en .env$(RESET)" && exit 1)
+	@echo "$(CYAN)Verificando StakeManager...$(RESET)"
+	@cd packages/contracts && forge verify-contract $$STAKE_MANAGER_ADDRESS src/StakeManager.sol:StakeManager --chain base-sepolia --etherscan-api-key $$BASESCAN_API_KEY
+	@echo "$(CYAN)Verificando DisputeResolver...$(RESET)"
+	@cd packages/contracts && forge verify-contract $$DISPUTE_RESOLVER_ADDRESS src/DisputeResolver.sol:DisputeResolver --chain base-sepolia --etherscan-api-key $$BASESCAN_API_KEY
+	@echo "$(CYAN)Verificando NodeRegistry...$(RESET)"
+	@cd packages/contracts && forge verify-contract $$NODE_REGISTRY_ADDRESS src/NodeRegistry.sol:NodeRegistry --chain base-sepolia --etherscan-api-key $$BASESCAN_API_KEY
+	@echo "$(GREEN)✓ Verificación completa.$(RESET)"
 
 # ── Setup inicial ─────────────────────────────────────────────
 

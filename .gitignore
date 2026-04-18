@@ -40,8 +40,10 @@ packages/sdk-js/dist/
 # ============================================================
 packages/contracts/out/
 packages/contracts/cache/
-packages/contracts/broadcast/
 packages/contracts/.gas-snapshot
+
+# Foundry broadcast (transaction artifacts per chain)
+packages/contracts/broadcast/
 
 # ============================================================
 # Node daemon runtime data
