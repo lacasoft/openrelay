@@ -8,6 +8,16 @@ Si corres tu propio nodo, no cuesta nada. Si usas la red comunitaria, pagas frac
 
 ---
 
+## Estado del protocolo
+
+✅ **Phase 1 live en Base Sepolia** desde 2026-04-18.
+Los contratos están deployados y con código fuente verificado en
+[Basescan Sepolia](https://sepolia.basescan.org/). Direcciones en
+[`packages/contracts/deployments/sepolia.json`](packages/contracts/deployments/sepolia.json).
+Auditoría externa y deploy a mainnet pendientes.
+
+---
+
 ## Qué es OpenRelay
 
 - Un protocolo de enrutamiento de pagos con nodos operados por la comunidad

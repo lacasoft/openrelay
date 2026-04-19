@@ -2,6 +2,8 @@
 
 *De testnet a red comunitaria con tracción real. Construido por la comunidad, al ritmo de la comunidad.*
 
+> **Actualización (2026-04-18):** Phase 1 hito completado — deploy en Base Sepolia live con contratos verificados. Ver `packages/contracts/deployments/sepolia.json`.
+
 ---
 
 ## Por qué existe esta hoja de ruta
@@ -40,7 +42,7 @@ Esa es la oportunidad que persigue OpenRelay. La ventana para construir infraest
 - [x] SDK JS: `@openrelay/sdk` con payment intents, webhooks, middleware x402
 - [x] Docker Compose: stack autoalojado completo en un solo comando
 - [x] CI con GitHub Actions: typecheck + test + build + Foundry
-- [ ] **Deploy de contratos a Base Sepolia** — siguiente paso inmediato
+- [x] **Deploy de contratos a Base Sepolia** — completado 2026-04-18 (ver `packages/contracts/deployments/sepolia.json`)
 - [ ] Conectar el motor de routing a `NodeRegistry.sol` via viem
 - [ ] Implementar persistencia en PostgreSQL en la API
 - [ ] Conectar firma HMAC en el daemon del nodo

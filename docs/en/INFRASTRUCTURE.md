@@ -181,6 +181,10 @@ Lightning Network support (BTC/sats) is included in Phase 1 for BTC-denominated 
 
 Three non-upgradeable contracts on Base define all on-chain protocol rules.
 
+### Deployment status
+
+The first testnet deployment was completed on **2026-04-18 on Base Sepolia (chainId 84532)**. All three contracts are live and source-verified on Basescan. The canonical source of truth for deployed addresses, block, commit hash, and constructor parameters is `packages/contracts/deployments/sepolia.json` — that JSON is what the API, node daemon, and any integrator read. Mainnet remains blocked by the pending external audit.
+
 ### Design principles
 
 - **Non-upgradeable:** No proxy patterns, no admin keys, no pause functions. What is audited is what runs. If a bug requires a fix, the correct response is a new deployment with an RFC-approved migration path.
@@ -1147,6 +1151,8 @@ forge script script/Deploy.s.sol --rpc-url $BASE_SEPOLIA_RPC_URL --broadcast
 ```
 
 ### 15.2 Testnet deployment (Base Sepolia)
+
+The reference Base Sepolia deploy is already live (2026-04-18) — the canonical addresses are in `packages/contracts/deployments/sepolia.json`. The steps below are for operators who want their own independent Sepolia deploy; to just point a node/API at the existing deploy, read that JSON directly.
 
 ```bash
 # 1. Get testnet USDC

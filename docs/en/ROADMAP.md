@@ -3,6 +3,8 @@
 > "La pregunta no es si el mundo se digitaliza. Eso ya está pasando.
 > La pregunta es quién va a ser dueño de esa infraestructura."
 
+> **Update (2026-04-18):** Phase 1 milestone complete — Base Sepolia deploy live with source-verified contracts. See `packages/contracts/deployments/sepolia.json`.
+
 ---
 
 ## Why This Roadmap Exists
@@ -46,7 +48,7 @@ The window to build community-owned infrastructure before institutional standard
 - [x] SDK JS: `@openrelay/sdk` with payment intents, webhooks, x402 middleware
 - [x] Docker Compose: full self-hosted stack in one command
 - [x] GitHub Actions CI: typecheck + test + build + Foundry
-- [ ] **Deploy contracts to Base Sepolia** — next immediate step
+- [x] **Deploy contracts to Base Sepolia** — completed 2026-04-18 (see `packages/contracts/deployments/sepolia.json`)
 - [ ] Wire routing engine to `NodeRegistry.sol` via viem
 - [ ] Implement PostgreSQL persistence in API
 - [ ] Wire HMAC signing in node daemon
