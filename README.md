@@ -8,13 +8,21 @@ Si corres tu propio nodo, no cuesta nada. Si usas la red comunitaria, pagas frac
 
 ---
 
-## Estado del protocolo
+## 🚀 Estado actual
 
-✅ **Phase 1 live en Base Sepolia** desde 2026-04-18.
-Los contratos están deployados y con código fuente verificado en
-[Basescan Sepolia](https://sepolia.basescan.org/). Direcciones en
+✅ **Contratos desplegados en Base Sepolia** (testnet) desde 2026-04-18.
+Código fuente verificado en Basescan · `minStake` inicial: 40 USDC.
+
+| Contrato | Dirección |
+|----------|-----------|
+| `NodeRegistry` | [`0x15e742142CB23E6f5c1B20aAE13CDd49E6b68565`](https://sepolia.basescan.org/address/0x15e742142CB23E6f5c1B20aAE13CDd49E6b68565#code) |
+| `StakeManager` | [`0xBbcE040401e4612337799bABCeE7860a9A0fcA84`](https://sepolia.basescan.org/address/0xBbcE040401e4612337799bABCeE7860a9A0fcA84#code) |
+| `DisputeResolver` | [`0xb8d6D150D2567644D404b6Bd46c81cc749c0926D`](https://sepolia.basescan.org/address/0xb8d6D150D2567644D404b6Bd46c81cc749c0926D#code) |
+
+Fuente canónica de direcciones (para SDKs y dashboards):
 [`packages/contracts/deployments/sepolia.json`](packages/contracts/deployments/sepolia.json).
-Auditoría externa y deploy a mainnet pendientes.
+
+🔜 Auditoría externa y deploy a mainnet pendientes.
 
 ---
 
