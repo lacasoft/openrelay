@@ -8,7 +8,7 @@ RUN corepack enable && corepack prepare pnpm@9 --activate
 
 WORKDIR /app
 
-COPY package.json pnpm-workspace.yaml turbo.json tsconfig.json ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml turbo.json tsconfig.json ./
 COPY packages/protocol/package.json ./packages/protocol/
 COPY packages/node/package.json     ./packages/node/
 
@@ -30,7 +30,7 @@ RUN corepack enable && corepack prepare pnpm@9 --activate
 
 WORKDIR /app
 
-COPY package.json pnpm-workspace.yaml ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/protocol/package.json ./packages/protocol/
 COPY packages/node/package.json     ./packages/node/
 

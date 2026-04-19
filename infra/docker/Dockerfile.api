@@ -6,7 +6,7 @@ RUN corepack enable && corepack prepare pnpm@9 --activate
 WORKDIR /app
 
 # Copy workspace files
-COPY package.json pnpm-workspace.yaml turbo.json tsconfig.json biome.json ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml turbo.json tsconfig.json biome.json ./
 
 # Copy package manifests first (layer cache optimization)
 COPY packages/protocol/package.json  ./packages/protocol/
@@ -31,7 +31,7 @@ RUN corepack enable && corepack prepare pnpm@9 --activate
 
 WORKDIR /app
 
-COPY package.json pnpm-workspace.yaml ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/protocol/package.json  ./packages/protocol/
 COPY packages/api/package.json       ./packages/api/
 
