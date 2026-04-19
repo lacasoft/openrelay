@@ -51,7 +51,7 @@ down: ## Baja el stack
 
 seed: ## Crea el primer merchant y muestra las API keys
 	@echo "$(CYAN)Creando merchant inicial...$(RESET)"
-	@docker compose exec api node dist/scripts/seed.js
+	@docker compose exec api node packages/api/dist/scripts/seed.js
 	@echo ""
 	@echo "$(GREEN)Merchant creado. Guarda las API keys mostradas arriba.$(RESET)"
 

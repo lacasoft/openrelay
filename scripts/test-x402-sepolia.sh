@@ -61,7 +61,10 @@ if [ ! -f /tmp/smoke-test-keys.txt ]; then
   make seed 2>&1 | tee /tmp/smoke-test-keys.txt
 fi
 
-SK_KEY=$(grep -oE "sk_(live|test)_[a-zA-Z0-9]+" /tmp/smoke-test-keys.txt | head -1)
+SK_KEY=$(grep -oE '"sk_live":"[^"]+' /tmp/smoke-test-keys.txt | head -1 | cut -d'"' -f4)
+if [ -z "$SK_KEY" ]; then
+  SK_KEY=$(grep -oE '"sk_test":"[^"]+' /tmp/smoke-test-keys.txt | head -1 | cut -d'"' -f4)
+fi
 if [ -z "$SK_KEY" ]; then
   echo "ERROR: Could not extract sk_ key from /tmp/smoke-test-keys.txt" >&2
   exit 1

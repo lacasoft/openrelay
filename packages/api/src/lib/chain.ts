@@ -25,7 +25,7 @@ export async function verifyUsdcTransfer(
   client: ChainClient,
   txHash: `0x${string}`,
   expectedTo: string,
-  expectedAmountUsdc: number,
+  expectedAmountUnits: number,  // USDC smallest units (6 decimals) — matches rest of the API
   usdcAddress: string,
 ): Promise<{ valid: boolean; reason?: string }> {
   try {
@@ -50,8 +50,8 @@ export async function verifyUsdcTransfer(
     const to = `0x${transferLog.topics[2]?.slice(26)}`.toLowerCase()
     const value = BigInt(transferLog.data)
 
-    // USDC has 6 decimals
-    const expectedAmount = BigInt(Math.round(expectedAmountUsdc * 1e6))
+    // expectedAmountUnits is already in base units (USDC has 6 decimals)
+    const expectedAmount = BigInt(expectedAmountUnits)
 
     if (to !== expectedTo.toLowerCase()) {
       return { valid: false, reason: 'wrong_recipient' }
