@@ -9,11 +9,12 @@ import {Pausable} from "./Pausable.sol";
 /// @notice Permissionless registry for OpenRelay node operators.
 ///         Any address can register by staking the minimum USDC amount.
 contract NodeRegistry is Pausable {
-    // ── Constants ────────────────────────────────────────────
-
-    uint256 public constant MIN_STAKE = 100_000_000; // 100 USDC (6 decimals)
-
     // ── State ─────────────────────────────────────────────────
+
+    /// @notice Minimum USDC stake required to register a node (6 decimals).
+    ///         Settable by guardian (increase-only) to raise the bar as the
+    ///         network grows. Phase 1 testnet default: 40 USDC.
+    uint256 public minStake;
 
     IERC20 public immutable usdc;
     IStakeManager public immutable stakeManager;
@@ -35,6 +36,7 @@ contract NodeRegistry is Pausable {
     event NodeUpdated(address indexed operator, string endpoint);
     event NodeDeactivated(address indexed operator);
     event NodeActivated(address indexed operator);
+    event MinStakeIncreased(uint256 previous, uint256 newMin);
 
     // ── Errors ───────────────────────────────────────────────
 
@@ -42,12 +44,14 @@ contract NodeRegistry is Pausable {
     error NotRegistered();
     error StakeTooLow(uint256 provided, uint256 minimum);
     error EmptyEndpoint();
+    error MinStakeCannotDecrease(uint256 current, uint256 attempted);
 
     // ── Constructor ──────────────────────────────────────────
 
-    constructor(address _usdc, address _stakeManager, address _guardian) Pausable(_guardian) {
+    constructor(address _usdc, address _stakeManager, address _guardian, uint256 _minStake) Pausable(_guardian) {
         usdc = IERC20(_usdc);
         stakeManager = IStakeManager(_stakeManager);
+        minStake = _minStake;
     }
 
     // ── External ─────────────────────────────────────────────
@@ -56,7 +60,7 @@ contract NodeRegistry is Pausable {
     ///         stakeAmount of USDC to the StakeManager before calling.
     function register(string calldata endpoint, uint256 stakeAmount) external whenNotPaused {
         if (_nodes[msg.sender].registeredAt != 0) revert AlreadyRegistered();
-        if (stakeAmount < MIN_STAKE) revert StakeTooLow(stakeAmount, MIN_STAKE);
+        if (stakeAmount < minStake) revert StakeTooLow(stakeAmount, minStake);
         if (bytes(endpoint).length == 0) revert EmptyEndpoint();
 
         stakeManager.depositFor(msg.sender, stakeAmount);
@@ -98,6 +102,14 @@ contract NodeRegistry is Pausable {
         _activeIndex[msg.sender] = _activeOperators.length;
         _activeOperators.push(msg.sender);
         emit NodeActivated(msg.sender);
+    }
+
+    /// @notice Raise the minimum stake. Guardian-only. Can never decrease —
+    ///         this prevents a malicious guardian from devaluing existing stakes.
+    function setMinStake(uint256 newMin) external onlyGuardian {
+        if (newMin < minStake) revert MinStakeCannotDecrease(minStake, newMin);
+        emit MinStakeIncreased(minStake, newMin);
+        minStake = newMin;
     }
 
     // ── Views ─────────────────────────────────────────────────
