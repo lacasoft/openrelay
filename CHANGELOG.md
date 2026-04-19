@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Deployed
+- **Base Sepolia (testnet)**: First on-chain deployment of the three core contracts.
+  Source code verified on Basescan. See `packages/contracts/deployments/sepolia.json`
+  for addresses and deployment metadata. Deployed at block 40395831.
+
 ### Added
 - On-chain USDC transfer verification via viem (x402 + settlements)
 - HD wallet address derivation for secure payment address generation
