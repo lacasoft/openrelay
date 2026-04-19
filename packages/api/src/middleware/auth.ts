@@ -37,12 +37,13 @@ export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
   req.isSecretKey    = result.key.key_prefix.startsWith('sk_')
 }
 
-export function requireSecretKey(req: FastifyRequest, reply: FastifyReply) {
+export async function requireSecretKey(req: FastifyRequest, reply: FastifyReply) {
+  // Must be async (or use the `done` callback) — Fastify hangs forever on a
+  // sync preHandler that neither sends a reply nor returns a Promise.
   if (!req.isSecretKey) {
     return reply.status(403).send(apiError(
       'insufficient_permissions',
       'This action requires a secret API key (sk_live_xxx).'
     ))
   }
-  return
 }

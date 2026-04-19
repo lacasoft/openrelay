@@ -39,14 +39,15 @@ process.on('SIGINT',  shutdown)
 async function start() {
   await verifyRegistration(config)
 
+  // Start the chain watcher and register its cleanup hook BEFORE listening —
+  // Fastify rejects addHook calls once the server is accepting connections.
+  const stopWatcher = startChainWatcher({ config, store, logger: app.log })
+  app.addHook('onClose', () => stopWatcher())
+
   await app.listen({ port: config.port, host: '0.0.0.0' })
   app.log.info(`OpenRelay Node v0.1.0`)
   app.log.info(`Operator: ${config.operatorAddress}`)
   app.log.info(`Endpoint: ${config.endpoint}`)
-
-  // Start monitoring on-chain for settlements
-  const stopWatcher = startChainWatcher({ config, store, logger: app.log })
-  app.addHook('onClose', () => stopWatcher())
 }
 
 start().catch((err) => {
