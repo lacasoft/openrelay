@@ -8,11 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Deployed
-- **Base Sepolia (testnet)**: First on-chain deployment of the three core contracts.
-  Source code verified on Basescan. See `packages/contracts/deployments/sepolia.json`
-  for addresses and deployment metadata. Deployed at block 40395831.
+- **Base Sepolia (testnet, 2026-04-19)**: Redeploy with adjustable `minStake`
+  set to 40 USDC (from PR #14). All three contracts source-verified on
+  Basescan. Block 40408950. Previous deploy (block 40395831, hardcoded
+  100 USDC stake) is orphaned. See `packages/contracts/deployments/sepolia.json`
+  for current addresses and historical context.
 
 ### Added
+- Adjustable `minStake` on `NodeRegistry` — state variable set at deploy time,
+  guardian can raise (never lower) via `setMinStake()`. Testnet default: 40 USDC.
+  Preserves Sybil resistance while lowering early-adopter friction.
 - On-chain USDC transfer verification via viem (x402 + settlements)
 - HD wallet address derivation for secure payment address generation
 - Real chain watcher with USDC Transfer event polling

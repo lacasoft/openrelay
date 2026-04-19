@@ -8,13 +8,21 @@ If you run your own node, it costs nothing. If you use the community network, yo
 
 ---
 
-## Protocol status
+## 🚀 Current status
 
-✅ **Phase 1 live on Base Sepolia** since 2026-04-18.
-Contracts are deployed and source-verified on
-[Sepolia Basescan](https://sepolia.basescan.org/). Addresses in
+✅ **Contracts deployed on Base Sepolia** (testnet) since 2026-04-18.
+Source code verified on Basescan · initial `minStake`: 40 USDC.
+
+| Contract | Address |
+|----------|---------|
+| `NodeRegistry` | [`0x15e742142CB23E6f5c1B20aAE13CDd49E6b68565`](https://sepolia.basescan.org/address/0x15e742142CB23E6f5c1B20aAE13CDd49E6b68565#code) |
+| `StakeManager` | [`0xBbcE040401e4612337799bABCeE7860a9A0fcA84`](https://sepolia.basescan.org/address/0xBbcE040401e4612337799bABCeE7860a9A0fcA84#code) |
+| `DisputeResolver` | [`0xb8d6D150D2567644D404b6Bd46c81cc749c0926D`](https://sepolia.basescan.org/address/0xb8d6D150D2567644D404b6Bd46c81cc749c0926D#code) |
+
+Canonical source of addresses (for SDKs and dashboards):
 [`packages/contracts/deployments/sepolia.json`](../../packages/contracts/deployments/sepolia.json).
-External audit and mainnet deploy still pending.
+
+🔜 External audit and mainnet deploy still pending.
 
 ---
 
