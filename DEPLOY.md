@@ -1,5 +1,11 @@
 # OpenRelay — Guía de Deploy (Base Sepolia)
 
+> **Nota**: Este guide fue el usado para el primer deploy a Base Sepolia
+> (completado 2026-04-18). Los addresses resultantes están en
+> [`packages/contracts/deployments/sepolia.json`](packages/contracts/deployments/sepolia.json).
+> Si vas a redeployar por alguna razón, este documento te sirve; si solo
+> quieres usar los contratos ya deployados, lee ese JSON directamente.
+
 Esta guía cubre el proceso completo para desplegar los contratos de OpenRelay
 (`NodeRegistry`, `StakeManager`, `DisputeResolver`) en **Base Sepolia testnet**.
 

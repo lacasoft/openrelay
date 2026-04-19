@@ -347,6 +347,7 @@ Los reportes se publicarán en el repositorio público.
 ### 7.1 Qué funciona hoy (v0.1)
 
 - Los tres contratos inteligentes con ~240+ tests (unit + fuzz) pasando
+- **Deploy en Base Sepolia live** con contratos verificados en Basescan (ver `packages/contracts/deployments/sepolia.json`)
 - SDK JS/Python/PHP publicables, con tests
 - REST API completa (payment intents, webhooks, x402) con 60+ tests
 - Daemon del nodo con verificación on-chain real via viem
@@ -359,7 +360,7 @@ Los reportes se publicarán en el repositorio público.
 
 Seamos honestos:
 
-- **No hay deploy en mainnet.** Ni siquiera en Sepolia. Estamos completando la auditoría interna antes del primer deploy.
+- **Deploy en Base Sepolia completo (testnet)** — addresses en `packages/contracts/deployments/sepolia.json`. Mainnet aún no: está bloqueado por auditoría externa pendiente.
 - **No hay auditoría externa.** Es requisito obligatorio antes de mainnet. Presupuestado contra el treasury de Fase 2.
 - **Solo USDC en Base.** No hay BTC/Lightning, ni Polygon, ni Solana hasta Fase 2+.
 - **Sin on-ramps fiat.** SPEI y Oxxo Pay son Fase 2. Hoy el merchant necesita que el cliente ya tenga USDC.
@@ -382,7 +383,7 @@ Si estás evaluando OpenRelay para producción hoy: es viable en modo autoalojad
 - ✅ Derivación HD wallet para direcciones de pago
 - ✅ CI/CD con GitHub Actions
 - 🔄 Auditoría interna de seguridad
-- 🔄 Deploy en Base Sepolia
+- ✅ Deploy en Base Sepolia (2026-04-18 — ver `packages/contracts/deployments/sepolia.json`)
 - 🔄 Primer comercio en producción (autoalojado)
 
 ### Fase 2 — Red (meses 4-10)
