@@ -6,10 +6,10 @@
 #
 # Flow:
 #   1. Load .env (requires DEPLOYER_PRIVATE_KEY and BASE_SEPOLIA_RPC_URL)
-#   2. Read MIN_STAKE from NodeRegistry and USDC balance of the operator
-#   3. Abort if balance < MIN_STAKE (so no gas is wasted)
-#   4. Approve StakeManager to pull MIN_STAKE of USDC
-#   5. Call NodeRegistry.register(endpoint, MIN_STAKE)
+#   2. Read minStake from NodeRegistry and USDC balance of the operator
+#   3. Abort if balance < minStake (so no gas is wasted)
+#   4. Approve StakeManager to pull minStake of USDC
+#   5. Call NodeRegistry.register(endpoint, minStake)
 #   6. Print tx hashes + Basescan links
 #   7. Verify on-chain via NodeRegistry.getNode(operator)
 #
@@ -76,8 +76,8 @@ log() {
 
 # ---------- 1. Read MIN_STAKE ----------
 
-log "Reading NodeRegistry.MIN_STAKE()"
-MIN_STAKE_RAW="$(cast call "$NODE_REGISTRY" "MIN_STAKE()(uint256)" --rpc-url "$RPC")"
+log "Reading NodeRegistry.minStake()"
+MIN_STAKE_RAW="$(cast call "$NODE_REGISTRY" "minStake()(uint256)" --rpc-url "$RPC")"
 # cast may print trailing info like "100000000 [1e8]"; keep only the leading integer.
 MIN_STAKE_RAW="${MIN_STAKE_RAW%% *}"
 echo "    MIN_STAKE = $MIN_STAKE_RAW ($(fmt_usdc "$MIN_STAKE_RAW") USDC)"

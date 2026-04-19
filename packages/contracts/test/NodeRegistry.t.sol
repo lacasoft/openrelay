@@ -42,7 +42,7 @@ contract NodeRegistryTest is Test {
             address(stakeManager), treasury, arbiters, guardian
         );
 
-        registry = new NodeRegistry(address(usdc), address(stakeManager), guardian);
+        registry = new NodeRegistry(address(usdc), address(stakeManager), guardian, MIN_STAKE);
 
         vm.prank(guardian);
         stakeManager.initialize(address(resolver), address(registry));
@@ -316,6 +316,64 @@ contract NodeRegistryTest is Test {
         vm.prank(newGuardian);
         registry.pause();
         assertTrue(registry.paused());
+    }
+
+    // ── Adjustable min stake ──────────────────────────────────
+
+    function test_MinStake_InitialValue() public view {
+        assertEq(registry.minStake(), MIN_STAKE);
+    }
+
+    function test_SetMinStake_GuardianCanIncrease() public {
+        uint256 newMin = MIN_STAKE * 2;
+
+        vm.expectEmit(true, true, true, true);
+        emit NodeRegistry.MinStakeIncreased(MIN_STAKE, newMin);
+
+        vm.prank(guardian);
+        registry.setMinStake(newMin);
+
+        assertEq(registry.minStake(), newMin);
+    }
+
+    function test_SetMinStake_Revert_Decrease() public {
+        uint256 lowerMin = MIN_STAKE - 1;
+
+        vm.prank(guardian);
+        vm.expectRevert(
+            abi.encodeWithSelector(NodeRegistry.MinStakeCannotDecrease.selector, MIN_STAKE, lowerMin)
+        );
+        registry.setMinStake(lowerMin);
+    }
+
+    function test_SetMinStake_Revert_NonGuardian() public {
+        vm.prank(operator);
+        vm.expectRevert(Pausable.NotGuardian.selector);
+        registry.setMinStake(MIN_STAKE * 2);
+    }
+
+    function test_SetMinStake_SameValueAllowed() public {
+        // Setting to the same value is a no-op but shouldn't revert
+        // (it's a set, not a strict increase — emits the event anyway)
+        vm.prank(guardian);
+        registry.setMinStake(MIN_STAKE);
+        assertEq(registry.minStake(), MIN_STAKE);
+    }
+
+    function test_Register_AfterMinStakeIncrease_OldStakeTooLow() public {
+        uint256 newMin = MIN_STAKE * 2;
+        vm.prank(guardian);
+        registry.setMinStake(newMin);
+
+        // Trying to register with the previous MIN_STAKE should now fail
+        usdc.mint(operator, MIN_STAKE);
+        vm.startPrank(operator);
+        usdc.approve(address(stakeManager), MIN_STAKE);
+        vm.expectRevert(
+            abi.encodeWithSelector(NodeRegistry.StakeTooLow.selector, MIN_STAKE, newMin)
+        );
+        registry.register(ENDPOINT, MIN_STAKE);
+        vm.stopPrank();
     }
 
     // ── Helpers ───────────────────────────────────────────────

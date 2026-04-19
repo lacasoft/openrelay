@@ -67,10 +67,17 @@ contract Deploy is Script {
         console.log("DisputeResolver deployed at:", address(disputeResolver));
 
         // ── Step 3: NodeRegistry ──────────────────────────────
+        // Initial minStake: read from env var (defaults to 40 USDC for testnet).
+        // Guardian can increase it later via setMinStake(). Recommended:
+        //   testnet/early mainnet → 40 USDC (40_000_000)
+        //   mature mainnet       → 100 USDC (100_000_000)
+        uint256 initialMinStake = vm.envOr("MIN_STAKE_USDC_UNITS", uint256(40_000_000));
+
         NodeRegistry nodeRegistry = new NodeRegistry(
             usdc,
             address(stakeManager),
-            deployer  // guardian for Pausable
+            deployer, // guardian for Pausable
+            initialMinStake
         );
 
         console.log("NodeRegistry deployed at:", address(nodeRegistry));
@@ -94,7 +101,7 @@ contract Deploy is Script {
         require(address(stakeManager.usdc()) == usdc, "StakeManager: wrong usdc");
         require(address(disputeResolver.stakeManager()) == address(stakeManager), "DisputeResolver: wrong stakeManager");
         require(address(nodeRegistry.usdc()) == usdc, "NodeRegistry: wrong usdc");
-        require(nodeRegistry.MIN_STAKE() == 100_000_000, "NodeRegistry: wrong MIN_STAKE");
+        require(nodeRegistry.minStake() == initialMinStake, "NodeRegistry: wrong initial minStake");
         console.log("All checks passed.");
     }
 
