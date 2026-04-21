@@ -11,13 +11,24 @@ If you run your own node, it costs nothing. If you use the community network, yo
 ## 🚀 Current status
 
 ✅ **Contracts deployed on Base Sepolia** (testnet) since 2026-04-18.
-Source code verified on Basescan · initial `minStake`: 40 USDC.
+Source code verified on Basescan · initial `minStake`: 40 USDC on testnet
+(100 USDC on mainnet; adjustable by guardian, increase-only).
 
 | Contract | Address |
 |----------|---------|
 | `NodeRegistry` | [`0x15e742142CB23E6f5c1B20aAE13CDd49E6b68565`](https://sepolia.basescan.org/address/0x15e742142CB23E6f5c1B20aAE13CDd49E6b68565#code) |
 | `StakeManager` | [`0xBbcE040401e4612337799bABCeE7860a9A0fcA84`](https://sepolia.basescan.org/address/0xBbcE040401e4612337799bABCeE7860a9A0fcA84#code) |
 | `DisputeResolver` | [`0xb8d6D150D2567644D404b6Bd46c81cc749c0926D`](https://sepolia.basescan.org/address/0xb8d6D150D2567644D404b6Bd46c81cc749c0926D#code) |
+
+✅ **First node registered on-chain** since 2026-04-21 (block 40514749).
+Bootstrap node operated by the core team during Phase 1.
+
+| Field | Value |
+|---|---|
+| Operator | [`0x0632...F05C`](https://sepolia.basescan.org/address/0x063250650155518BE28989Ec41c597dC1d1eF05C) |
+| Endpoint | `https://nodeit.openrelay.site` |
+| Stake | 40 USDC (locked on-chain) |
+| Register tx | [`0x42c1...37c6`](https://sepolia.basescan.org/tx/0x42c170db7d754063bf03d7dd86f1e684c74c573d600c16e57a63b9fecf4937c6) |
 
 Canonical source of addresses (for SDKs and dashboards):
 [`packages/contracts/deployments/sepolia.json`](../../packages/contracts/deployments/sepolia.json).
@@ -154,7 +165,7 @@ Five layers with strict separation of concerns:
 | **API** | Merchant interface | Fastify + PostgreSQL + Redis |
 | **SDK** | Developer experience | TypeScript · Python · PHP |
 
-Smart contracts are non-upgradeable. No admin keys. No pause functions. What is audited is what runs.
+Smart contracts are non-upgradeable. They include an emergency-pause function governed by a 3-of-5 multisig — not by a single key. In Phase 3, the guardian migrates to on-chain governance. What is audited is what runs.
 
 → Full architecture and technical deep-dive: [INFRASTRUCTURE.md](./INFRASTRUCTURE.md)
 → Protocol specification: [PROTOCOL.md](./PROTOCOL.md)
@@ -165,7 +176,7 @@ Smart contracts are non-upgradeable. No admin keys. No pause functions. What is 
 
 Anyone can run a node. No whitelist. No application.
 
-Requirements: stake 100 USDC on-chain, expose an HTTPS endpoint, maintain uptime. Reputation is computed publicly. Bad nodes lose routing naturally. Node operators earn 80% of the 0.05% protocol fee on every transaction they route, in USDC, on-chain.
+Requirements: stake the current `minStake` on-chain (100 USDC on mainnet · 40 USDC on Sepolia testnet; adjustable by guardian, increase-only), expose an HTTPS endpoint, maintain uptime. Reputation is computed publicly. Bad nodes lose routing naturally. Node operators earn 80% of the 0.05% protocol fee on every transaction they route, in USDC, on-chain.
 
 **Running a node in Mexico or Spain is a political act as much as a technical one.** Every community node is infrastructure that no institution controls.
 
@@ -187,7 +198,7 @@ Requirements: stake 100 USDC on-chain, expose an HTTPS endpoint, maintain uptime
 
 | Phase | Timeline | Key Deliverables |
 |---|---|---|
-| **Phase 1 — Foundation** | Months 1–4 | Base Sepolia deploy · JS SDK · First merchant · First node |
+| **Phase 1 — Foundation** | Months 1–4 | ✅ Base Sepolia deploy · ✅ JS SDK · ✅ First node registered · First merchant |
 | **Phase 2 — Network** | Months 4–10 | Permissionless nodes · Python + PHP SDKs · Lightning · WooCommerce · SPEI on-ramp |
 | **Phase 3 — Ecosystem** | Months 10–18 | Multi-chain · Go SDK · Institutional layer · On-chain governance |
 

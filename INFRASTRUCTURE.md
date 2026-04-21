@@ -208,7 +208,7 @@ address[] private _activeOperators;
 
 `register(string endpoint, uint256 stakeAmount)`
 - Invocable por cualquiera con suficiente aprobación de USDC
-- Requiere `stakeAmount >= MIN_STAKE` (100 USDC = 100,000,000)
+- Requiere `stakeAmount >= minStake` (100 USDC en mainnet · 40 USDC en Sepolia testnet — ajustable por guardian vía `updateMinStake`, solo incrementos)
 - Llama a `StakeManager.depositFor()` para transferir USDC
 - Hace push del operator a `_activeOperators`
 - Emite `NodeRegistered`
@@ -865,7 +865,7 @@ Example: 1,000 tx/day, avg $50
 Costos para un node básico:
 ```
 VPS (2 vCPU, 2GB RAM):  ~$20/month
-Minimum stake (100 USDC): one-time, recoverable
+Minimum stake (100 USDC mainnet · 40 USDC testnet): one-time, recoverable
 Base gas for registration: ~$0.005
 ```
 
@@ -968,7 +968,7 @@ Los reportes de auditoría serán publicados en `/audits` en el repositorio. La 
 | Almacenamiento | 10 GB SSD | 50 GB SSD |
 | Red | 100 Mbps | 1 Gbps |
 | SLA de Uptime | 99% | 99.9% |
-| Stake de USDC | 100 USDC | 1,000+ USDC |
+| Stake de USDC | 100 USDC (mainnet) · 40 USDC (testnet) | 1,000+ USDC |
 | RPC de Base | Público (rate limited) | Dedicado (Alchemy, QuickNode) |
 
 ### 13.2 Configuración desde cero
@@ -1284,7 +1284,7 @@ Estas son las propiedades que OpenRelay garantiza a todos los participantes. Deb
 
 1. No existe admin key que pueda pausar, actualizar o modificar los contratos desplegados
 2. El fee split (80/20 node/treasury) está codificado en el protocolo y no puede cambiarse sin un nuevo despliegue
-3. El stake mínimo (100 USDC) es una constante del protocolo que no puede cambiarse sin un nuevo despliegue de contrato
+3. El stake mínimo (`minStake`) es una variable de estado ajustable por el guardian vía `NodeRegistry.updateMinStake()`, pero el contrato **rechaza reducciones** — solo incrementos. Esto permite que la red aumente la barrera anti-Sybil conforme madura (valor inicial: 100 USDC en mainnet, 40 USDC en Sepolia testnet) sin invalidar a operadores ya registrados.
 4. Todos los registros de nodes son sin permisos — ningún comité de whitelist puede bloquear a un node de unirse
 
 ---

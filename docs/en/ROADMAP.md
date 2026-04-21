@@ -58,7 +58,7 @@ The window to build community-owned infrastructure before institutional standard
 
 ### Market Milestones
 
-- [ ] First bootstrap node operational (team-operated)
+- [x] First bootstrap node registered on-chain (team-operated) — 2026-04-21, [`0x0632...F05C`](https://sepolia.basescan.org/address/0x063250650155518BE28989Ec41c597dC1d1eF05C), endpoint `https://nodeit.openrelay.site`, 40 USDC staked. Pending: bring up the daemon and serve real traffic.
 - [ ] First merchant integration (self-hosted, Mexico)
 - [ ] Public testnet announcement in Spanish-language developer communities
 - [ ] Repository public on GitHub under `lacasoft`
