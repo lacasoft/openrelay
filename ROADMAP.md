@@ -52,7 +52,7 @@ Esa es la oportunidad que persigue OpenRelay. La ventana para construir infraest
 
 ### Hitos de Mercado
 
-- [x] Primer bootstrap node registrado on-chain (operado por el equipo) — 2026-04-21, [`0x0632...F05C`](https://sepolia.basescan.org/address/0x063250650155518BE28989Ec41c597dC1d1eF05C), endpoint `https://nodeit.openrelay.site`, 40 USDC stakeados. Pendiente: levantar el daemon y servir tráfico real.
+- [x] Primer bootstrap node registrado on-chain (operado por el equipo, operator [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) separado del deployer) — 2026-04-21, bloque 40522829, tx [`0x399c...93ca`](https://sepolia.basescan.org/tx/0x399c077b7cdd19e99658ca69790ca985304be65b2fcc7cbe0aec8b54608893ca), endpoint `https://nodeit.openrelay.site`, 40 USDC stakeados. Pendiente: levantar el daemon y servir tráfico real.
 - [ ] Primera integración con un comercio (autoalojado, México)
 - [ ] Anuncio público de testnet en comunidades de desarrolladores hispanohablantes
 - [ ] Repositorio público en GitHub bajo `lacasoft`

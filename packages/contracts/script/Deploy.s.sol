@@ -53,16 +53,20 @@ contract Deploy is Script {
         //   - DisputeResolver.vote() calls StakeManager.slash()
         // StakeManager gates those calls on msg.sender == nodeRegistry /
         // disputeResolver. We break the cycle with an initialization pattern:
-        //   1. Deploy StakeManager with only (usdc, guardian)
-        //   2. Deploy DisputeResolver and NodeRegistry pointing at StakeManager
-        //   3. Call stakeManager.initialize(disputeResolver, nodeRegistry)
-        // After initialization, the links are locked in (initialize reverts
-        // with AlreadyInitialized on any subsequent call).
+        //   1. Deploy the three contracts with the deployer as *temporary*
+        //      guardian so the deployer can call stakeManager.initialize()
+        //      (which is gated by onlyGuardian).
+        //   2. Call stakeManager.initialize(disputeResolver, nodeRegistry).
+        //   3. Transfer guardianship on all three contracts to the real
+        //      GUARDIAN_ADDRESS via Pausable.transferGuardian(). After this,
+        //      the deployer has no authority over the protocol.
+        // Final state: guardian = GUARDIAN_ADDRESS on all three. Deployer
+        // only paid gas.
 
         // ── Step 1: StakeManager ───────────────────────────────
         StakeManager stakeManager = new StakeManager(
             usdc,
-            guardian // guardian for Pausable
+            deployerAddr // temporary guardian (transferred to real guardian below)
         );
 
         console.log("StakeManager deployed at:", address(stakeManager));
@@ -72,7 +76,7 @@ contract Deploy is Script {
             address(stakeManager),
             treasury,
             arbiters,
-            guardian // guardian for Pausable
+            deployerAddr // temporary guardian
         );
 
         console.log("DisputeResolver deployed at:", address(disputeResolver));
@@ -87,7 +91,7 @@ contract Deploy is Script {
         NodeRegistry nodeRegistry = new NodeRegistry(
             usdc,
             address(stakeManager),
-            guardian, // guardian for Pausable
+            deployerAddr, // temporary guardian
             initialMinStake
         );
 
@@ -97,6 +101,15 @@ contract Deploy is Script {
         stakeManager.initialize(address(disputeResolver), address(nodeRegistry));
 
         console.log("StakeManager initialized with resolver + registry");
+
+        // ── Step 5: Transfer guardian to the real guardian ────
+        // From this point on, only GUARDIAN_ADDRESS can pause or adjust minStake.
+        // The deployer keeps no authority over the protocol.
+        stakeManager.transferGuardian(guardian);
+        disputeResolver.transferGuardian(guardian);
+        nodeRegistry.transferGuardian(guardian);
+
+        console.log("Guardianship transferred to:", guardian);
 
         vm.stopBroadcast();
 
@@ -113,6 +126,9 @@ contract Deploy is Script {
         require(address(disputeResolver.stakeManager()) == address(stakeManager), "DisputeResolver: wrong stakeManager");
         require(address(nodeRegistry.usdc()) == usdc, "NodeRegistry: wrong usdc");
         require(nodeRegistry.minStake() == initialMinStake, "NodeRegistry: wrong initial minStake");
+        require(stakeManager.guardian() == guardian, "StakeManager: guardian not transferred");
+        require(disputeResolver.guardian() == guardian, "DisputeResolver: guardian not transferred");
+        require(nodeRegistry.guardian() == guardian, "NodeRegistry: guardian not transferred");
         console.log("All checks passed.");
     }
 
