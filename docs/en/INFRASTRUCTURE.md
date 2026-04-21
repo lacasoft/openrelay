@@ -208,7 +208,7 @@ address[] private _activeOperators;
 
 `register(string endpoint, uint256 stakeAmount)`
 - Callable by anyone with sufficient USDC approval
-- Requires `stakeAmount >= MIN_STAKE` (100 USDC = 100,000,000)
+- Requires `stakeAmount >= minStake` (100 USDC on mainnet · 40 USDC on Sepolia testnet — adjustable by the guardian via `updateMinStake`, increase-only)
 - Calls `StakeManager.depositFor()` to transfer USDC
 - Pushes operator to `_activeOperators`
 - Emits `NodeRegistered`
@@ -865,7 +865,7 @@ Example: 1,000 tx/day, avg $50
 Costs for a basic node:
 ```
 VPS (2 vCPU, 2GB RAM):  ~$20/month
-Minimum stake (100 USDC): one-time, recoverable
+Minimum stake (100 USDC mainnet · 40 USDC testnet): one-time, recoverable
 Base gas for registration: ~$0.005
 ```
 
@@ -968,7 +968,7 @@ Audit reports will be published at `/audits` in the repository. The community sh
 | Storage | 10 GB SSD | 50 GB SSD |
 | Network | 100 Mbps | 1 Gbps |
 | Uptime SLA | 99% | 99.9% |
-| USDC stake | 100 USDC | 1,000+ USDC |
+| USDC stake | 100 USDC (mainnet) · 40 USDC (testnet) | 1,000+ USDC |
 | Base RPC | Public (rate limited) | Dedicated (Alchemy, QuickNode) |
 
 ### 13.2 Setup from zero
@@ -1284,7 +1284,7 @@ These are the properties that OpenRelay guarantees to all participants. They mus
 
 1. There is no admin key that can pause, upgrade, or modify the deployed contracts
 2. The fee split (80/20 node/treasury) is encoded in the protocol and cannot be changed without a new deployment
-3. The minimum stake (100 USDC) is a protocol constant that cannot be changed without a new contract deployment
+3. The minimum stake (`minStake`) is a state variable adjustable by the guardian via `NodeRegistry.updateMinStake()`, but the contract **rejects decreases** — increase-only. This lets the network raise the anti-Sybil floor as it matures (initial value: 100 USDC on mainnet, 40 USDC on Sepolia testnet) without invalidating already-registered operators.
 4. All node registrations are permissionless — no whitelist committee can block a node from joining
 
 ---

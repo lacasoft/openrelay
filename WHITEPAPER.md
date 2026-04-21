@@ -93,7 +93,7 @@ El nodo nunca toca los fondos. Solo confirma que la transacción ocurrió y avis
 
 Cualquiera puede operar un nodo. Solo necesitas:
 
-1. Depositar 100 USDC de stake (recuperable)
+1. Depositar el `minStake` on-chain (**100 USDC en mainnet · 40 USDC en Sepolia testnet**). El stake es recuperable vía `StakeManager.withdraw()` con timelock de 7 días. El guardian puede aumentar `minStake` conforme la red madura — nunca reducirlo — sin afectar a operadores ya registrados.
 2. Correr el software en un VPS (~$20/mes)
 3. Mantener buen uptime y velocidad
 
@@ -129,7 +129,7 @@ No hay token. No hay mining. Solo trabajo real por pago real.
 
 Tres contratos en Base:
 
-- **NodeRegistry:** registro público de nodos, cualquiera se registra con stake mínimo 100 USDC
+- **NodeRegistry:** registro público de nodos, cualquiera se registra con stake ≥ `minStake` (100 USDC mainnet · 40 USDC testnet; ajustable por guardian, solo incrementos)
 - **StakeManager:** depósitos, retiros con timelock 7 días, slashing por disputas
 - **DisputeResolver:** si un nodo no responde en 48 horas, pierde stake automático. Árbitros gestionados por multisig 3-de-5
 
@@ -260,7 +260,8 @@ Resultado: ingreso real, no sueldo completo.
 
 ```
 VPS (2 vCPU, 2GB RAM):   ~$20/mes
-Stake (100 USDC):         único, recuperable con timelock 7 días
+Stake (100 USDC mainnet):  único, recuperable con timelock 7 días
+                           (Sepolia testnet: 40 USDC)
 Gas de registro en Base:  ~$0.005 (una sola vez)
 ```
 
@@ -436,7 +437,7 @@ const intent = await client.paymentIntents.create({
 ### Operadores de nodo
 
 ```bash
-# Registrar nodo on-chain (100 USDC stake)
+# Registrar nodo on-chain (stake >= minStake: 100 USDC mainnet · 40 USDC testnet)
 # Correr el daemon
 npm run node:start
 ```
@@ -476,7 +477,10 @@ npm run node:start
 PROTOCOL_VERSION         = "0.1"
 USDC_BASE_ADDRESS        = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
 USDC_DECIMALS            = 6
-MIN_STAKE_USDC           = 100,000,000   (100 USDC)
+minStake (mainnet)       = 100,000,000   (100 USDC) — initial value at deploy
+minStake (Sepolia)       =  40,000,000   ( 40 USDC) — initial value at deploy
+                           adjustable by guardian via NodeRegistry.updateMinStake(),
+                           increase-only (never reduced).
 PROTOCOL_FEE_BPS         = 50            (0.05%)
 NODE_FEE_SHARE           = 0.80          (80% al nodo)
 TREASURY_FEE_SHARE       = 0.20          (20% al treasury)

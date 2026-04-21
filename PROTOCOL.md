@@ -208,7 +208,11 @@ function getNode(address operator) external view returns (Node memory);
 function getActiveNodes() external view returns (address[] memory);
 ```
 
-**Stake mínimo:** 100 USDC (100,000,000 micro-unidades). Constante del protocolo, no configurable por admin.
+**Stake mínimo (`minStake`):** variable de estado en `NodeRegistry`, inicializada en el deploy.
+- **Mainnet:** 100 USDC (100,000,000 micro-unidades) — valor anti-Sybil del protocolo
+- **Sepolia testnet:** 40 USDC (40,000,000 micro-unidades) — inicial reducido para facilitar onboarding con faucets
+
+El guardian puede aumentar `minStake` vía `NodeRegistry.updateMinStake(uint256)` conforme la red madura. El contrato **rechaza reducciones** — solo incrementos. Esto permite subir la barrera anti-Sybil sin comprometer a operadores ya registrados (su stake existente sigue válido).
 
 ### 4.2 StakeManager.sol
 
@@ -425,7 +429,7 @@ export const GET = relay.x402.handler({
 | Node roba fondos | Los fondos nunca pasan por los nodes — siempre payer-a-comercio |
 | Node enruta a dirección equivocada | La dirección del comercio proviene de la capa de API, no del node |
 | Node cobra fee sin liquidar | Dispute + slashing de stake |
-| Ataque Sybil | El stake mínimo de 100 USDC hace que Sybil sea costoso |
+| Ataque Sybil | `minStake` de 100 USDC (mainnet) hace que Sybil sea costoso |
 | Node exit scam | Timelock de retiro de 7 días |
 | Double-spend | Se requiere confirmación on-chain antes de SETTLED |
 | Replay de x402 | tx_hash almacenado en x402_payments_used después del primer uso |
@@ -512,7 +516,7 @@ Prefijo de URL: `/v1/`. La nueva versión de API no se introducirá antes de la 
 | Disco | 10 GB SSD | 50 GB SSD |
 | Red | 100 Mbps | 1 Gbps |
 | SLA de Uptime | 99% | 99.9% |
-| Stake USDC | 100 USDC | 1,000+ USDC |
+| Stake USDC | 100 USDC (mainnet) · 40 USDC (testnet) | 1,000+ USDC |
 
 ---
 

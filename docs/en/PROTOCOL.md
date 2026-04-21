@@ -208,7 +208,11 @@ function getNode(address operator) external view returns (Node memory);
 function getActiveNodes() external view returns (address[] memory);
 ```
 
-**Minimum stake:** 100 USDC (100,000,000 micro-units). Protocol constant, not admin-configurable.
+**Minimum stake (`minStake`):** state variable on `NodeRegistry`, initialized at deploy time.
+- **Mainnet:** 100 USDC (100,000,000 micro-units) — the protocol's anti-Sybil floor
+- **Sepolia testnet:** 40 USDC (40,000,000 micro-units) — lowered initial value to ease onboarding with faucets
+
+The guardian can raise `minStake` via `NodeRegistry.updateMinStake(uint256)` as the network matures. The contract **rejects decreases** — increase-only. This lets the Sybil floor rise without invalidating existing operators' stakes.
 
 ### 4.2 StakeManager.sol
 
@@ -425,7 +429,7 @@ export const GET = relay.x402.handler({
 | Node steals funds | Funds never pass through nodes — payer-to-merchant always |
 | Node routes to wrong address | Merchant address from API layer, not node |
 | Node collects fee without settling | Dispute + stake slashing |
-| Sybil attack | 100 USDC minimum stake makes Sybil costly |
+| Sybil attack | `minStake` of 100 USDC (mainnet) makes Sybil costly |
 | Node exit scam | 7-day withdrawal timelock |
 | Double-spend | On-chain confirmation required before SETTLED |
 | x402 replay | tx_hash stored in x402_payments_used after first use |
@@ -512,7 +516,7 @@ URL prefix: `/v1/`. New API version will not be introduced before protocol v1.0.
 | Disk | 10 GB SSD | 50 GB SSD |
 | Network | 100 Mbps | 1 Gbps |
 | Uptime SLA | 99% | 99.9% |
-| USDC Stake | 100 USDC | 1,000+ USDC |
+| USDC Stake | 100 USDC (mainnet) · 40 USDC (testnet) | 1,000+ USDC |
 
 ---
 

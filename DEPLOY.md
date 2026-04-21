@@ -334,19 +334,41 @@ Después de un deploy exitoso:
 ### Registrar tu primer nodo
 
 Para operar un relay node, primero aprueba USDC al `StakeManager` y luego llama
-a `NodeRegistry.register()` con el stake mínimo (100 USDC = `100000000` con
-6 decimales):
+a `NodeRegistry.register()` con un stake `>= minStake`. En Sepolia testnet
+`minStake` arranca en 40 USDC (`40000000` con 6 decimales). En mainnet
+arrancará en 100 USDC. El `minStake` actual se puede leer on-chain:
 
 ```bash
-# 1. Aprobar USDC al StakeManager
+cast call $NODE_REGISTRY_ADDRESS "minStake()(uint256)" --rpc-url $BASE_SEPOLIA_RPC_URL
+```
+
+**⚠️ El `endpoint` queda publicado on-chain** (visible a cualquiera que consulte
+el registry) y solo puede actualizarse después vía `updateEndpoint()`. Nunca
+registres `http://localhost:*` — usa tu URL pública real (ej.
+`https://node-01.tu-dominio.com`).
+
+**Opción A — script de conveniencia (recomendada para Sepolia):**
+
+```bash
+# Requiere NODE_ENDPOINT en .env con la URL pública de tu nodo.
+bash scripts/register-node-sepolia.sh
+```
+
+El script lee `minStake` on-chain, valida tu balance de USDC, aborta si el
+endpoint es localhost, y corre los dos `cast send` con verificación final.
+
+**Opción B — manual con `cast`:**
+
+```bash
+# 1. Aprobar USDC al StakeManager (40 USDC en Sepolia)
 cast send $USDC_ADDRESS "approve(address,uint256)" \
-  $STAKE_MANAGER_ADDRESS 100000000 \
+  $STAKE_MANAGER_ADDRESS 40000000 \
   --private-key $NODE_OPERATOR_PRIVATE_KEY \
   --rpc-url $BASE_SEPOLIA_RPC_URL
 
-# 2. Registrar el nodo
+# 2. Registrar el nodo (reemplaza el endpoint por tu URL pública)
 cast send $NODE_REGISTRY_ADDRESS "register(string,uint256)" \
-  "http://localhost:4000" 100000000 \
+  "https://tu-nodo.example.com" 40000000 \
   --private-key $NODE_OPERATOR_PRIVATE_KEY \
   --rpc-url $BASE_SEPOLIA_RPC_URL
 ```

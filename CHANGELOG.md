@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Deployed
+- **Base Sepolia (testnet, 2026-04-21)**: First OpenRelay node registered
+  on-chain. Bootstrap node operated by the core team, endpoint
+  `https://nodeit.openrelay.site`, 40 USDC staked. Operator
+  `0x063250650155518BE28989Ec41c597dC1d1eF05C`, register tx
+  `0x42c170db7d754063bf03d7dd86f1e684c74c573d600c16e57a63b9fecf4937c6`,
+  block 40514749. Verifiable via `NodeRegistry.getNode(operator)` on Basescan.
 - **Base Sepolia (testnet, 2026-04-19)**: Redeploy with adjustable `minStake`
   set to 40 USDC (from PR #14). All three contracts source-verified on
   Basescan. Block 40408950. Previous deploy (block 40395831, hardcoded

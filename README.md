@@ -11,13 +11,24 @@ Si corres tu propio nodo, no cuesta nada. Si usas la red comunitaria, pagas frac
 ## 🚀 Estado actual
 
 ✅ **Contratos desplegados en Base Sepolia** (testnet) desde 2026-04-18.
-Código fuente verificado en Basescan · `minStake` inicial: 40 USDC.
+Código fuente verificado en Basescan · `minStake` inicial: 40 USDC en testnet
+(100 USDC en mainnet; ajustable por guardian, solo incrementos).
 
 | Contrato | Dirección |
 |----------|-----------|
 | `NodeRegistry` | [`0x15e742142CB23E6f5c1B20aAE13CDd49E6b68565`](https://sepolia.basescan.org/address/0x15e742142CB23E6f5c1B20aAE13CDd49E6b68565#code) |
 | `StakeManager` | [`0xBbcE040401e4612337799bABCeE7860a9A0fcA84`](https://sepolia.basescan.org/address/0xBbcE040401e4612337799bABCeE7860a9A0fcA84#code) |
 | `DisputeResolver` | [`0xb8d6D150D2567644D404b6Bd46c81cc749c0926D`](https://sepolia.basescan.org/address/0xb8d6D150D2567644D404b6Bd46c81cc749c0926D#code) |
+
+✅ **Primer nodo registrado on-chain** desde 2026-04-21 (bloque 40514749).
+Bootstrap node operado por el equipo core durante Fase 1.
+
+| Campo | Valor |
+|---|---|
+| Operator | [`0x0632...F05C`](https://sepolia.basescan.org/address/0x063250650155518BE28989Ec41c597dC1d1eF05C) |
+| Endpoint | `https://nodeit.openrelay.site` |
+| Stake | 40 USDC (bloqueados on-chain) |
+| Tx de registro | [`0x42c1...37c6`](https://sepolia.basescan.org/tx/0x42c170db7d754063bf03d7dd86f1e684c74c573d600c16e57a63b9fecf4937c6) |
 
 Fuente canónica de direcciones (para SDKs y dashboards):
 [`packages/contracts/deployments/sepolia.json`](packages/contracts/deployments/sepolia.json).
@@ -144,7 +155,7 @@ Los smart contracts incluyen pausa de emergencia gobernada por multisig 3-de-5 �
 
 Cualquiera puede correr un nodo. Sin whitelist. Sin aplicación.
 
-Requisitos: depositar 100 USDC de stake on-chain, exponer un endpoint HTTPS, mantener buen uptime. La reputación se computa públicamente. Los nodos malos pierden tráfico de forma natural. Los operadores de nodo ganan el 80% de la comisión del protocolo (0.05%) por cada transacción que enrutan, en USDC, on-chain.
+Requisitos: depositar el `minStake` on-chain (100 USDC en mainnet · 40 USDC en testnet Sepolia; ajustable por guardian, solo incrementos), exponer un endpoint HTTPS, mantener buen uptime. La reputación se computa públicamente. Los nodos malos pierden tráfico de forma natural. Los operadores de nodo ganan el 80% de la comisión del protocolo (0.05%) por cada transacción que enrutan, en USDC, on-chain.
 
 Correr un nodo es una forma concreta de participar en la infraestructura. Cada nodo comunitario es una pieza más de una red que nadie controla en solitario.
 
@@ -166,7 +177,7 @@ Correr un nodo es una forma concreta de participar en la infraestructura. Cada n
 
 | Fase | Periodo | Entregables clave |
 |---|---|---|
-| **Fase 1 — Fundación** | Meses 1–4 | Deploy en Base Sepolia · SDK JS · Primer comercio · Primer nodo |
+| **Fase 1 — Fundación** | Meses 1–4 | ✅ Deploy en Base Sepolia · ✅ SDK JS · ✅ Primer nodo registrado · Primer comercio |
 | **Fase 2 — Red** | Meses 4–10 | Nodos permissionless · SDK Python y PHP · Lightning · WooCommerce · On-ramp SPEI |
 | **Fase 3 — Ecosistema** | Meses 10–18 | Multi-chain · SDK Go · Gobernanza on-chain · Treasury autosustentable |
 
