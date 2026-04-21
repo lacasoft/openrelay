@@ -10,25 +10,26 @@ If you run your own node, it costs nothing. If you use the community network, yo
 
 ## 🚀 Current status
 
-✅ **Contracts deployed on Base Sepolia** (testnet) since 2026-04-18.
+✅ **Contracts deployed on Base Sepolia** (testnet) — redeployed 2026-04-21 with
+**role separation** (deployer, treasury, guardian, and node operator on distinct wallets).
 Source code verified on Basescan · initial `minStake`: 40 USDC on testnet
 (100 USDC on mainnet; adjustable by guardian, increase-only).
 
 | Contract | Address |
 |----------|---------|
-| `NodeRegistry` | [`0x15e742142CB23E6f5c1B20aAE13CDd49E6b68565`](https://sepolia.basescan.org/address/0x15e742142CB23E6f5c1B20aAE13CDd49E6b68565#code) |
-| `StakeManager` | [`0xBbcE040401e4612337799bABCeE7860a9A0fcA84`](https://sepolia.basescan.org/address/0xBbcE040401e4612337799bABCeE7860a9A0fcA84#code) |
-| `DisputeResolver` | [`0xb8d6D150D2567644D404b6Bd46c81cc749c0926D`](https://sepolia.basescan.org/address/0xb8d6D150D2567644D404b6Bd46c81cc749c0926D#code) |
+| `NodeRegistry` | [`0x2dFdF6151d6BF0156D28976F23823d3f1f9CB106`](https://sepolia.basescan.org/address/0x2dFdF6151d6BF0156D28976F23823d3f1f9CB106#code) |
+| `StakeManager` | [`0xFf4e68652BC8C6b8de18a79C4D2FDDe0c9C9F517`](https://sepolia.basescan.org/address/0xFf4e68652BC8C6b8de18a79C4D2FDDe0c9C9F517#code) |
+| `DisputeResolver` | [`0xAAB6E368767707e562Fb09dB2432F9a691B9915a`](https://sepolia.basescan.org/address/0xAAB6E368767707e562Fb09dB2432F9a691B9915a#code) |
 
-✅ **First node registered on-chain** since 2026-04-21 (block 40514749).
-Bootstrap node operated by the core team during Phase 1.
+**Roles (separate wallets):**
 
-| Field | Value |
-|---|---|
-| Operator | [`0x0632...F05C`](https://sepolia.basescan.org/address/0x063250650155518BE28989Ec41c597dC1d1eF05C) |
-| Endpoint | `https://nodeit.openrelay.site` |
-| Stake | 40 USDC (locked on-chain) |
-| Register tx | [`0x42c1...37c6`](https://sepolia.basescan.org/tx/0x42c170db7d754063bf03d7dd86f1e684c74c573d600c16e57a63b9fecf4937c6) |
+| Role | Wallet | Responsibility |
+|---|---|---|
+| Treasury | [`0x05CD...8261`](https://sepolia.basescan.org/address/0x05CDED242AFC9D7e60eC3049bD8bDccbbA078261) | Receives 20% of fees + slashed stake (**immutable**) |
+| Guardian | [`0xbB51...7Ddf`](https://sepolia.basescan.org/address/0xbB514Eca8f39d0A3B8092B323282304709d17Ddf) | Emergency pause + `updateMinStake()` (rotatable) |
+| Node Operator (bootstrap) | [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) | Stakes USDC + signs daemon HMAC |
+
+🚧 **First bootstrap node** — pending re-registration with the new operator wallet (`0xf73e…5da4`) on the freshly-deployed `NodeRegistry`. Reserved endpoint: `https://nodeit.openrelay.site`.
 
 Canonical source of addresses (for SDKs and dashboards):
 [`packages/contracts/deployments/sepolia.json`](../../packages/contracts/deployments/sepolia.json).

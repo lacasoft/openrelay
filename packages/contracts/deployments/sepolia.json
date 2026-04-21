@@ -1,35 +1,52 @@
 {
   "chain": "base-sepolia",
   "chainId": 84532,
-  "deployedAt": "2026-04-19T08:10:35Z",
-  "deployBlock": 40408950,
+  "deployedAt": "2026-04-21T22:36:28Z",
+  "deployBlock": 40522124,
   "deployer": "0x063250650155518BE28989Ec41c597dC1d1eF05C",
   "contracts": {
-    "stakeManager":    "0xBbcE040401e4612337799bABCeE7860a9A0fcA84",
-    "disputeResolver": "0xb8d6D150D2567644D404b6Bd46c81cc749c0926D",
-    "nodeRegistry":    "0x15e742142CB23E6f5c1B20aAE13CDd49E6b68565"
+    "stakeManager":    "0xFf4e68652BC8C6b8de18a79C4D2FDDe0c9C9F517",
+    "disputeResolver": "0xAAB6E368767707e562Fb09dB2432F9a691B9915a",
+    "nodeRegistry":    "0x2dFdF6151d6BF0156D28976F23823d3f1f9CB106"
   },
   "parameters": {
     "usdc":          "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
-    "treasury":      "0x063250650155518BE28989Ec41c597dC1d1eF05C",
+    "treasury":      "0x05CDED242AFC9D7e60eC3049bD8bDccbbA078261",
+    "guardian":      "0xbB514Eca8f39d0A3B8092B323282304709d17Ddf",
     "arbiters": [
       "0xa6b6FB0B17BeAA2419a9F7f87049BBF47AF7f838",
       "0xD32Ec6dda5dB526a588Be9C07B0770DD0EfB9a7D",
       "0x6e11b024FF5839290b541c49cd073067Bc45c470"
     ],
-    "guardian":      "0x063250650155518BE28989Ec41c597dC1d1eF05C",
     "minStakeUsdc":  "40000000",
     "minStakeUsdcHuman": "40 USDC"
   },
   "verification": {
     "basescan": {
-      "stakeManager":    "https://sepolia.basescan.org/address/0xBbcE040401e4612337799bABCeE7860a9A0fcA84#code",
-      "disputeResolver": "https://sepolia.basescan.org/address/0xb8d6D150D2567644D404b6Bd46c81cc749c0926D#code",
-      "nodeRegistry":    "https://sepolia.basescan.org/address/0x15e742142CB23E6f5c1B20aAE13CDd49E6b68565#code"
+      "stakeManager":    "https://sepolia.basescan.org/address/0xFf4e68652BC8C6b8de18a79C4D2FDDe0c9C9F517#code",
+      "disputeResolver": "https://sepolia.basescan.org/address/0xAAB6E368767707e562Fb09dB2432F9a691B9915a#code",
+      "nodeRegistry":    "https://sepolia.basescan.org/address/0x2dFdF6151d6BF0156D28976F23823d3f1f9CB106#code"
     },
     "sourceCodeVerified": true
   },
+  "roleSeparation": {
+    "note": "Deployer, treasury, guardian, and node operator are FOUR DISTINCT wallets. Deployer paid gas only and has no post-deploy authority. Deploy.s.sol reverts if any two of them collide.",
+    "deployer":  "0x063250650155518BE28989Ec41c597dC1d1eF05C",
+    "treasury":  "0x05CDED242AFC9D7e60eC3049bD8bDccbbA078261",
+    "guardian":  "0xbB514Eca8f39d0A3B8092B323282304709d17Ddf",
+    "nodeOperator (first bootstrap)": "0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4"
+  },
   "previousDeploys": [
+    {
+      "deployedAt": "2026-04-19T08:10:35Z",
+      "deployBlock": 40408950,
+      "reason": "Redeploy with adjustable minStake=40 USDC (PR #15). Orphaned after role-separation redeploy — deployer + treasury + guardian were the same wallet (audit finding C1).",
+      "contracts": {
+        "stakeManager":    "0xBbcE040401e4612337799bABCeE7860a9A0fcA84",
+        "disputeResolver": "0xb8d6D150D2567644D404b6Bd46c81cc749c0926D",
+        "nodeRegistry":    "0x15e742142CB23E6f5c1B20aAE13CDd49E6b68565"
+      }
+    },
     {
       "deployedAt": "2026-04-18T21:19:58Z",
       "deployBlock": 40395831,
@@ -41,5 +58,5 @@
       }
     }
   ],
-  "notes": "Phase 1 testnet deployment with adjustable minStake=40 USDC. Guardian can raise via NodeRegistry.setMinStake() as the network matures. Treasury and guardian share the deployer address. 3/5 arbiter slots filled. External audit pending before mainnet."
+  "notes": "Phase 1 testnet deployment with adjustable minStake=40 USDC and FOUR separated wallets (deployer/treasury/guardian/nodeOperator). Guardian can raise minStake via NodeRegistry.setMinStake() as the network matures — increase-only. 3/5 arbiter slots filled. External audit pending before mainnet."
 }
