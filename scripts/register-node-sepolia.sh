@@ -26,7 +26,7 @@ NODE_REGISTRY="0x15e742142CB23E6f5c1B20aAE13CDd49E6b68565"
 STAKE_MANAGER="0xBbcE040401e4612337799bABCeE7860a9A0fcA84"
 USDC="0x036CbD53842c5426634e7929541eC2318f3dCF7e"
 OPERATOR="0x063250650155518BE28989Ec41c597dC1d1eF05C"
-ENDPOINT="http://localhost:4000"
+# ENDPOINT is read from .env (NODE_ENDPOINT) — see load step below.
 
 BASESCAN_TX="https://sepolia.basescan.org/tx"
 BASESCAN_ADDR="https://sepolia.basescan.org/address"
@@ -55,8 +55,19 @@ set +a
 
 : "${DEPLOYER_PRIVATE_KEY:?DEPLOYER_PRIVATE_KEY must be set in .env}"
 : "${BASE_SEPOLIA_RPC_URL:?BASE_SEPOLIA_RPC_URL must be set in .env}"
+: "${NODE_ENDPOINT:?NODE_ENDPOINT must be set in .env (public URL of the node)}"
 
 RPC="$BASE_SEPOLIA_RPC_URL"
+ENDPOINT="$NODE_ENDPOINT"
+
+# Guard: never publish a localhost URL on-chain. Immutable history — would look bad.
+case "$ENDPOINT" in
+  *localhost*|*127.0.0.1*|*0.0.0.0*)
+    echo "ERROR: NODE_ENDPOINT ('$ENDPOINT') points to localhost." >&2
+    echo "       Set NODE_ENDPOINT in .env to the public URL of your node before registering on-chain." >&2
+    exit 1
+    ;;
+esac
 
 # ---------- Helpers ----------
 
