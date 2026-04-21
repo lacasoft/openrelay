@@ -261,12 +261,12 @@ describe('requireSecretKey middleware', () => {
     expect(reply.body.error.message).toContain('secret API key')
   })
 
-  it('should pass through when isSecretKey is true', () => {
+  it('should pass through when isSecretKey is true', async () => {
     const req = makeMockRequest({}) as any
     req.isSecretKey = true
     const reply = makeMockReply()
 
-    const result = requireSecretKey(req, reply)
+    const result = await requireSecretKey(req, reply)
 
     expect(reply.status).not.toHaveBeenCalled()
     expect(result).toBeUndefined()
