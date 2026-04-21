@@ -8,12 +8,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Deployed
-- **Base Sepolia (testnet, 2026-04-21)**: First OpenRelay node registered
-  on-chain. Bootstrap node operated by the core team, endpoint
-  `https://nodeit.openrelay.site`, 40 USDC staked. Operator
+- **Base Sepolia (testnet, 2026-04-21, block 40522124)**: Redeploy with
+  **separated roles** (deployer, treasury, guardian, and node operator on four
+  distinct wallets), addressing the pre-public audit finding C1. All three
+  contracts source-verified on Basescan. The previous deploy (block 40408950)
+  is orphaned — its registered node (operator `0x0632…F05C`) lives on the
+  orphaned `NodeRegistry`. See
+  `packages/contracts/deployments/sepolia.json` for current addresses and full
+  deploy history.
+
+  New contract addresses:
+  - `NodeRegistry`    — `0x2dFdF6151d6BF0156D28976F23823d3f1f9CB106`
+  - `StakeManager`    — `0xFf4e68652BC8C6b8de18a79C4D2FDDe0c9C9F517`
+  - `DisputeResolver` — `0xAAB6E368767707e562Fb09dB2432F9a691B9915a`
+
+  Role wallets:
+  - Treasury  — `0x05CDED242AFC9D7e60eC3049bD8bDccbbA078261`
+  - Guardian  — `0xbB514Eca8f39d0A3B8092B323282304709d17Ddf`
+  - Operator  — `0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4`
+
+- **Base Sepolia (testnet, 2026-04-21, block 40522829)**: Bootstrap node
+  **re-registered on the new `NodeRegistry`** with the separated operator
+  wallet. Endpoint `https://nodeit.openrelay.site`, 40 USDC staked, operator
+  `0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4`, register tx
+  `0x399c077b7cdd19e99658ca69790ca985304be65b2fcc7cbe0aec8b54608893ca`.
+  Confirmed via `NodeRegistry.getNode(operator)` → `active = true`.
+
+- **Base Sepolia (testnet, 2026-04-21, block 40514749)**: First OpenRelay node
+  registered on-chain on the previous (now-orphaned) `NodeRegistry`. Bootstrap
+  node with endpoint `https://nodeit.openrelay.site`, 40 USDC staked. Operator
   `0x063250650155518BE28989Ec41c597dC1d1eF05C`, register tx
-  `0x42c170db7d754063bf03d7dd86f1e684c74c573d600c16e57a63b9fecf4937c6`,
-  block 40514749. Verifiable via `NodeRegistry.getNode(operator)` on Basescan.
+  `0x42c170db7d754063bf03d7dd86f1e684c74c573d600c16e57a63b9fecf4937c6`.
+  Historical record — this registry was superseded by the 2026-04-21 redeploy
+  above.
 - **Base Sepolia (testnet, 2026-04-19)**: Redeploy with adjustable `minStake`
   set to 40 USDC (from PR #14). All three contracts source-verified on
   Basescan. Block 40408950. Previous deploy (block 40395831, hardcoded
