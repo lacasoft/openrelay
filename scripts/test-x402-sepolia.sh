@@ -10,10 +10,11 @@
 #   5. Replay the same request, expect 409 (SET NX replay protection)
 #
 # Requirements:
-#   - .env at repo root with DEPLOYER_PRIVATE_KEY, BASE_SEPOLIA_RPC_URL
+#   - .env at repo root with NODE_OPERATOR_ADDRESS, NODE_OPERATOR_PRIVATE_KEY,
+#     USDC_ADDRESS, BASE_SEPOLIA_RPC_URL
 #   - Stack running (make up, make seed)
 #   - /tmp/smoke-test-keys.txt with the seeded sk_live_* and pk_live_* keys
-#   - Deployer wallet with:
+#   - Operator wallet with:
 #       - >= 1000 USDC units (0.001 USDC) on Base Sepolia
 #       - >= 0.0001 ETH for gas on Base Sepolia
 #
@@ -28,8 +29,13 @@ cd "$(dirname "$0")/.."
 set -a; . ./.env; set +a
 export PATH="$HOME/.foundry/bin:$PATH"
 
-USDC=0x036CbD53842c5426634e7929541eC2318f3dCF7e
-OPERATOR=0x063250650155518BE28989Ec41c597dC1d1eF05C
+: "${NODE_OPERATOR_ADDRESS:?NODE_OPERATOR_ADDRESS must be set in .env}"
+: "${NODE_OPERATOR_PRIVATE_KEY:?NODE_OPERATOR_PRIVATE_KEY must be set in .env}"
+: "${USDC_ADDRESS:?USDC_ADDRESS must be set in .env}"
+: "${BASE_SEPOLIA_RPC_URL:?BASE_SEPOLIA_RPC_URL must be set in .env}"
+
+USDC="$USDC_ADDRESS"
+OPERATOR="$NODE_OPERATOR_ADDRESS"
 TRANSFER_AMOUNT=1000   # 0.001 USDC (USDC has 6 decimals)
 
 # ── 1. Prerequisites ───────────────────────────────────────────
@@ -73,10 +79,10 @@ echo "  Using API key: ${SK_KEY:0:10}..."
 
 # ── 3. Execute USDC transfer on-chain ──────────────────────────
 
-echo "→ Sending USDC transfer (self-to-self)..."
+echo "→ Sending USDC transfer (operator self-to-self)..."
 TX_JSON=$(cast send "$USDC" "transfer(address,uint256)" "$OPERATOR" "$TRANSFER_AMOUNT" \
   --rpc-url "$BASE_SEPOLIA_RPC_URL" \
-  --private-key "$DEPLOYER_PRIVATE_KEY" \
+  --private-key "$NODE_OPERATOR_PRIVATE_KEY" \
   --json)
 TX_HASH=$(echo "$TX_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['transactionHash'])")
 echo "  Tx hash: $TX_HASH"
