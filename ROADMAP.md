@@ -30,7 +30,7 @@ Esa es la oportunidad que persigue OpenRelay. La ventana para construir infraest
 
 ## Fase 1 — Fundación (Meses 1–4)
 
-**Objetivo:** Protocolo funcionando en Base Sepolia testnet. Primera integración con SDK. Primer comercio. Primer nodo comunitario.
+**Objetivo:** Protocolo funcionando en Base Sepolia testnet. Primera integración con SDK. Primer comercio. Primer bootstrap node operado por el equipo. (Los primeros nodos comunitarios — operadores ajenos al equipo — son Fase 2.)
 
 ### Hitos Técnicos
 
@@ -43,12 +43,12 @@ Esa es la oportunidad que persigue OpenRelay. La ventana para construir infraest
 - [x] Docker Compose: stack autoalojado completo en un solo comando
 - [x] CI con GitHub Actions: typecheck + test + build + Foundry
 - [x] **Deploy de contratos a Base Sepolia** — completado 2026-04-18 (ver `packages/contracts/deployments/sepolia.json`)
-- [ ] Conectar el motor de routing a `NodeRegistry.sol` via viem
-- [ ] Implementar persistencia en PostgreSQL en la API
-- [ ] Conectar firma HMAC en el daemon del nodo
-- [ ] Dirección de pago única por intent (derivación HD wallet)
-- [ ] Verificación on-chain de pagos x402 + protección contra replay
-- [ ] Entrega de webhooks con cola de reintentos
+- [x] Persistencia en PostgreSQL en la API (`packages/api/src/lib/db.ts` + `repository.ts`)
+- [x] Firma HMAC en el daemon del nodo (`packages/node/src/lib/hmac.ts`, ventana 60s)
+- [x] Dirección de pago única por intent (derivación HD wallet)
+- [x] Verificación on-chain de pagos x402 + protección contra replay (atomic `SET NX` en Redis + tx_hash en DB)
+- [x] Entrega de webhooks con cola de reintentos en Redis
+- _Nota:_ "Motor de routing leyendo nodos desde `NodeRegistry.sol` via viem" se movió a Fase 2 — con un solo nodo registrado el descubrimiento on-chain da el mismo resultado que el fallback de `BOOTSTRAP_NODE_ENDPOINT`. Ver Fase 2 > Hitos Técnicos.
 
 ### Hitos de Mercado
 
