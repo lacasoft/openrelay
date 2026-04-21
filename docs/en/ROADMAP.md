@@ -36,7 +36,7 @@ The window to build community-owned infrastructure before institutional standard
 
 ## Phase 1 — Foundation (Months 1–4)
 
-**Goal:** Working protocol on Base Sepolia testnet. First SDK integration. First merchant. First community node.
+**Goal:** Working protocol on Base Sepolia testnet. First SDK integration. First merchant. First team-operated bootstrap node. (First community nodes — run by operators outside the team — are Phase 2.)
 
 ### Technical Milestones
 
@@ -49,12 +49,12 @@ The window to build community-owned infrastructure before institutional standard
 - [x] Docker Compose: full self-hosted stack in one command
 - [x] GitHub Actions CI: typecheck + test + build + Foundry
 - [x] **Deploy contracts to Base Sepolia** — completed 2026-04-18 (see `packages/contracts/deployments/sepolia.json`)
-- [ ] Wire routing engine to `NodeRegistry.sol` via viem
-- [ ] Implement PostgreSQL persistence in API
-- [ ] Wire HMAC signing in node daemon
-- [ ] Unique payment address per intent (HD wallet derivation)
-- [ ] x402 on-chain payment verification + replay protection
-- [ ] Webhook delivery with retry queue
+- [x] PostgreSQL persistence in API (`packages/api/src/lib/db.ts` + `repository.ts`)
+- [x] HMAC signing in node daemon (`packages/node/src/lib/hmac.ts`, 60s window)
+- [x] Unique payment address per intent (HD wallet derivation)
+- [x] x402 on-chain payment verification + replay protection (atomic Redis `SET NX` + tx_hash in DB)
+- [x] Webhook delivery with Redis-backed retry queue
+- _Note:_ "Routing engine reading nodes from `NodeRegistry.sol` via viem" was moved to Phase 2 — with only one node registered, on-chain discovery yields the same result as the `BOOTSTRAP_NODE_ENDPOINT` fallback. See Phase 2 > Technical Milestones.
 
 ### Market Milestones
 
