@@ -2,10 +2,10 @@
 #
 # register-node-sepolia.sh
 #
-# Register the first OpenRelay node on Base Sepolia testnet.
+# Register an OpenRelay node on Base Sepolia testnet.
 #
 # Flow:
-#   1. Load .env (requires DEPLOYER_PRIVATE_KEY and BASE_SEPOLIA_RPC_URL)
+#   1. Load .env (all config comes from there)
 #   2. Read minStake from NodeRegistry and USDC balance of the operator
 #   3. Abort if balance < minStake (so no gas is wasted)
 #   4. Approve StakeManager to pull minStake of USDC
@@ -14,6 +14,9 @@
 #   7. Verify on-chain via NodeRegistry.getNode(operator)
 #
 # The script never prints the private key.
+#
+# All contract addresses and the operator identity are read from .env — this
+# script is reusable by any operator and by future redeploys (just update .env).
 
 set -euo pipefail
 
@@ -21,12 +24,6 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
-
-NODE_REGISTRY="0x15e742142CB23E6f5c1B20aAE13CDd49E6b68565"
-STAKE_MANAGER="0xBbcE040401e4612337799bABCeE7860a9A0fcA84"
-USDC="0x036CbD53842c5426634e7929541eC2318f3dCF7e"
-OPERATOR="0x063250650155518BE28989Ec41c597dC1d1eF05C"
-# ENDPOINT is read from .env (NODE_ENDPOINT) — see load step below.
 
 BASESCAN_TX="https://sepolia.basescan.org/tx"
 BASESCAN_ADDR="https://sepolia.basescan.org/address"
@@ -53,12 +50,20 @@ set -a
 . "$REPO_ROOT/.env"
 set +a
 
-: "${DEPLOYER_PRIVATE_KEY:?DEPLOYER_PRIVATE_KEY must be set in .env}"
 : "${BASE_SEPOLIA_RPC_URL:?BASE_SEPOLIA_RPC_URL must be set in .env}"
 : "${NODE_ENDPOINT:?NODE_ENDPOINT must be set in .env (public URL of the node)}"
+: "${NODE_OPERATOR_ADDRESS:?NODE_OPERATOR_ADDRESS must be set in .env}"
+: "${NODE_OPERATOR_PRIVATE_KEY:?NODE_OPERATOR_PRIVATE_KEY must be set in .env}"
+: "${NODE_REGISTRY_ADDRESS:?NODE_REGISTRY_ADDRESS must be set in .env (after deploy)}"
+: "${STAKE_MANAGER_ADDRESS:?STAKE_MANAGER_ADDRESS must be set in .env (after deploy)}"
+: "${USDC_ADDRESS:?USDC_ADDRESS must be set in .env}"
 
 RPC="$BASE_SEPOLIA_RPC_URL"
 ENDPOINT="$NODE_ENDPOINT"
+OPERATOR="$NODE_OPERATOR_ADDRESS"
+NODE_REGISTRY="$NODE_REGISTRY_ADDRESS"
+STAKE_MANAGER="$STAKE_MANAGER_ADDRESS"
+USDC="$USDC_ADDRESS"
 
 # Guard: never publish a localhost URL on-chain. Immutable history — would look bad.
 case "$ENDPOINT" in
@@ -120,7 +125,7 @@ APPROVE_OUT="$(cast send "$USDC" \
   "$STAKE_MANAGER" \
   "$MIN_STAKE_RAW" \
   --rpc-url "$RPC" \
-  --private-key "$DEPLOYER_PRIVATE_KEY" \
+  --private-key "$NODE_OPERATOR_PRIVATE_KEY" \
   --json)"
 
 APPROVE_TX="$(printf '%s' "$APPROVE_OUT" | sed -n 's/.*"transactionHash":"\(0x[0-9a-fA-F]\{64\}\)".*/\1/p')"
@@ -140,7 +145,7 @@ REGISTER_OUT="$(cast send "$NODE_REGISTRY" \
   "$ENDPOINT" \
   "$MIN_STAKE_RAW" \
   --rpc-url "$RPC" \
-  --private-key "$DEPLOYER_PRIVATE_KEY" \
+  --private-key "$NODE_OPERATOR_PRIVATE_KEY" \
   --json)"
 
 REGISTER_TX="$(printf '%s' "$REGISTER_OUT" | sed -n 's/.*"transactionHash":"\(0x[0-9a-fA-F]\{64\}\)".*/\1/p')"

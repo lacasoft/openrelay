@@ -16,7 +16,11 @@ import {DisputeResolver} from "../src/DisputeResolver.sol";
 ///
 /// Required env vars:
 ///   USDC_ADDRESS          — USDC token contract on the target chain
-///   TREASURY_ADDRESS      — Wallet that receives protocol treasury funds
+///   TREASURY_ADDRESS      — Wallet that receives protocol treasury funds (immutable
+///                           in DisputeResolver after deploy)
+///   GUARDIAN_ADDRESS      — Wallet with pause/setMinStake authority on all three
+///                           contracts. Rotatable post-deploy via Pausable.transferGuardian().
+///                           Should be a wallet SEPARATE from the deployer.
 ///   ARBITER_1             — First arbiter address
 ///   ARBITER_2             — Second arbiter address
 ///   ARBITER_3             — Third arbiter address
@@ -26,10 +30,19 @@ contract Deploy is Script {
     function run() external {
         address usdc     = vm.envAddress("USDC_ADDRESS");
         address treasury = vm.envAddress("TREASURY_ADDRESS");
+        address guardian = vm.envAddress("GUARDIAN_ADDRESS");
 
         address[] memory arbiters = _loadArbiters();
 
         uint256 deployerKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
+
+        // Sanity checks: roles that should NEVER collapse into the deployer.
+        // Treasury and guardian must be separate wallets so that a deployer-key
+        // compromise does not hand over treasury funds + pause authority.
+        address deployerAddr = vm.addr(deployerKey);
+        require(treasury != deployerAddr, "Deploy: TREASURY_ADDRESS == deployer (separate them)");
+        require(guardian != deployerAddr, "Deploy: GUARDIAN_ADDRESS == deployer (separate them)");
+        require(guardian != treasury,     "Deploy: GUARDIAN_ADDRESS == TREASURY_ADDRESS (separate them)");
 
         vm.startBroadcast(deployerKey);
 
@@ -46,12 +59,10 @@ contract Deploy is Script {
         // After initialization, the links are locked in (initialize reverts
         // with AlreadyInitialized on any subsequent call).
 
-        address deployer = vm.addr(deployerKey);
-
         // ── Step 1: StakeManager ───────────────────────────────
         StakeManager stakeManager = new StakeManager(
             usdc,
-            deployer  // guardian for Pausable
+            guardian  // guardian for Pausable
         );
 
         console.log("StakeManager deployed at:", address(stakeManager));
@@ -61,7 +72,7 @@ contract Deploy is Script {
             address(stakeManager),
             treasury,
             arbiters,
-            deployer  // guardian for Pausable
+            guardian  // guardian for Pausable
         );
 
         console.log("DisputeResolver deployed at:", address(disputeResolver));
@@ -76,7 +87,7 @@ contract Deploy is Script {
         NodeRegistry nodeRegistry = new NodeRegistry(
             usdc,
             address(stakeManager),
-            deployer, // guardian for Pausable
+            guardian, // guardian for Pausable
             initialMinStake
         );
 
