@@ -8,19 +8,19 @@ import {MockUSDC} from "./mocks/MockUSDC.sol";
 
 contract StakeManagerTest is Test {
     StakeManager stakeManager;
-    MockUSDC     usdc;
+    MockUSDC usdc;
 
-    address operator        = makeAddr("operator");
+    address operator = makeAddr("operator");
     address disputeResolver = makeAddr("disputeResolver");
-    address nodeRegistry    = makeAddr("nodeRegistry");
-    address treasury        = makeAddr("treasury");
-    address guardian        = makeAddr("guardian");
+    address nodeRegistry = makeAddr("nodeRegistry");
+    address treasury = makeAddr("treasury");
+    address guardian = makeAddr("guardian");
 
-    uint256 constant STAKE        = 500_000_000; // 500 USDC
-    uint256 constant TIMELOCK     = 7 days;
+    uint256 constant STAKE = 500_000_000; // 500 USDC
+    uint256 constant TIMELOCK = 7 days;
 
     function setUp() public {
-        usdc         = new MockUSDC();
+        usdc = new MockUSDC();
         stakeManager = new StakeManager(address(usdc), guardian);
 
         vm.prank(guardian);
@@ -83,9 +83,9 @@ contract StakeManagerTest is Test {
         stakeManager.requestWithdrawal(STAKE);
 
         StakeManager.StakeInfo memory info = stakeManager.getStakeInfo(operator);
-        assertEq(info.staked,            0);
+        assertEq(info.staked, 0);
         assertEq(info.pendingWithdrawal, STAKE);
-        assertEq(info.unlockAt,          block.timestamp + TIMELOCK);
+        assertEq(info.unlockAt, block.timestamp + TIMELOCK);
     }
 
     function test_RequestWithdrawal_EmitsEvent() public {
@@ -102,9 +102,7 @@ contract StakeManagerTest is Test {
         _depositViaRegistry(operator, STAKE);
 
         vm.prank(operator);
-        vm.expectRevert(
-            abi.encodeWithSelector(StakeManager.InsufficientStake.selector, STAKE, STAKE + 1)
-        );
+        vm.expectRevert(abi.encodeWithSelector(StakeManager.InsufficientStake.selector, STAKE, STAKE + 1));
         stakeManager.requestWithdrawal(STAKE + 1);
     }
 
@@ -128,7 +126,7 @@ contract StakeManagerTest is Test {
 
         StakeManager.StakeInfo memory info = stakeManager.getStakeInfo(operator);
         assertEq(info.pendingWithdrawal, 0);
-        assertEq(info.unlockAt,          0);
+        assertEq(info.unlockAt, 0);
     }
 
     function test_ExecuteWithdrawal_Revert_TimelockNotExpired() public {
@@ -140,9 +138,7 @@ contract StakeManagerTest is Test {
         vm.warp(block.timestamp + TIMELOCK - 1); // one second before unlock
 
         vm.prank(operator);
-        vm.expectRevert(
-            abi.encodeWithSelector(StakeManager.TimelockNotExpired.selector, block.timestamp + 1)
-        );
+        vm.expectRevert(abi.encodeWithSelector(StakeManager.TimelockNotExpired.selector, block.timestamp + 1));
         stakeManager.executeWithdrawal();
     }
 
@@ -195,7 +191,7 @@ contract StakeManagerTest is Test {
         stakeManager.slash(operator, STAKE, disputeId); // slash full amount
 
         StakeManager.StakeInfo memory info = stakeManager.getStakeInfo(operator);
-        assertEq(info.staked,            0);
+        assertEq(info.staked, 0);
         assertEq(info.pendingWithdrawal, 0);
     }
 

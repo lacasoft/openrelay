@@ -28,7 +28,7 @@ import {DisputeResolver} from "../src/DisputeResolver.sol";
 ///   ARBITER_5             — Fifth arbiter address (optional, set to address(0) to skip)
 contract Deploy is Script {
     function run() external {
-        address usdc     = vm.envAddress("USDC_ADDRESS");
+        address usdc = vm.envAddress("USDC_ADDRESS");
         address treasury = vm.envAddress("TREASURY_ADDRESS");
         address guardian = vm.envAddress("GUARDIAN_ADDRESS");
 
@@ -42,7 +42,7 @@ contract Deploy is Script {
         address deployerAddr = vm.addr(deployerKey);
         require(treasury != deployerAddr, "Deploy: TREASURY_ADDRESS == deployer (separate them)");
         require(guardian != deployerAddr, "Deploy: GUARDIAN_ADDRESS == deployer (separate them)");
-        require(guardian != treasury,     "Deploy: GUARDIAN_ADDRESS == TREASURY_ADDRESS (separate them)");
+        require(guardian != treasury, "Deploy: GUARDIAN_ADDRESS == TREASURY_ADDRESS (separate them)");
 
         vm.startBroadcast(deployerKey);
 
@@ -62,7 +62,7 @@ contract Deploy is Script {
         // ── Step 1: StakeManager ───────────────────────────────
         StakeManager stakeManager = new StakeManager(
             usdc,
-            guardian  // guardian for Pausable
+            guardian // guardian for Pausable
         );
 
         console.log("StakeManager deployed at:", address(stakeManager));
@@ -72,7 +72,7 @@ contract Deploy is Script {
             address(stakeManager),
             treasury,
             arbiters,
-            guardian  // guardian for Pausable
+            guardian // guardian for Pausable
         );
 
         console.log("DisputeResolver deployed at:", address(disputeResolver));
@@ -102,8 +102,8 @@ contract Deploy is Script {
 
         // ── Print .env block ──────────────────────────────────
         console.log("\n--- Copy to your .env ---");
-        console.log("NODE_REGISTRY_ADDRESS=%s",    address(nodeRegistry));
-        console.log("STAKE_MANAGER_ADDRESS=%s",    address(stakeManager));
+        console.log("NODE_REGISTRY_ADDRESS=%s", address(nodeRegistry));
+        console.log("STAKE_MANAGER_ADDRESS=%s", address(stakeManager));
         console.log("DISPUTE_RESOLVER_ADDRESS=%s", address(disputeResolver));
         console.log("-------------------------\n");
 

@@ -9,20 +9,20 @@ import {Pausable} from "../src/Pausable.sol";
 import {MockUSDC} from "./mocks/MockUSDC.sol";
 
 contract NodeRegistryTest is Test {
-    NodeRegistry    registry;
-    StakeManager    stakeManager;
-    MockUSDC        usdc;
+    NodeRegistry registry;
+    StakeManager stakeManager;
+    MockUSDC usdc;
 
-    address guardian  = makeAddr("guardian");
-    address treasury  = makeAddr("treasury");
-    address arbiter1  = makeAddr("arbiter1");
-    address arbiter2  = makeAddr("arbiter2");
-    address arbiter3  = makeAddr("arbiter3");
-    address operator  = makeAddr("operator");
+    address guardian = makeAddr("guardian");
+    address treasury = makeAddr("treasury");
+    address arbiter1 = makeAddr("arbiter1");
+    address arbiter2 = makeAddr("arbiter2");
+    address arbiter3 = makeAddr("arbiter3");
+    address operator = makeAddr("operator");
     address operator2 = makeAddr("operator2");
 
     uint256 constant MIN_STAKE = 100_000_000; // 100 USDC
-    string  constant ENDPOINT  = "https://node.example.com";
+    string constant ENDPOINT = "https://node.example.com";
 
     function setUp() public {
         usdc = new MockUSDC();
@@ -38,9 +38,7 @@ contract NodeRegistryTest is Test {
         arbiters[1] = arbiter2;
         arbiters[2] = arbiter3;
 
-        DisputeResolver resolver = new DisputeResolver(
-            address(stakeManager), treasury, arbiters, guardian
-        );
+        DisputeResolver resolver = new DisputeResolver(address(stakeManager), treasury, arbiters, guardian);
 
         registry = new NodeRegistry(address(usdc), address(stakeManager), guardian, MIN_STAKE);
 
@@ -48,7 +46,7 @@ contract NodeRegistryTest is Test {
         stakeManager.initialize(address(resolver), address(registry));
 
         // Fund operator
-        usdc.mint(operator,  10 * MIN_STAKE);
+        usdc.mint(operator, 10 * MIN_STAKE);
         usdc.mint(operator2, 10 * MIN_STAKE);
     }
 
@@ -61,9 +59,9 @@ contract NodeRegistryTest is Test {
         vm.stopPrank();
 
         NodeRegistry.Node memory node = registry.getNode(operator);
-        assertEq(node.operator,    operator);
-        assertEq(node.endpoint,    ENDPOINT);
-        assertEq(node.active,      true);
+        assertEq(node.operator, operator);
+        assertEq(node.endpoint, ENDPOINT);
+        assertEq(node.active, true);
         assertGt(node.registeredAt, 0);
     }
 
@@ -104,9 +102,7 @@ contract NodeRegistryTest is Test {
         uint256 lowStake = MIN_STAKE - 1;
         usdc.approve(address(stakeManager), lowStake);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(NodeRegistry.StakeTooLow.selector, lowStake, MIN_STAKE)
-        );
+        vm.expectRevert(abi.encodeWithSelector(NodeRegistry.StakeTooLow.selector, lowStake, MIN_STAKE));
         registry.register(ENDPOINT, lowStake);
         vm.stopPrank();
     }
@@ -170,7 +166,7 @@ contract NodeRegistryTest is Test {
     }
 
     function test_Deactivate_RemovesFromActiveList() public {
-        _registerOperator(operator,  MIN_STAKE);
+        _registerOperator(operator, MIN_STAKE);
         _registerOperator(operator2, MIN_STAKE);
 
         vm.prank(operator);
@@ -204,7 +200,7 @@ contract NodeRegistryTest is Test {
     // ── Multiple nodes ────────────────────────────────────────
 
     function test_MultipleNodes_ActiveList() public {
-        _registerOperator(operator,  MIN_STAKE);
+        _registerOperator(operator, MIN_STAKE);
         _registerOperator(operator2, MIN_STAKE * 2);
 
         address[] memory active = registry.getActiveNodes();
@@ -219,9 +215,7 @@ contract NodeRegistryTest is Test {
         vm.startPrank(operator);
         usdc.approve(address(stakeManager), stake);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(NodeRegistry.StakeTooLow.selector, stake, MIN_STAKE)
-        );
+        vm.expectRevert(abi.encodeWithSelector(NodeRegistry.StakeTooLow.selector, stake, MIN_STAKE));
         registry.register(ENDPOINT, stake);
         vm.stopPrank();
     }
@@ -340,9 +334,7 @@ contract NodeRegistryTest is Test {
         uint256 lowerMin = MIN_STAKE - 1;
 
         vm.prank(guardian);
-        vm.expectRevert(
-            abi.encodeWithSelector(NodeRegistry.MinStakeCannotDecrease.selector, MIN_STAKE, lowerMin)
-        );
+        vm.expectRevert(abi.encodeWithSelector(NodeRegistry.MinStakeCannotDecrease.selector, MIN_STAKE, lowerMin));
         registry.setMinStake(lowerMin);
     }
 
@@ -369,9 +361,7 @@ contract NodeRegistryTest is Test {
         usdc.mint(operator, MIN_STAKE);
         vm.startPrank(operator);
         usdc.approve(address(stakeManager), MIN_STAKE);
-        vm.expectRevert(
-            abi.encodeWithSelector(NodeRegistry.StakeTooLow.selector, MIN_STAKE, newMin)
-        );
+        vm.expectRevert(abi.encodeWithSelector(NodeRegistry.StakeTooLow.selector, MIN_STAKE, newMin));
         registry.register(ENDPOINT, MIN_STAKE);
         vm.stopPrank();
     }
