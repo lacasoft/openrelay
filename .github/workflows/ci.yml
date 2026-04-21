@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [master]
   pull_request:
-    branches: [main, develop]
+    branches: [master]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -102,10 +102,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Audit dependencies
         run: pnpm audit --audit-level=high
-        continue-on-error: true
       - name: Check for known vulnerabilities
         run: npx audit-ci --high
-        continue-on-error: true
 
   # ── Build Check ─────────────────────────────────────────────
   build:
