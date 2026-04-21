@@ -29,7 +29,15 @@ Código fuente verificado en Basescan · `minStake` inicial: 40 USDC en testnet
 | Guardian | [`0xbB51...7Ddf`](https://sepolia.basescan.org/address/0xbB514Eca8f39d0A3B8092B323282304709d17Ddf) | Pausa de emergencia + `updateMinStake()` (rotable) |
 | Node Operator (bootstrap) | [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) | Stakea USDC + firma HMAC del daemon |
 
-🚧 **Primer nodo bootstrap** — pendiente de re-registro con el nuevo operator wallet (`0xf73e…5da4`) en el `NodeRegistry` recién desplegado. Endpoint reservado: `https://nodeit.openrelay.site`.
+✅ **Primer nodo bootstrap registrado on-chain** desde 2026-04-21 (bloque 40522829).
+Operado por el equipo core durante Fase 1 con el operator wallet **separado del deployer**.
+
+| Campo | Valor |
+|---|---|
+| Operator | [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) |
+| Endpoint | `https://nodeit.openrelay.site` |
+| Stake | 40 USDC (bloqueados on-chain) |
+| Tx de registro | [`0x399c...93ca`](https://sepolia.basescan.org/tx/0x399c077b7cdd19e99658ca69790ca985304be65b2fcc7cbe0aec8b54608893ca) |
 
 Fuente canónica de direcciones (para SDKs y dashboards):
 [`packages/contracts/deployments/sepolia.json`](packages/contracts/deployments/sepolia.json).

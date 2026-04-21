@@ -13,8 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   distinct wallets), addressing the pre-public audit finding C1. All three
   contracts source-verified on Basescan. The previous deploy (block 40408950)
   is orphaned — its registered node (operator `0x0632…F05C`) lives on the
-  orphaned `NodeRegistry`. First bootstrap re-registration with the new
-  operator wallet (`0xf73e…5da4`) is the next step. See
+  orphaned `NodeRegistry`. See
   `packages/contracts/deployments/sepolia.json` for current addresses and full
   deploy history.
 
@@ -27,6 +26,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Treasury  — `0x05CDED242AFC9D7e60eC3049bD8bDccbbA078261`
   - Guardian  — `0xbB514Eca8f39d0A3B8092B323282304709d17Ddf`
   - Operator  — `0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4`
+
+- **Base Sepolia (testnet, 2026-04-21, block 40522829)**: Bootstrap node
+  **re-registered on the new `NodeRegistry`** with the separated operator
+  wallet. Endpoint `https://nodeit.openrelay.site`, 40 USDC staked, operator
+  `0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4`, register tx
+  `0x399c077b7cdd19e99658ca69790ca985304be65b2fcc7cbe0aec8b54608893ca`.
+  Confirmed via `NodeRegistry.getNode(operator)` → `active = true`.
 
 - **Base Sepolia (testnet, 2026-04-21, block 40514749)**: First OpenRelay node
   registered on-chain on the previous (now-orphaned) `NodeRegistry`. Bootstrap
