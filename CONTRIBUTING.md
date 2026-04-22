@@ -103,7 +103,7 @@ Tipos: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`
 
 ## Vulnerabilidades de seguridad
 
-**security@openrelay.dev** — divulgación responsable, recompensas por hallazgos críticos, acuse de recibo en 48 horas.
+**lacasoft.proyectos@gmail.com** — divulgación responsable, recompensas por hallazgos críticos, acuse de recibo en 48 horas.
 
 No abras issues públicos para vulnerabilidades de seguridad.
 

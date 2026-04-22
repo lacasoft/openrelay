@@ -1291,4 +1291,4 @@ These are the properties that OpenRelay guarantees to all participants. They mus
 
 *This document reflects the state of OpenRelay at v0.1. It is updated with every significant architectural decision.*
 
-*For questions, open a GitHub discussion. For security issues, email security@openrelay.dev.*
+*For questions, open a GitHub discussion. For security issues, email lacasoft.proyectos@gmail.com.*

@@ -6,7 +6,7 @@ OpenRelay es infraestructura de pagos. Tomamos las vulnerabilidades muy en serio
 
 ## Reportar una vulnerabilidad
 
-**📧 security@openrelay.dev**
+**📧 lacasoft.proyectos@gmail.com**
 
 Para reportes sensibles escribe a ese correo. Si prefieres canal encriptado, puedes usar el formulario privado de [GitHub Security Advisories](https://github.com/lacasoft/openrelay/security/advisories/new) — llega al mismo equipo y tiene cifrado extremo a extremo.
 
@@ -70,7 +70,7 @@ OpenRelay está en **Phase 1 (testnet)**. Solo la última versión del `master` 
 
 Los contratos en Base Sepolia tienen un **guardian** (`Pausable.guardian`) que puede pausar funciones críticas en caso de exploit activo. La dirección del guardian está publicada en `packages/contracts/deployments/sepolia.json`.
 
-Si detectas un exploit **activo** en tiempo real, además de escribirnos a `security@openrelay.dev`, incluye la palabra "GUARDIAN-PAUSE" en el asunto. Escalamos al operador del guardian para una pausa de emergencia mientras coordinamos el fix.
+Si detectas un exploit **activo** en tiempo real, además de escribirnos a `lacasoft.proyectos@gmail.com`, incluye la palabra "GUARDIAN-PAUSE" en el asunto. Escalamos al operador del guardian para una pausa de emergencia mientras coordinamos el fix.
 
 ## Qué NO hacer
 

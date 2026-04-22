@@ -29,13 +29,14 @@ Código fuente verificado en Basescan · `minStake` inicial: 40 USDC en testnet
 | Guardian | [`0xbB51...7Ddf`](https://sepolia.basescan.org/address/0xbB514Eca8f39d0A3B8092B323282304709d17Ddf) | Pausa de emergencia + `updateMinStake()` (rotable) |
 | Node Operator (bootstrap) | [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) | Stakea USDC + firma HMAC del daemon |
 
-✅ **Primer nodo bootstrap registrado on-chain** desde 2026-04-21 (bloque 40522829).
+✅ **Primer nodo bootstrap registrado on-chain y operativo en producción** desde 2026-04-21 (bloque 40522829).
 Operado por el equipo core durante Fase 1 con el operator wallet **separado del deployer**.
+Daemon desplegado en Fly.io (region `dfw`) — prueba rápida: `curl https://nodeit.openrelay.site/health` → `200 OK`.
 
 | Campo | Valor |
 |---|---|
 | Operator | [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) |
-| Endpoint | `https://nodeit.openrelay.site` |
+| Endpoint | [`https://nodeit.openrelay.site`](https://nodeit.openrelay.site/health) |
 | Stake | 40 USDC (bloqueados on-chain) |
 | Tx de registro | [`0x399c...93ca`](https://sepolia.basescan.org/tx/0x399c077b7cdd19e99658ca69790ca985304be65b2fcc7cbe0aec8b54608893ca) |
 
@@ -217,7 +218,7 @@ Mantenido por la OpenRelay Foundation. Los cambios al protocolo pasan por RFCs p
 ## Seguridad
 
 Auditoría externa requerida antes del deploy en mainnet. Los reportes se publicarán en `/audits`.
-Vulnerabilidades: **security@openrelay.dev** — divulgación responsable con bounties.
+Vulnerabilidades: **lacasoft.proyectos@gmail.com** — divulgación responsable con bounties.
 
 ---
 
@@ -237,7 +238,7 @@ Vulnerabilidades: **security@openrelay.dev** — divulgación responsable con bo
 | Discord | discord.openrelay.dev |
 | SDK npm | @openrelay/sdk |
 | Especificación x402 | x402.org |
-| Seguridad | security@openrelay.dev |
+| Seguridad | lacasoft.proyectos@gmail.com |
 
 ---
 
