@@ -126,5 +126,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Skip @openrelay/contracts — `forge build` lives in the dedicated
+      # contracts job (which has foundry installed). Same filter pattern
+      # as the test job.
       - name: Build all packages
-        run: pnpm build
+        run: pnpm exec turbo run build --filter='!@openrelay/contracts'
