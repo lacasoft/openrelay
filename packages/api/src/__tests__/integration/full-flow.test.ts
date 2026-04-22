@@ -1,10 +1,12 @@
-import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest'
-import Fastify, { type FastifyInstance } from 'fastify'
 import { createHash, timingSafeEqual } from 'node:crypto'
+import Fastify, { type FastifyInstance } from 'fastify'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // ── Global mocks ──────────────────────────────────────────────────
 
-const mockFetch = vi.fn().mockResolvedValue({ ok: false, status: 503, json: () => Promise.resolve({}) })
+const mockFetch = vi
+  .fn()
+  .mockResolvedValue({ ok: false, status: 503, json: () => Promise.resolve({}) })
 vi.stubGlobal('fetch', mockFetch)
 
 // Mock auth middleware
@@ -54,12 +56,14 @@ vi.mock('../../lib/repository', () => ({
       if (extra) Object.assign(mockIntentStore[id], extra)
     }
   }),
-  listPaymentIntents: vi.fn(async (_db: any, merchantId: string, limit: number, _startingAfter?: string) => {
-    const intents = Object.values(mockIntentStore)
-      .filter((i: any) => i.merchant_id === merchantId)
-      .slice(0, limit)
-    return { data: intents, has_more: intents.length >= limit }
-  }),
+  listPaymentIntents: vi.fn(
+    async (_db: any, merchantId: string, limit: number, _startingAfter?: string) => {
+      const intents = Object.values(mockIntentStore)
+        .filter((i: any) => i.merchant_id === merchantId)
+        .slice(0, limit)
+      return { data: intents, has_more: intents.length >= limit }
+    },
+  ),
   insertWebhookEndpoint: vi.fn(async (_db: any, params: any) => {
     mockWebhookStore[params.id] = params
   }),
@@ -94,10 +98,10 @@ vi.mock('../../lib/errors', () => ({
   }),
 }))
 
+import { internalRoute } from '../../routes/internal.js'
 import { paymentIntentsRoute } from '../../routes/payment-intents.js'
 import { webhooksRoute } from '../../routes/webhooks.js'
 import { x402Route } from '../../routes/x402.js'
-import { internalRoute } from '../../routes/internal.js'
 
 // ── App setup ─────────────────────────────────────────────────────
 
@@ -117,11 +121,11 @@ const mockConfig = {
 }
 
 const mockRedis = {
-  ping:   vi.fn().mockResolvedValue('PONG'),
+  ping: vi.fn().mockResolvedValue('PONG'),
   exists: vi.fn().mockResolvedValue(0),
-  setex:  vi.fn().mockResolvedValue('OK'),
-  set:    vi.fn().mockResolvedValue('OK'), // default: not-already-used (SET NX returns 'OK' on success)
-  quit:   vi.fn(),
+  setex: vi.fn().mockResolvedValue('OK'),
+  set: vi.fn().mockResolvedValue('OK'), // default: not-already-used (SET NX returns 'OK' on success)
+  quit: vi.fn(),
 }
 
 beforeAll(async () => {
@@ -156,8 +160,8 @@ afterAll(async () => {
 
 beforeEach(() => {
   // Clear stores
-  Object.keys(mockIntentStore).forEach(k => delete mockIntentStore[k])
-  Object.keys(mockWebhookStore).forEach(k => delete mockWebhookStore[k])
+  Object.keys(mockIntentStore).forEach((k) => delete mockIntentStore[k])
+  Object.keys(mockWebhookStore).forEach((k) => delete mockWebhookStore[k])
   vi.clearAllMocks()
   mockFetch.mockResolvedValue({ ok: false, status: 503, json: () => Promise.resolve({}) })
 })
@@ -347,12 +351,14 @@ describe('Webhook endpoint CRUD', () => {
 
 describe('x402 payment flow', () => {
   it('should verify a valid x402 payment', async () => {
-    const paymentPayload = Buffer.from(JSON.stringify({
-      tx_hash: '0xabc123',
-      amount: 1000,
-      asset: 'usdc',
-      network: 'base',
-    })).toString('base64')
+    const paymentPayload = Buffer.from(
+      JSON.stringify({
+        tx_hash: '0xabc123',
+        amount: 1000,
+        asset: 'usdc',
+        network: 'base',
+      }),
+    ).toString('base64')
 
     mockRedis.exists.mockResolvedValueOnce(0)
 
@@ -391,12 +397,14 @@ describe('x402 payment flow', () => {
   })
 
   it('should reject insufficient payment', async () => {
-    const paymentPayload = Buffer.from(JSON.stringify({
-      tx_hash: '0xinsufficient',
-      amount: 500,
-      asset: 'usdc',
-      network: 'base',
-    })).toString('base64')
+    const paymentPayload = Buffer.from(
+      JSON.stringify({
+        tx_hash: '0xinsufficient',
+        amount: 500,
+        asset: 'usdc',
+        network: 'base',
+      }),
+    ).toString('base64')
 
     const res = await app.inject({
       method: 'POST',
@@ -415,12 +423,14 @@ describe('x402 payment flow', () => {
   })
 
   it('should reject already-used payment via Redis', async () => {
-    const paymentPayload = Buffer.from(JSON.stringify({
-      tx_hash: '0xreplay',
-      amount: 1000,
-      asset: 'usdc',
-      network: 'base',
-    })).toString('base64')
+    const paymentPayload = Buffer.from(
+      JSON.stringify({
+        tx_hash: '0xreplay',
+        amount: 1000,
+        asset: 'usdc',
+        network: 'base',
+      }),
+    ).toString('base64')
 
     // Atomic SET NX returns null if key already exists — simulates replay
     mockRedis.set.mockResolvedValueOnce(null)

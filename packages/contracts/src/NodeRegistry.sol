@@ -21,9 +21,9 @@ contract NodeRegistry is Pausable {
 
     struct Node {
         address operator;
-        string  endpoint;
+        string endpoint;
         uint256 registeredAt;
-        bool    active;
+        bool active;
     }
 
     mapping(address => Node) private _nodes;
@@ -65,12 +65,8 @@ contract NodeRegistry is Pausable {
 
         stakeManager.depositFor(msg.sender, stakeAmount);
 
-        _nodes[msg.sender] = Node({
-            operator:     msg.sender,
-            endpoint:     endpoint,
-            registeredAt: block.timestamp,
-            active:       true
-        });
+        _nodes[msg.sender] =
+            Node({operator: msg.sender, endpoint: endpoint, registeredAt: block.timestamp, active: true});
 
         _activeIndex[msg.sender] = _activeOperators.length;
         _activeOperators.push(msg.sender);

@@ -1,27 +1,27 @@
-import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import rateLimit from '@fastify/rate-limit'
-import { paymentIntentsRoute } from './routes/payment-intents'
-import { webhooksRoute }       from './routes/webhooks'
-import { x402Route }           from './routes/x402'
-import { nodesRoute }          from './routes/nodes'
-import { internalRoute }       from './routes/internal'
+import Fastify from 'fastify'
 import { loadConfig } from './lib/config'
 import { buildDb } from './lib/db'
 import { buildRedis } from './lib/redis'
+import { internalRoute } from './routes/internal'
+import { nodesRoute } from './routes/nodes'
+import { paymentIntentsRoute } from './routes/payment-intents'
+import { webhooksRoute } from './routes/webhooks'
+import { x402Route } from './routes/x402'
 import { startWebhookWorker } from './services/webhook'
 
 const RATE_LIMIT_MAX = 100
 const RATE_LIMIT_WINDOW = '1 minute'
 
 const config = loadConfig()
-const db     = buildDb(config.databaseUrl)
-const redis  = buildRedis(config.redisUrl)
+const db = buildDb(config.databaseUrl)
+const redis = buildRedis(config.redisUrl)
 
-const isDev = process.env['NODE_ENV'] !== 'production'
+const isDev = process.env.NODE_ENV !== 'production'
 const app = Fastify({
   logger: {
-    level: process.env['LOG_LEVEL'] ?? 'info',
+    level: process.env.LOG_LEVEL ?? 'info',
     ...(isDev && {
       transport: { target: 'pino-pretty', options: { colorize: true } },
     }),
@@ -42,36 +42,40 @@ async function main() {
     max: RATE_LIMIT_MAX,
     timeWindow: RATE_LIMIT_WINDOW,
     keyGenerator: (req) => {
-      const auth = req.headers['authorization'] ?? ''
+      const auth = req.headers.authorization ?? ''
       return auth.slice(7, 23) // use key prefix for rate limiting, not full key
     },
   })
 
   // ── Routes ────────────────────────────────────────────────────
   app.register(paymentIntentsRoute, { prefix: '/v1' })
-  app.register(webhooksRoute,       { prefix: '/v1' })
-  app.register(x402Route,           { prefix: '/v1' })
-  app.register(nodesRoute,          { prefix: '/v1' })
-  app.register(internalRoute,       { prefix: '/v1' })   // node → API callbacks
+  app.register(webhooksRoute, { prefix: '/v1' })
+  app.register(x402Route, { prefix: '/v1' })
+  app.register(nodesRoute, { prefix: '/v1' })
+  app.register(internalRoute, { prefix: '/v1' }) // node → API callbacks
 
   // ── Health ────────────────────────────────────────────────────
   app.get('/health', async () => {
-    let dbOk    = false
+    let dbOk = false
     let redisOk = false
 
     try {
       await db`SELECT 1`
       dbOk = true
-    } catch (err) { app.log.debug({ err }, 'health check: db unreachable') }
+    } catch (err) {
+      app.log.debug({ err }, 'health check: db unreachable')
+    }
 
     try {
       await redis.ping()
       redisOk = true
-    } catch (err) { app.log.debug({ err }, 'health check: redis unreachable') }
+    } catch (err) {
+      app.log.debug({ err }, 'health check: redis unreachable')
+    }
 
     return {
-      status:   dbOk && redisOk ? 'ok' : 'degraded',
-      version:  '0.1.0',
+      status: dbOk && redisOk ? 'ok' : 'degraded',
+      version: '0.1.0',
       services: { postgres: dbOk, redis: redisOk },
     }
   })
@@ -90,7 +94,7 @@ async function main() {
   }
 
   process.on('SIGTERM', shutdown)
-  process.on('SIGINT',  shutdown)
+  process.on('SIGINT', shutdown)
 
   // ── Start ─────────────────────────────────────────────────────
   await app.listen({ port: config.port, host: '0.0.0.0' })

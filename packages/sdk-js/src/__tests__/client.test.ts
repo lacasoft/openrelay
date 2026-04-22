@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)
@@ -44,7 +44,7 @@ describe('OpenRelay client initialization', () => {
     // Allow the promise to resolve
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('https://api.openrelay.dev/v1/payment_intents'),
-      expect.anything()
+      expect.anything(),
     )
   })
 
@@ -87,7 +87,7 @@ describe('paymentIntents.create', () => {
     const [url, opts] = mockFetch.mock.calls[0]!
     expect(url).toBe('https://api.test.openrelay.dev/v1/payment_intents')
     expect(opts.method).toBe('POST')
-    expect(opts.headers['Authorization']).toBe('Bearer sk_live_testkey1234567890')
+    expect(opts.headers.Authorization).toBe('Bearer sk_live_testkey1234567890')
     expect(opts.headers['Content-Type']).toBe('application/json')
     expect(opts.headers['OpenRelay-Version']).toBe('0.1')
 
@@ -102,13 +102,18 @@ describe('paymentIntents.create', () => {
   })
 
   it('should handle optional metadata and expires_in', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({
-      id: 'pi_minimal',
-      amount: 500,
-      currency: 'btc',
-      chain: 'lightning',
-      status: 'created',
-    }, 201))
+    mockFetch.mockResolvedValueOnce(
+      mockFetchResponse(
+        {
+          id: 'pi_minimal',
+          amount: 500,
+          currency: 'btc',
+          chain: 'lightning',
+          status: 'created',
+        },
+        201,
+      ),
+    )
 
     await client.paymentIntents.create({
       amount: 500,
@@ -116,7 +121,7 @@ describe('paymentIntents.create', () => {
       chain: 'lightning',
     })
 
-    const sentBody = JSON.parse(mockFetch.mock.calls[0]![1].body)
+    const sentBody = JSON.parse(mockFetch.mock.calls[0]?.[1].body)
     expect(sentBody.amount).toBe(500)
     expect(sentBody.currency).toBe('btc')
     expect(sentBody.chain).toBe('lightning')
@@ -170,10 +175,12 @@ describe('paymentIntents.cancel', () => {
 
 describe('paymentIntents.list', () => {
   it('should send GET request with pagination query params', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({
-      data: [],
-      has_more: false,
-    }))
+    mockFetch.mockResolvedValueOnce(
+      mockFetchResponse({
+        data: [],
+        has_more: false,
+      }),
+    )
 
     await client.paymentIntents.list({ limit: 25, starting_after: 'pi_cursor1' })
 
@@ -184,10 +191,12 @@ describe('paymentIntents.list', () => {
   })
 
   it('should send GET without query params when no options given', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({
-      data: [],
-      has_more: false,
-    }))
+    mockFetch.mockResolvedValueOnce(
+      mockFetchResponse({
+        data: [],
+        has_more: false,
+      }),
+    )
 
     await client.paymentIntents.list()
 
@@ -235,8 +244,7 @@ describe('error handling', () => {
 
     mockFetch.mockResolvedValueOnce(mockFetchResponse(apiError, 401))
 
-    await expect(client.paymentIntents.retrieve('pi_bad'))
-      .rejects.toEqual(apiError.error)
+    await expect(client.paymentIntents.retrieve('pi_bad')).rejects.toEqual(apiError.error)
   })
 
   it('should throw intent_not_found error on 404', async () => {
@@ -251,15 +259,17 @@ describe('error handling', () => {
 
     mockFetch.mockResolvedValueOnce(mockFetchResponse(apiError, 404))
 
-    await expect(client.paymentIntents.retrieve('pi_nonexistent'))
-      .rejects.toMatchObject({ code: 'intent_not_found' })
+    await expect(client.paymentIntents.retrieve('pi_nonexistent')).rejects.toMatchObject({
+      code: 'intent_not_found',
+    })
   })
 
   it('should throw on network error from fetch', async () => {
     mockFetch.mockRejectedValueOnce(new Error('Network failure'))
 
-    await expect(client.paymentIntents.retrieve('pi_network_err'))
-      .rejects.toThrow('Network failure')
+    await expect(client.paymentIntents.retrieve('pi_network_err')).rejects.toThrow(
+      'Network failure',
+    )
   })
 })
 

@@ -2,7 +2,7 @@ export interface OpenRelayConfig {
   apiKey: string
   baseUrl?: string
   timeout?: number
-  merchantWallet?: string   // wallet address that receives payments (required for x402)
+  merchantWallet?: string // wallet address that receives payments (required for x402)
 }
 
 export interface RequestOptions {
@@ -20,7 +20,7 @@ export async function request<T>(config: OpenRelayConfig, opts: RequestOptions):
   const res = await fetch(url, {
     method: opts.method,
     headers: {
-      'Authorization': `Bearer ${config.apiKey}`,
+      Authorization: `Bearer ${config.apiKey}`,
       'Content-Type': 'application/json',
       'OpenRelay-Version': '0.1',
     },

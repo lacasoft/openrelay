@@ -16,6 +16,6 @@ export function buildDb(url: string) {
     max: DB_POOL_MAX,
     idle_timeout: DB_IDLE_TIMEOUT,
     connect_timeout: DB_MAX_LIFETIME,
-    onnotice: () => {},  // suppress NOTICE messages
+    onnotice: () => {}, // suppress NOTICE messages
   })
 }

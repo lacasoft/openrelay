@@ -28,7 +28,7 @@ import {DisputeResolver} from "../src/DisputeResolver.sol";
 ///   ARBITER_5             — Fifth arbiter address (optional, set to address(0) to skip)
 contract Deploy is Script {
     function run() external {
-        address usdc     = vm.envAddress("USDC_ADDRESS");
+        address usdc = vm.envAddress("USDC_ADDRESS");
         address treasury = vm.envAddress("TREASURY_ADDRESS");
         address guardian = vm.envAddress("GUARDIAN_ADDRESS");
 
@@ -42,7 +42,7 @@ contract Deploy is Script {
         address deployerAddr = vm.addr(deployerKey);
         require(treasury != deployerAddr, "Deploy: TREASURY_ADDRESS == deployer (separate them)");
         require(guardian != deployerAddr, "Deploy: GUARDIAN_ADDRESS == deployer (separate them)");
-        require(guardian != treasury,     "Deploy: GUARDIAN_ADDRESS == TREASURY_ADDRESS (separate them)");
+        require(guardian != treasury, "Deploy: GUARDIAN_ADDRESS == TREASURY_ADDRESS (separate them)");
 
         vm.startBroadcast(deployerKey);
 
@@ -66,7 +66,7 @@ contract Deploy is Script {
         // ── Step 1: StakeManager ───────────────────────────────
         StakeManager stakeManager = new StakeManager(
             usdc,
-            deployerAddr  // temporary guardian (transferred to real guardian below)
+            deployerAddr // temporary guardian (transferred to real guardian below)
         );
 
         console.log("StakeManager deployed at:", address(stakeManager));
@@ -76,7 +76,7 @@ contract Deploy is Script {
             address(stakeManager),
             treasury,
             arbiters,
-            deployerAddr  // temporary guardian
+            deployerAddr // temporary guardian
         );
 
         console.log("DisputeResolver deployed at:", address(disputeResolver));
@@ -91,7 +91,7 @@ contract Deploy is Script {
         NodeRegistry nodeRegistry = new NodeRegistry(
             usdc,
             address(stakeManager),
-            deployerAddr,  // temporary guardian
+            deployerAddr, // temporary guardian
             initialMinStake
         );
 
@@ -115,8 +115,8 @@ contract Deploy is Script {
 
         // ── Print .env block ──────────────────────────────────
         console.log("\n--- Copy to your .env ---");
-        console.log("NODE_REGISTRY_ADDRESS=%s",    address(nodeRegistry));
-        console.log("STAKE_MANAGER_ADDRESS=%s",    address(stakeManager));
+        console.log("NODE_REGISTRY_ADDRESS=%s", address(nodeRegistry));
+        console.log("STAKE_MANAGER_ADDRESS=%s", address(stakeManager));
         console.log("DISPUTE_RESOLVER_ADDRESS=%s", address(disputeResolver));
         console.log("-------------------------\n");
 
@@ -126,9 +126,9 @@ contract Deploy is Script {
         require(address(disputeResolver.stakeManager()) == address(stakeManager), "DisputeResolver: wrong stakeManager");
         require(address(nodeRegistry.usdc()) == usdc, "NodeRegistry: wrong usdc");
         require(nodeRegistry.minStake() == initialMinStake, "NodeRegistry: wrong initial minStake");
-        require(stakeManager.guardian()    == guardian, "StakeManager: guardian not transferred");
+        require(stakeManager.guardian() == guardian, "StakeManager: guardian not transferred");
         require(disputeResolver.guardian() == guardian, "DisputeResolver: guardian not transferred");
-        require(nodeRegistry.guardian()    == guardian, "NodeRegistry: guardian not transferred");
+        require(nodeRegistry.guardian() == guardian, "NodeRegistry: guardian not transferred");
         console.log("All checks passed.");
     }
 

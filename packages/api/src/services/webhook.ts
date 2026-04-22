@@ -1,33 +1,33 @@
 import { createHmac } from 'node:crypto'
+import type { PaymentIntent } from '@openrelay/protocol'
+import type Redis from 'ioredis'
 import { pino } from 'pino'
 import type { Sql } from 'postgres'
-import type Redis from 'ioredis'
-import type { PaymentIntent } from '@openrelay/protocol'
 import { getActiveWebhooksForEvent } from '../lib/repository'
 
 const logger = pino({ name: 'webhook' })
 
 interface DeliveryOptions {
-  db:         Sql
-  redis:      Redis
-  intentId:   string
-  eventType:  string
+  db: Sql
+  redis: Redis
+  intentId: string
+  eventType: string
   merchantId: string
-  data:       PaymentIntent | Record<string, unknown>
+  data: PaymentIntent | Record<string, unknown>
 }
 
 interface WebhookJob {
-  endpoint:  { id: string; url: string; secret_hash: string }
-  payload:   string
-  attempt:   number
+  endpoint: { id: string; url: string; secret_hash: string }
+  payload: string
+  attempt: number
 }
 
-const MAX_ATTEMPTS  = 6
-const RETRY_DELAYS  = [30_000, 300_000, 1_800_000, 7_200_000, 43_200_000]
+const MAX_ATTEMPTS = 6
+const RETRY_DELAYS = [30_000, 300_000, 1_800_000, 7_200_000, 43_200_000]
 // Delays:           30s     5min     30min      2h         12h
 
 const PENDING_KEY = 'webhook:pending'
-const RETRY_KEY   = 'webhook:retry'
+const RETRY_KEY = 'webhook:retry'
 
 const RETRY_POLL_INTERVAL_MS = 5_000
 
@@ -42,10 +42,10 @@ export async function deliverWebhook(opts: DeliveryOptions): Promise<void> {
   const endpoints = await getActiveWebhooksForEvent(db, merchantId, eventType)
   if (endpoints.length === 0) return
 
-  const eventId  = `evt_${Date.now().toString(36)}`
-  const payload  = JSON.stringify({
-    id:      eventId,
-    type:    eventType,
+  const eventId = `evt_${Date.now().toString(36)}`
+  const payload = JSON.stringify({
+    id: eventId,
+    type: eventType,
     created: Math.floor(Date.now() / 1000),
     data,
   })
@@ -65,8 +65,9 @@ export async function deliverWebhook(opts: DeliveryOptions): Promise<void> {
  * Process all jobs in the pending queue (immediate delivery attempts).
  */
 async function processPendingQueue(redis: Redis): Promise<void> {
-  let raw: string | null
-  while ((raw = await redis.rpop(PENDING_KEY)) !== null) {
+  while (true) {
+    const raw = await redis.rpop(PENDING_KEY)
+    if (raw === null) break
     try {
       const job: WebhookJob = JSON.parse(raw)
       await attemptDelivery(redis, job)
@@ -84,7 +85,10 @@ async function attemptDelivery(redis: Redis, job: WebhookJob): Promise<void> {
   const { endpoint, payload, attempt } = job
 
   if (attempt >= MAX_ATTEMPTS) {
-    logger.error({ endpoint_id: endpoint.id, attempts: MAX_ATTEMPTS }, 'Endpoint failed after max attempts')
+    logger.error(
+      { endpoint_id: endpoint.id, attempts: MAX_ATTEMPTS },
+      'Endpoint failed after max attempts',
+    )
     return
   }
 
@@ -97,9 +101,9 @@ async function attemptDelivery(redis: Redis, job: WebhookJob): Promise<void> {
     const res = await fetch(endpoint.url, {
       method: 'POST',
       headers: {
-        'Content-Type':          'application/json',
-        'OpenRelay-Signature':   `t=${timestamp},v1=${signature}`,
-        'OpenRelay-Webhook-Id':  endpoint.id,
+        'Content-Type': 'application/json',
+        'OpenRelay-Signature': `t=${timestamp},v1=${signature}`,
+        'OpenRelay-Webhook-Id': endpoint.id,
       },
       body: payload,
       signal: AbortSignal.timeout(10_000),
@@ -110,7 +114,10 @@ async function attemptDelivery(redis: Redis, job: WebhookJob): Promise<void> {
       return
     }
 
-    logger.warn({ url: endpoint.url, status: res.status }, 'Webhook endpoint responded with error — scheduling retry')
+    logger.warn(
+      { url: endpoint.url, status: res.status },
+      'Webhook endpoint responded with error — scheduling retry',
+    )
   } catch (err) {
     logger.warn({ url: endpoint.url, err }, 'Webhook endpoint unreachable — scheduling retry')
   }

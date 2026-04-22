@@ -1,10 +1,15 @@
 import type { PaymentIntent } from './payment-intent'
 
 export type WebhookEventType =
-  | 'payment_intent.created' | 'payment_intent.pending'
-  | 'payment_intent.confirming' | 'payment_intent.settled'
-  | 'payment_intent.failed' | 'payment_intent.expired'
-  | 'payment_intent.cancelled' | 'dispute.opened' | 'dispute.resolved'
+  | 'payment_intent.created'
+  | 'payment_intent.pending'
+  | 'payment_intent.confirming'
+  | 'payment_intent.settled'
+  | 'payment_intent.failed'
+  | 'payment_intent.expired'
+  | 'payment_intent.cancelled'
+  | 'dispute.opened'
+  | 'dispute.resolved'
 
 export interface WebhookEvent {
   id: string

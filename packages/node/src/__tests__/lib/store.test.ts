@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { initStore, type NodeStore } from '../../lib/store.js'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { type NodeStore, initStore } from '../../lib/store.js'
 
 let store: NodeStore
 
@@ -65,18 +65,18 @@ describe('insertAssignment and getAssignment', () => {
 
     const result = store.getAssignment('pi_test001')
     expect(result).toBeDefined()
-    expect(result!.intent_id).toBe('pi_test001')
-    expect(result!.amount).toBe(5000)
-    expect(result!.currency).toBe('usdc')
-    expect(result!.chain).toBe('base')
-    expect(result!.merchant_address).toBe('0xMerchant1')
-    expect(result!.payment_address).toBe('0xPayment1')
-    expect(result!.status).toBe('assigned')
-    expect(result!.tx_hash).toBeNull()
-    expect(result!.intent_index).toBe(idx)
-    expect(result!.assigned_at).toBeTypeOf('number')
-    expect(result!.assigned_at).toBeGreaterThan(0)
-    expect(result!.settled_at).toBeNull()
+    expect(result?.intent_id).toBe('pi_test001')
+    expect(result?.amount).toBe(5000)
+    expect(result?.currency).toBe('usdc')
+    expect(result?.chain).toBe('base')
+    expect(result?.merchant_address).toBe('0xMerchant1')
+    expect(result?.payment_address).toBe('0xPayment1')
+    expect(result?.status).toBe('assigned')
+    expect(result?.tx_hash).toBeNull()
+    expect(result?.intent_index).toBe(idx)
+    expect(result?.assigned_at).toBeTypeOf('number')
+    expect(result?.assigned_at).toBeGreaterThan(0)
+    expect(result?.settled_at).toBeNull()
   })
 
   it('should return undefined for non-existent assignment', () => {
@@ -102,8 +102,8 @@ describe('insertAssignment and getAssignment', () => {
     const after = Math.floor(Date.now() / 1000)
     const result = store.getAssignment('pi_timestamp')
 
-    expect(result!.assigned_at).toBeGreaterThanOrEqual(before)
-    expect(result!.assigned_at).toBeLessThanOrEqual(after)
+    expect(result?.assigned_at).toBeGreaterThanOrEqual(before)
+    expect(result?.assigned_at).toBeLessThanOrEqual(after)
   })
 })
 
@@ -123,7 +123,7 @@ describe('getAssignmentByAddress', () => {
 
     const result = store.getAssignmentByAddress('0xUniquePayAddr')
     expect(result).toBeDefined()
-    expect(result!.intent_id).toBe('pi_addr_test')
+    expect(result?.intent_id).toBe('pi_addr_test')
   })
 
   it('should return undefined for non-existent address', () => {
@@ -170,10 +170,10 @@ describe('updateAssignment', () => {
     store.updateAssignment('pi_update1', 'settled', '0xTxHash123')
 
     const result = store.getAssignment('pi_update1')
-    expect(result!.status).toBe('settled')
-    expect(result!.tx_hash).toBe('0xTxHash123')
-    expect(result!.settled_at).toBeTypeOf('number')
-    expect(result!.settled_at).toBeGreaterThan(0)
+    expect(result?.status).toBe('settled')
+    expect(result?.tx_hash).toBe('0xTxHash123')
+    expect(result?.settled_at).toBeTypeOf('number')
+    expect(result?.settled_at).toBeGreaterThan(0)
   })
 
   it('should update status to failed without tx_hash', () => {
@@ -192,10 +192,10 @@ describe('updateAssignment', () => {
     store.updateAssignment('pi_fail1', 'failed')
 
     const result = store.getAssignment('pi_fail1')
-    expect(result!.status).toBe('failed')
-    expect(result!.tx_hash).toBeNull()
+    expect(result?.status).toBe('failed')
+    expect(result?.tx_hash).toBeNull()
     // settled_at should remain null for failed status
-    expect(result!.settled_at).toBeNull()
+    expect(result?.settled_at).toBeNull()
   })
 
   it('should set settled_at only when status becomes settled', () => {
@@ -214,13 +214,13 @@ describe('updateAssignment', () => {
     // Update to expired (not settled)
     store.updateAssignment('pi_settle_time', 'expired')
     let result = store.getAssignment('pi_settle_time')
-    expect(result!.settled_at).toBeNull()
+    expect(result?.settled_at).toBeNull()
 
     // Now settle it
     store.updateAssignment('pi_settle_time', 'settled', '0xTx')
     result = store.getAssignment('pi_settle_time')
-    expect(result!.settled_at).not.toBeNull()
-    expect(result!.settled_at).toBeGreaterThan(0)
+    expect(result?.settled_at).not.toBeNull()
+    expect(result?.settled_at).toBeGreaterThan(0)
   })
 
   it('should not overwrite existing tx_hash when not provided', () => {
@@ -240,7 +240,7 @@ describe('updateAssignment', () => {
     store.updateAssignment('pi_keep_tx', 'settled') // no tx_hash provided
 
     const result = store.getAssignment('pi_keep_tx')
-    expect(result!.tx_hash).toBe('0xOriginalTx')
+    expect(result?.tx_hash).toBe('0xOriginalTx')
   })
 })
 
@@ -261,7 +261,7 @@ describe('getPendingAssignments', () => {
     // With olderThanMs=0, everything is "older" (threshold is now)
     const pending = store.getPendingAssignments(0)
     expect(pending.length).toBeGreaterThanOrEqual(1)
-    expect(pending.some(a => a.intent_id === 'pi_pending1')).toBe(true)
+    expect(pending.some((a) => a.intent_id === 'pi_pending1')).toBe(true)
   })
 
   it('should not return settled assignments', () => {
@@ -280,7 +280,7 @@ describe('getPendingAssignments', () => {
     store.updateAssignment('pi_pend_settled', 'settled', '0xTx')
 
     const pending = store.getPendingAssignments(0)
-    expect(pending.some(a => a.intent_id === 'pi_pend_settled')).toBe(false)
+    expect(pending.some((a) => a.intent_id === 'pi_pend_settled')).toBe(false)
   })
 
   it('should not return very recent assignments when olderThanMs is large', () => {
@@ -303,7 +303,7 @@ describe('getPendingAssignments', () => {
     // So with olderThanMs = 1 hour = 3600000, cutoff = now - 3600 seconds
     // The assignment was just created (assigned_at ~ now), so now > cutoff => not returned
     const pending = store.getPendingAssignments(3_600_000)
-    expect(pending.some(a => a.intent_id === 'pi_recent')).toBe(false)
+    expect(pending.some((a) => a.intent_id === 'pi_recent')).toBe(false)
   })
 })
 

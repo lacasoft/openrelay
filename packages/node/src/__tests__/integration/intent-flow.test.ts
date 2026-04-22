@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest'
-import Fastify, { type FastifyInstance } from 'fastify'
 import { createHmac } from 'node:crypto'
-import { initStore, type NodeStore } from '../../lib/store.js'
+import Fastify, { type FastifyInstance } from 'fastify'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { type NodeStore, initStore } from '../../lib/store.js'
 import { healthRoute, infoRoute } from '../../routes/health.js'
 
 // Mock the chain-verify module to avoid real RPC calls
@@ -12,7 +12,7 @@ vi.mock('../../lib/chain-verify', () => ({
 
 // Mock viem for derivePaymentAddress
 vi.mock('viem', async (importOriginal) => {
-  const actual = await importOriginal() as any
+  const actual = (await importOriginal()) as any
   return {
     ...actual,
     keccak256: actual.keccak256,
@@ -122,10 +122,10 @@ describe('Full intent assignment flow', () => {
     // Verify stored in SQLite
     const assignment = store.getAssignment('pi_flow_store_002')
     expect(assignment).toBeDefined()
-    expect(assignment!.intent_id).toBe('pi_flow_store_002')
-    expect(assignment!.amount).toBe(5000)
-    expect(assignment!.status).toBe('assigned')
-    expect(assignment!.payment_address).toMatch(/^0x/)
+    expect(assignment?.intent_id).toBe('pi_flow_store_002')
+    expect(assignment?.amount).toBe(5000)
+    expect(assignment?.status).toBe('assigned')
+    expect(assignment?.payment_address).toMatch(/^0x/)
   })
 
   it('should reject expired intents', async () => {
@@ -207,8 +207,8 @@ describe('Settlement notification flow', () => {
 
     // Verify stored state updated
     const assignment = store.getAssignment('pi_settle_006')
-    expect(assignment!.status).toBe('settled')
-    expect(assignment!.tx_hash).toBe('0xSettleTx123')
+    expect(assignment?.status).toBe('settled')
+    expect(assignment?.tx_hash).toBe('0xSettleTx123')
   })
 
   it('should return 404 for non-existent intent settlement', async () => {

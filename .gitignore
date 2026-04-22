@@ -76,6 +76,8 @@ lcov.info
 test-results/
 playwright-report/
 .phpunit.result.cache
+# phpunit 10+ uses a directory-based cache
+.phpunit.cache/
 
 # ============================================================
 # Logs

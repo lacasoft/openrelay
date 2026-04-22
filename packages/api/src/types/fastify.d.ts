@@ -1,5 +1,5 @@
-import type { Sql } from 'postgres'
 import type { Redis } from 'ioredis'
+import type { Sql } from 'postgres'
 import type { AppConfig } from '../lib/config'
 
 declare module 'fastify' {

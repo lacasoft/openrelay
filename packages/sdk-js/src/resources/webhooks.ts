@@ -6,7 +6,10 @@ import { request } from '../lib/types'
 export class Webhooks {
   constructor(private config: OpenRelayConfig) {}
 
-  async register(url: string, events: string[]): Promise<{ id: string; url: string; secret: string }> {
+  async register(
+    url: string,
+    events: string[],
+  ): Promise<{ id: string; url: string; secret: string }> {
     return request(this.config, {
       method: 'POST',
       path: '/webhooks',
@@ -28,9 +31,7 @@ export class Webhooks {
 
     if (!ts || !sig) throw new Error('Invalid signature format')
 
-    const expected = createHmac('sha256', secret)
-      .update(`${ts}.${payload}`)
-      .digest('hex')
+    const expected = createHmac('sha256', secret).update(`${ts}.${payload}`).digest('hex')
 
     if (expected !== sig) throw new Error('Signature verification failed')
 

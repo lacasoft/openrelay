@@ -12,7 +12,7 @@ export function verifyRequest(
   body: string,
   timestamp: number,
   signature: string,
-  secret: string
+  secret: string,
 ): boolean {
   if (Math.abs(Date.now() - timestamp * 1000) > TOLERANCE_MS) return false
   return signature === `sha256=${signRequest(body, timestamp, secret)}`

@@ -1,7 +1,7 @@
+import type { OpenRelayConfig } from './lib/types'
 import { PaymentIntents } from './resources/payment-intents'
 import { Webhooks } from './resources/webhooks'
 import { X402 } from './x402/middleware'
-import type { OpenRelayConfig } from './lib/types'
 
 export class OpenRelay {
   private config: OpenRelayConfig

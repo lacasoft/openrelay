@@ -9,25 +9,25 @@ import {MockUSDC} from "./mocks/MockUSDC.sol";
 
 contract DisputeResolverTest is Test {
     DisputeResolver resolver;
-    StakeManager    stakeManager;
-    MockUSDC        usdc;
+    StakeManager stakeManager;
+    MockUSDC usdc;
 
-    address merchant      = makeAddr("merchant");
-    address nodeOperator  = makeAddr("nodeOperator");
-    address treasury      = makeAddr("treasury");
-    address guardian      = makeAddr("guardian");
-    address arbiter1      = makeAddr("arbiter1");
-    address arbiter2      = makeAddr("arbiter2");
-    address arbiter3      = makeAddr("arbiter3");
-    address arbiter4      = makeAddr("arbiter4");
-    address arbiter5      = makeAddr("arbiter5");
-    address randomUser    = makeAddr("randomUser");
-    address nodeRegistry  = makeAddr("nodeRegistry");
+    address merchant = makeAddr("merchant");
+    address nodeOperator = makeAddr("nodeOperator");
+    address treasury = makeAddr("treasury");
+    address guardian = makeAddr("guardian");
+    address arbiter1 = makeAddr("arbiter1");
+    address arbiter2 = makeAddr("arbiter2");
+    address arbiter3 = makeAddr("arbiter3");
+    address arbiter4 = makeAddr("arbiter4");
+    address arbiter5 = makeAddr("arbiter5");
+    address randomUser = makeAddr("randomUser");
+    address nodeRegistry = makeAddr("nodeRegistry");
 
-    uint256 constant STAKE            = 500_000_000; // 500 USDC
-    uint256 constant RESPONSE_WINDOW  = 48 hours;
-    string  constant EVIDENCE_CID     = "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi";
-    string  constant COUNTER_CID      = "bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku";
+    uint256 constant STAKE = 500_000_000; // 500 USDC
+    uint256 constant RESPONSE_WINDOW = 48 hours;
+    string constant EVIDENCE_CID = "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi";
+    string constant COUNTER_CID = "bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku";
 
     bytes32 paymentIntentId;
 
@@ -92,11 +92,11 @@ contract DisputeResolverTest is Test {
         DisputeResolver.Dispute memory d = resolver.getDispute(disputeId);
 
         assertEq(d.paymentIntentId, paymentIntentId);
-        assertEq(d.merchant,        merchant);
-        assertEq(d.nodeOperator,    nodeOperator);
-        assertEq(d.evidenceCid,     EVIDENCE_CID);
-        assertEq(uint8(d.status),   uint8(DisputeResolver.DisputeStatus.Open));
-        assertEq(uint8(d.outcome),  uint8(DisputeResolver.DisputeOutcome.None));
+        assertEq(d.merchant, merchant);
+        assertEq(d.nodeOperator, nodeOperator);
+        assertEq(d.evidenceCid, EVIDENCE_CID);
+        assertEq(uint8(d.status), uint8(DisputeResolver.DisputeStatus.Open));
+        assertEq(uint8(d.outcome), uint8(DisputeResolver.DisputeOutcome.None));
     }
 
     function test_OpenDispute_EmitsEvent() public {
@@ -204,7 +204,7 @@ contract DisputeResolverTest is Test {
 
         // Now resolved
         d = resolver.getDispute(disputeId);
-        assertEq(uint8(d.status),  uint8(DisputeResolver.DisputeStatus.Resolved));
+        assertEq(uint8(d.status), uint8(DisputeResolver.DisputeStatus.Resolved));
         assertEq(uint8(d.outcome), uint8(DisputeResolver.DisputeOutcome.MerchantWins));
         assertGt(d.resolvedAt, 0);
     }
@@ -221,7 +221,7 @@ contract DisputeResolverTest is Test {
         resolver.vote(disputeId, DisputeResolver.DisputeOutcome.NodeWins);
 
         DisputeResolver.Dispute memory d = resolver.getDispute(disputeId);
-        assertEq(uint8(d.status),  uint8(DisputeResolver.DisputeStatus.Resolved));
+        assertEq(uint8(d.status), uint8(DisputeResolver.DisputeStatus.Resolved));
         assertEq(uint8(d.outcome), uint8(DisputeResolver.DisputeOutcome.NodeWins));
     }
 

@@ -1,5 +1,17 @@
 # OpenRelay — Reporte de Auditoría Integral
 
+> **⚠️ Snapshot interno histórico — 2026-04-15**
+>
+> Este documento es una fotografía del estado del monorepo al **2026-04-15**, hecha durante Phase 1 por agentes de análisis automatizados, para guiar el trabajo de hardening previo al deploy.
+>
+> **La mayoría de los hallazgos P0/P1 listados aquí ya fueron corregidos** en la serie de commits que desembocó en el deploy a Sepolia (ver `CHANGELOG.md`, secciones `[Unreleased]` → Fixed / Security / Added). Por ejemplo: verificación on-chain de x402, CORS restringido, `crypto.timingSafeEqual`, tests en todos los paquetes, lockfile commiteado, HD wallet derivation, etc.
+>
+> Se mantiene bajo `docs/audits/` como **registro histórico** y para preservar el contexto de por qué se hicieron los cambios posteriores. No es la fuente de verdad del estado actual de seguridad — para eso ver `CHANGELOG.md` y `SECURITY.md`.
+>
+> Para auditorías externas formales pre-mainnet (pendientes), los reportes se publicarán en este mismo directorio con el naming `YYYY-MM-DD-<auditor>.md`.
+
+---
+
 **Fecha**: 2026-04-15
 **Alcance**: Análisis completo del monorepo — estructura, código, seguridad, arquitectura, dependencias, DevOps
 **Método**: 6 agentes de análisis paralelos escaneando todos los archivos fuente

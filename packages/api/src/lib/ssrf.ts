@@ -31,11 +31,7 @@ export function isPrivateUrl(urlStr: string): boolean {
 
   // Hostname-based checks
   const lower = hostname.toLowerCase()
-  if (
-    lower === 'localhost' ||
-    lower.endsWith('.local') ||
-    lower.endsWith('.internal')
-  ) {
+  if (lower === 'localhost' || lower.endsWith('.local') || lower.endsWith('.internal')) {
     return true
   }
 

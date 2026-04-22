@@ -1,25 +1,25 @@
 import Fastify from 'fastify'
+import { loadConfig } from './lib/config'
+import { initStore } from './lib/store'
 import { healthRoute, infoRoute } from './routes/health'
-import { intentsRoute }           from './routes/intents'
-import { loadConfig }             from './lib/config'
-import { initStore }              from './lib/store'
-import { verifyRegistration }     from './services/registry'
-import { startChainWatcher }      from './services/watcher'
+import { intentsRoute } from './routes/intents'
+import { verifyRegistration } from './services/registry'
+import { startChainWatcher } from './services/watcher'
 
 const config = loadConfig()
-const store  = initStore(config.dbPath)
+const store = initStore(config.dbPath)
 
-const isDev = process.env['NODE_ENV'] !== 'production'
+const isDev = process.env.NODE_ENV !== 'production'
 const app = Fastify({
   logger: {
-    level: process.env['LOG_LEVEL'] ?? 'info',
+    level: process.env.LOG_LEVEL ?? 'info',
     ...(isDev && {
       transport: { target: 'pino-pretty', options: { colorize: true } },
     }),
   },
 })
 
-app.decorate('store',  store)
+app.decorate('store', store)
 app.decorate('config', config)
 
 app.register(healthRoute)
@@ -34,7 +34,7 @@ const shutdown = async () => {
 }
 
 process.on('SIGTERM', shutdown)
-process.on('SIGINT',  shutdown)
+process.on('SIGINT', shutdown)
 
 async function start() {
   await verifyRegistration(config)
@@ -45,7 +45,7 @@ async function start() {
   app.addHook('onClose', () => stopWatcher())
 
   await app.listen({ port: config.port, host: '0.0.0.0' })
-  app.log.info(`OpenRelay Node v0.1.0`)
+  app.log.info('OpenRelay Node v0.1.0')
   app.log.info(`Operator: ${config.operatorAddress}`)
   app.log.info(`Endpoint: ${config.endpoint}`)
 }

@@ -1,13 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createHash } from 'node:crypto'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock the repository module before importing auth
 vi.mock('../../lib/repository', () => ({
   findMerchantByApiKey: vi.fn(),
 }))
 
-import { authenticate, requireSecretKey } from '../../middleware/auth.js'
 import { findMerchantByApiKey } from '../../lib/repository.js'
+import { authenticate, requireSecretKey } from '../../middleware/auth.js'
 
 const mockedFindMerchant = vi.mocked(findMerchantByApiKey)
 
@@ -261,12 +261,12 @@ describe('requireSecretKey middleware', () => {
     expect(reply.body.error.message).toContain('secret API key')
   })
 
-  it('should pass through when isSecretKey is true', () => {
+  it('should pass through when isSecretKey is true', async () => {
     const req = makeMockRequest({}) as any
     req.isSecretKey = true
     const reply = makeMockReply()
 
-    const result = requireSecretKey(req, reply)
+    const result = await requireSecretKey(req, reply)
 
     expect(reply.status).not.toHaveBeenCalled()
     expect(result).toBeUndefined()
@@ -279,6 +279,8 @@ describe('requireSecretKey middleware', () => {
 
     requireSecretKey(req, reply)
 
-    expect(reply.body.error.doc_url).toBe('https://docs.openrelay.dev/errors/insufficient_permissions')
+    expect(reply.body.error.doc_url).toBe(
+      'https://docs.openrelay.dev/errors/insufficient_permissions',
+    )
   })
 })

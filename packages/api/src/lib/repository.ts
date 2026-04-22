@@ -1,5 +1,5 @@
-import type { Sql } from 'postgres'
 import type { PaymentIntent, PaymentIntentStatus } from '@openrelay/protocol'
+import type { Sql } from 'postgres'
 
 // ── Merchants ──────────────────────────────────────────────────
 
@@ -24,7 +24,7 @@ export interface ApiKey {
 
 export async function findMerchantByApiKey(
   db: Sql,
-  keyHash: string
+  keyHash: string,
 ): Promise<{ merchant: Merchant; key: ApiKey } | null> {
   const rows = await db`
     SELECT
@@ -42,28 +42,28 @@ export async function findMerchantByApiKey(
   if (!row) return null
   return {
     merchant: {
-      id:               row.id,
-      name:             row.name,
-      email:            row.email,
-      wallet_address:   row.wallet_address,
-      routing_mode:     row.routing_mode,
-      min_node_stake:   BigInt(row.min_node_stake),
-      min_node_score:   Number(row.min_node_score),
-      created_at:       row.created_at,
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      wallet_address: row.wallet_address,
+      routing_mode: row.routing_mode,
+      min_node_stake: BigInt(row.min_node_stake),
+      min_node_score: Number(row.min_node_score),
+      created_at: row.created_at,
     },
     key: {
-      id:          row.key_id,
+      id: row.key_id,
       merchant_id: row.id,
-      key_hash:    row.key_hash,
-      key_prefix:  row.key_prefix,
-      label:       row.label,
+      key_hash: row.key_hash,
+      key_prefix: row.key_prefix,
+      label: row.label,
     },
   }
 }
 
 export async function createMerchant(
   db: Sql,
-  params: { id: string; name: string; email: string; wallet_address: string }
+  params: { id: string; name: string; email: string; wallet_address: string },
 ): Promise<Merchant> {
   const rows = await db`
     INSERT INTO merchants (id, name, email, wallet_address)
@@ -73,20 +73,20 @@ export async function createMerchant(
   const row = rows[0]
   if (!row) throw new Error('INSERT RETURNING returned no rows')
   return {
-    id:             row.id,
-    name:           row.name,
-    email:          row.email,
+    id: row.id,
+    name: row.name,
+    email: row.email,
     wallet_address: row.wallet_address,
-    routing_mode:   row.routing_mode,
+    routing_mode: row.routing_mode,
     min_node_stake: BigInt(row.min_node_stake),
     min_node_score: Number(row.min_node_score),
-    created_at:     row.created_at,
+    created_at: row.created_at,
   } as Merchant
 }
 
 export async function createApiKey(
   db: Sql,
-  params: { id: string; merchant_id: string; key_hash: string; key_prefix: string; label?: string }
+  params: { id: string; merchant_id: string; key_hash: string; key_prefix: string; label?: string },
 ): Promise<void> {
   await db`
     INSERT INTO api_keys (id, merchant_id, key_hash, key_prefix, label)
@@ -96,10 +96,7 @@ export async function createApiKey(
 
 // ── Payment Intents ────────────────────────────────────────────
 
-export async function insertPaymentIntent(
-  db: Sql,
-  intent: PaymentIntent
-): Promise<void> {
+export async function insertPaymentIntent(db: Sql, intent: PaymentIntent): Promise<void> {
   await db`
     INSERT INTO payment_intents (
       id, merchant_id, amount, currency, chain, status,
@@ -127,7 +124,7 @@ export async function insertPaymentIntent(
 export async function getPaymentIntent(
   db: Sql,
   id: string,
-  merchantId: string
+  merchantId: string,
 ): Promise<PaymentIntent | null> {
   const rows = await db`
     SELECT * FROM payment_intents
@@ -148,7 +145,7 @@ export async function updatePaymentIntentStatus(
     payer_address: string
     tx_hash: string
     settled_at: number
-  }> = {}
+  }> = {},
 ): Promise<void> {
   await db`
     UPDATE payment_intents SET
@@ -165,27 +162,24 @@ export async function listPaymentIntents(
   db: Sql,
   merchantId: string,
   limit: number,
-  startingAfter?: string
+  startingAfter?: string,
 ): Promise<{ data: PaymentIntent[]; has_more: boolean }> {
-  let rows
-  if (startingAfter) {
-    rows = await db`
-      SELECT * FROM payment_intents
-      WHERE merchant_id = ${merchantId}
-        AND created_at < (
-          SELECT created_at FROM payment_intents WHERE id = ${startingAfter}
-        )
-      ORDER BY created_at DESC
-      LIMIT ${limit + 1}
-    `
-  } else {
-    rows = await db`
-      SELECT * FROM payment_intents
-      WHERE merchant_id = ${merchantId}
-      ORDER BY created_at DESC
-      LIMIT ${limit + 1}
-    `
-  }
+  const rows: Record<string, unknown>[] = startingAfter
+    ? await db`
+        SELECT * FROM payment_intents
+        WHERE merchant_id = ${merchantId}
+          AND created_at < (
+            SELECT created_at FROM payment_intents WHERE id = ${startingAfter}
+          )
+        ORDER BY created_at DESC
+        LIMIT ${limit + 1}
+      `
+    : await db`
+        SELECT * FROM payment_intents
+        WHERE merchant_id = ${merchantId}
+        ORDER BY created_at DESC
+        LIMIT ${limit + 1}
+      `
   const has_more = rows.length > limit
   const data = rows.slice(0, limit).map(rowToIntent)
   return { data, has_more }
@@ -201,7 +195,7 @@ export async function insertWebhookEndpoint(
     url: string
     secret_hash: string
     events: string[]
-  }
+  },
 ): Promise<void> {
   await db`
     INSERT INTO webhook_endpoints (id, merchant_id, url, secret_hash, events)
@@ -211,16 +205,16 @@ export async function insertWebhookEndpoint(
 
 export async function listWebhookEndpoints(
   db: Sql,
-  merchantId: string
+  merchantId: string,
 ): Promise<{ id: string; url: string; events: string[] }[]> {
   const rows = await db`
     SELECT id, url, events FROM webhook_endpoints
     WHERE merchant_id = ${merchantId} AND deleted_at IS NULL
     ORDER BY created_at DESC
   `
-  return rows.map(row => ({
-    id:     row.id as string,
-    url:    row.url as string,
+  return rows.map((row) => ({
+    id: row.id as string,
+    url: row.url as string,
     events: row.events as string[],
   }))
 }
@@ -228,7 +222,7 @@ export async function listWebhookEndpoints(
 export async function getActiveWebhooksForEvent(
   db: Sql,
   merchantId: string,
-  eventType: string
+  eventType: string,
 ): Promise<{ id: string; url: string; secret_hash: string }[]> {
   const rows = await db`
     SELECT id, url, secret_hash FROM webhook_endpoints
@@ -236,20 +230,16 @@ export async function getActiveWebhooksForEvent(
       AND deleted_at IS NULL
       AND ${eventType} = ANY(events)
   `
-  return rows.map(row => ({
-    id:          row.id as string,
-    url:         row.url as string,
+  return rows.map((row) => ({
+    id: row.id as string,
+    url: row.url as string,
     secret_hash: row.secret_hash as string,
   }))
 }
 
 // ── x402 Replay Protection ─────────────────────────────────────
 
-export async function markX402TxUsed(
-  db: Sql,
-  txHash: string,
-  chain: string
-): Promise<boolean> {
+export async function markX402TxUsed(db: Sql, txHash: string, chain: string): Promise<boolean> {
   try {
     await db`
       INSERT INTO x402_payments_used (tx_hash, chain)
@@ -266,22 +256,23 @@ export async function markX402TxUsed(
 
 function rowToIntent(row: Record<string, unknown>): PaymentIntent {
   return {
-    id:            row.id as string,
-    merchant_id:   row.merchant_id as string,
-    amount:        Number(row.amount),
-    currency:      row.currency as 'usdc' | 'btc',
-    chain:         row.chain as 'base' | 'lightning',
-    status:        row.status as PaymentIntentStatus,
+    id: row.id as string,
+    merchant_id: row.merchant_id as string,
+    amount: Number(row.amount),
+    currency: row.currency as 'usdc' | 'btc',
+    chain: row.chain as 'base' | 'lightning',
+    status: row.status as PaymentIntentStatus,
     node_operator: (row.node_operator as string | null) ?? null,
     payer_address: (row.payer_address as string | null) ?? null,
-    tx_hash:       (row.tx_hash as string | null) ?? null,
-    fee_amount:    Number(row.fee_amount),
-    metadata:      typeof row.metadata === 'string'
-      ? JSON.parse(row.metadata)
-      : row.metadata as Record<string, string>,
-    created_at:    Math.floor(new Date(row.created_at as string).getTime() / 1000),
-    expires_at:    Math.floor(new Date(row.expires_at as string).getTime() / 1000),
-    settled_at:    row.settled_at
+    tx_hash: (row.tx_hash as string | null) ?? null,
+    fee_amount: Number(row.fee_amount),
+    metadata:
+      typeof row.metadata === 'string'
+        ? JSON.parse(row.metadata)
+        : (row.metadata as Record<string, string>),
+    created_at: Math.floor(new Date(row.created_at as string).getTime() / 1000),
+    expires_at: Math.floor(new Date(row.expires_at as string).getTime() / 1000),
+    settled_at: row.settled_at
       ? Math.floor(new Date(row.settled_at as string).getTime() / 1000)
       : null,
   }

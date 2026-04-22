@@ -1,28 +1,28 @@
 import Database from 'better-sqlite3'
 
 export interface IntentAssignment {
-  intent_id:        string
-  amount:           number
-  currency:         string
-  chain:            string
+  intent_id: string
+  amount: number
+  currency: string
+  chain: string
   merchant_address: string
-  payment_address:  string
-  status:           'assigned' | 'settled' | 'failed' | 'expired'
-  tx_hash:          string | null
-  assigned_at:      number
-  settled_at:       number | null
-  intent_index:     number
+  payment_address: string
+  status: 'assigned' | 'settled' | 'failed' | 'expired'
+  tx_hash: string | null
+  assigned_at: number
+  settled_at: number | null
+  intent_index: number
 }
 
 export interface NodeStore {
-  getNextIndex:           () => number
-  insertAssignment:       (a: Omit<IntentAssignment, 'assigned_at' | 'settled_at'>) => void
-  getAssignment:          (intentId: string) => IntentAssignment | undefined
+  getNextIndex: () => number
+  insertAssignment: (a: Omit<IntentAssignment, 'assigned_at' | 'settled_at'>) => void
+  getAssignment: (intentId: string) => IntentAssignment | undefined
   getAssignmentByAddress: (paymentAddress: string) => IntentAssignment | undefined
-  updateAssignment:       (intentId: string, status: string, txHash?: string) => void
-  getPendingAssignments:  (olderThanMs: number) => IntentAssignment[]
-  getStats:               () => { total_settled: number; avg_settlement_ms: number; uptime_start: number }
-  close:                  () => void
+  updateAssignment: (intentId: string, status: string, txHash?: string) => void
+  getPendingAssignments: (olderThanMs: number) => IntentAssignment[]
+  getStats: () => { total_settled: number; avg_settlement_ms: number; uptime_start: number }
+  close: () => void
 }
 
 export function initStore(dbPath: string): NodeStore {
@@ -51,11 +51,13 @@ export function initStore(dbPath: string): NodeStore {
   `)
 
   const getNextIndex = (): number => {
-    const row = db.prepare(`
+    const row = db
+      .prepare(`
       UPDATE node_meta SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT)
       WHERE key = 'intent_counter'
       RETURNING CAST(value AS INTEGER) as idx
-    `).get() as { idx: number }
+    `)
+      .get() as { idx: number }
     return row.idx
   }
 
@@ -66,14 +68,22 @@ export function initStore(dbPath: string): NodeStore {
          payment_address, status, tx_hash, assigned_at, settled_at, intent_index)
       VALUES (@intent_id, @amount, @currency, @chain, @merchant_address,
               @payment_address, @status, @tx_hash, @assigned_at, @settled_at, @intent_index)
-    `).run({ ...a, tx_hash: a.tx_hash ?? null, assigned_at: Math.floor(Date.now() / 1000), settled_at: null })
+    `).run({
+      ...a,
+      tx_hash: a.tx_hash ?? null,
+      assigned_at: Math.floor(Date.now() / 1000),
+      settled_at: null,
+    })
   }
 
   const getAssignment = (intentId: string) =>
-    db.prepare('SELECT * FROM intent_assignments WHERE intent_id = ?').get(intentId) as IntentAssignment | undefined
+    db.prepare('SELECT * FROM intent_assignments WHERE intent_id = ?').get(intentId) as
+      | IntentAssignment
+      | undefined
 
   const getAssignmentByAddress = (paymentAddress: string) =>
-    db.prepare(`SELECT * FROM intent_assignments WHERE payment_address = ? AND status = 'assigned'`)
+    db
+      .prepare(`SELECT * FROM intent_assignments WHERE payment_address = ? AND status = 'assigned'`)
       .get(paymentAddress) as IntentAssignment | undefined
 
   const updateAssignment = (intentId: string, status: string, txHash?: string) => {
@@ -87,18 +97,36 @@ export function initStore(dbPath: string): NodeStore {
 
   const getPendingAssignments = (olderThanMs: number): IntentAssignment[] => {
     const cutoff = Math.floor((Date.now() - olderThanMs) / 1000)
-    return db.prepare(`SELECT * FROM intent_assignments WHERE status = 'assigned' AND assigned_at <= ?`
-    ).all(cutoff) as IntentAssignment[]
+    return db
+      .prepare(`SELECT * FROM intent_assignments WHERE status = 'assigned' AND assigned_at <= ?`)
+      .all(cutoff) as IntentAssignment[]
   }
 
   const getStats = () => {
-    const s = db.prepare(`
+    const s = db
+      .prepare(`
       SELECT COUNT(*) as total, AVG(CAST(settled_at - assigned_at AS REAL)) * 1000 as avg_ms
       FROM intent_assignments WHERE status = 'settled'
-    `).get() as { total: number; avg_ms: number | null }
-    const m = db.prepare(`SELECT value FROM node_meta WHERE key = 'uptime_start'`).get() as { value: string }
-    return { total_settled: Number(s.total ?? 0), avg_settlement_ms: Math.round(s.avg_ms ?? 0), uptime_start: Number(m.value) }
+    `)
+      .get() as { total: number; avg_ms: number | null }
+    const m = db.prepare(`SELECT value FROM node_meta WHERE key = 'uptime_start'`).get() as {
+      value: string
+    }
+    return {
+      total_settled: Number(s.total ?? 0),
+      avg_settlement_ms: Math.round(s.avg_ms ?? 0),
+      uptime_start: Number(m.value),
+    }
   }
 
-  return { getNextIndex, insertAssignment, getAssignment, getAssignmentByAddress, updateAssignment, getPendingAssignments, getStats, close: () => db.close() }
+  return {
+    getNextIndex,
+    insertAssignment,
+    getAssignment,
+    getAssignmentByAddress,
+    updateAssignment,
+    getPendingAssignments,
+    getStats,
+    close: () => db.close(),
+  }
 }

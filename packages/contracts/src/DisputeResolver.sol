@@ -19,30 +19,39 @@ contract DisputeResolver is Pausable {
     // ── Constants ────────────────────────────────────────────
 
     uint256 public constant NODE_RESPONSE_WINDOW = 48 hours;
-    uint256 public constant SLASH_PERCENTAGE     = 20; // slash 20% of node stake on loss
+    uint256 public constant SLASH_PERCENTAGE = 20; // slash 20% of node stake on loss
 
     // ── Types ─────────────────────────────────────────────────
 
-    enum DisputeStatus  { Open, NodeResponded, Resolved, Expired }
-    enum DisputeOutcome { None, MerchantWins, NodeWins }
+    enum DisputeStatus {
+        Open,
+        NodeResponded,
+        Resolved,
+        Expired
+    }
+    enum DisputeOutcome {
+        None,
+        MerchantWins,
+        NodeWins
+    }
 
     struct Dispute {
-        bytes32        id;
-        bytes32        paymentIntentId;
-        address        merchant;
-        address        nodeOperator;
-        string         evidenceCid;         // IPFS CID of merchant evidence
-        string         counterEvidenceCid;  // IPFS CID of node counter-evidence
-        uint256        openedAt;
-        DisputeStatus  status;
+        bytes32 id;
+        bytes32 paymentIntentId;
+        address merchant;
+        address nodeOperator;
+        string evidenceCid; // IPFS CID of merchant evidence
+        string counterEvidenceCid; // IPFS CID of node counter-evidence
+        uint256 openedAt;
+        DisputeStatus status;
         DisputeOutcome outcome;
-        uint256        resolvedAt;
+        uint256 resolvedAt;
     }
 
     // ── State ─────────────────────────────────────────────────
 
     IStakeManager public immutable stakeManager;
-    address       public immutable treasury;
+    address public immutable treasury;
 
     /// @notice Addresses that can resolve disputes (Phase 1: multisig signers)
     mapping(address => bool) public isArbiter;
@@ -70,21 +79,10 @@ contract DisputeResolver is Pausable {
     // ── Events ───────────────────────────────────────────────
 
     event DisputeOpened(
-        bytes32 indexed disputeId,
-        bytes32 indexed paymentIntentId,
-        address indexed merchant,
-        address nodeOperator
+        bytes32 indexed disputeId, bytes32 indexed paymentIntentId, address indexed merchant, address nodeOperator
     );
-    event DisputeResponded(
-        bytes32 indexed disputeId,
-        address indexed nodeOperator,
-        string counterEvidenceCid
-    );
-    event DisputeResolved(
-        bytes32 indexed disputeId,
-        DisputeOutcome outcome,
-        address resolvedBy
-    );
+    event DisputeResponded(bytes32 indexed disputeId, address indexed nodeOperator, string counterEvidenceCid);
+    event DisputeResolved(bytes32 indexed disputeId, DisputeOutcome outcome, address resolvedBy);
     event DisputeExpired(bytes32 indexed disputeId);
     event ArbiterAdded(address indexed arbiter);
     event ArbiterRemoved(address indexed arbiter);
@@ -123,16 +121,13 @@ contract DisputeResolver is Pausable {
     /// @param _stakeManager Address of the StakeManager contract
     /// @param _treasury     Address that receives slashed stake
     /// @param _arbiters     Initial set of arbiter addresses (3–5 recommended)
-    constructor(
-        address _stakeManager,
-        address _treasury,
-        address[] memory _arbiters,
-        address _guardian
-    ) Pausable(_guardian) {
+    constructor(address _stakeManager, address _treasury, address[] memory _arbiters, address _guardian)
+        Pausable(_guardian)
+    {
         if (_arbiters.length < REQUIRED_ARBITERS) revert NotEnoughArbiters();
 
         stakeManager = IStakeManager(_stakeManager);
-        treasury     = _treasury;
+        treasury = _treasury;
 
         for (uint256 i = 0; i < _arbiters.length; i++) {
             isArbiter[_arbiters[i]] = true;
@@ -148,27 +143,27 @@ contract DisputeResolver is Pausable {
     /// @param paymentIntentId  The payment intent ID (bytes32 hash of the pi_ string ID)
     /// @param nodeOperator     Wallet address of the node operator being disputed
     /// @param evidenceCid      IPFS CID of the merchant's evidence package
-    function openDispute(
-        bytes32 paymentIntentId,
-        address nodeOperator,
-        string calldata evidenceCid
-    ) external whenNotPaused returns (bytes32 disputeId) {
+    function openDispute(bytes32 paymentIntentId, address nodeOperator, string calldata evidenceCid)
+        external
+        whenNotPaused
+        returns (bytes32 disputeId)
+    {
         if (bytes(evidenceCid).length == 0) revert EmptyEvidence();
         if (intentToDispute[paymentIntentId] != bytes32(0)) revert DisputeAlreadyExists();
 
         disputeId = keccak256(abi.encodePacked(paymentIntentId, msg.sender, block.timestamp));
 
         _disputes[disputeId] = Dispute({
-            id:                 disputeId,
-            paymentIntentId:    paymentIntentId,
-            merchant:           msg.sender,
-            nodeOperator:       nodeOperator,
-            evidenceCid:        evidenceCid,
-            counterEvidenceCid: '',
-            openedAt:           block.timestamp,
-            status:             DisputeStatus.Open,
-            outcome:            DisputeOutcome.None,
-            resolvedAt:         0
+            id: disputeId,
+            paymentIntentId: paymentIntentId,
+            merchant: msg.sender,
+            nodeOperator: nodeOperator,
+            evidenceCid: evidenceCid,
+            counterEvidenceCid: "",
+            openedAt: block.timestamp,
+            status: DisputeStatus.Open,
+            outcome: DisputeOutcome.None,
+            resolvedAt: 0
         });
 
         intentToDispute[paymentIntentId] = disputeId;
@@ -182,10 +177,11 @@ contract DisputeResolver is Pausable {
     ///         Must be called within NODE_RESPONSE_WINDOW of dispute opening.
     /// @param disputeId        The dispute ID
     /// @param counterEvidenceCid  IPFS CID of the node's counter-evidence
-    function respondToDispute(
-        bytes32 disputeId,
-        string calldata counterEvidenceCid
-    ) external whenNotPaused disputeExists(disputeId) {
+    function respondToDispute(bytes32 disputeId, string calldata counterEvidenceCid)
+        external
+        whenNotPaused
+        disputeExists(disputeId)
+    {
         Dispute storage dispute = _disputes[disputeId];
 
         if (msg.sender != dispute.nodeOperator) revert NotNodeOperator();
@@ -207,16 +203,17 @@ contract DisputeResolver is Pausable {
     ///         If the node did not respond and the window has expired, arbiters can still vote.
     /// @param disputeId  The dispute ID
     /// @param outcome    MerchantWins or NodeWins
-    function vote(
-        bytes32 disputeId,
-        DisputeOutcome outcome
-    ) external whenNotPaused onlyArbiter disputeExists(disputeId) {
+    function vote(bytes32 disputeId, DisputeOutcome outcome)
+        external
+        whenNotPaused
+        onlyArbiter
+        disputeExists(disputeId)
+    {
         Dispute storage dispute = _disputes[disputeId];
 
-        if (
-            dispute.status != DisputeStatus.Open &&
-            dispute.status != DisputeStatus.NodeResponded
-        ) revert DisputeNotResolvable();
+        if (dispute.status != DisputeStatus.Open && dispute.status != DisputeStatus.NodeResponded) {
+            revert DisputeNotResolvable();
+        }
 
         if (outcome == DisputeOutcome.None) revert InvalidOutcome();
         if (arbiterVotes[disputeId][msg.sender] != DisputeOutcome.None) revert AlreadyVoted();
@@ -312,8 +309,8 @@ contract DisputeResolver is Pausable {
     function _resolve(bytes32 disputeId, DisputeOutcome outcome) internal {
         Dispute storage dispute = _disputes[disputeId];
 
-        dispute.status     = DisputeStatus.Resolved;
-        dispute.outcome    = outcome;
+        dispute.status = DisputeStatus.Resolved;
+        dispute.outcome = outcome;
         dispute.resolvedAt = block.timestamp;
 
         emit DisputeResolved(disputeId, outcome, msg.sender);

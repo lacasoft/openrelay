@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createHmac } from 'node:crypto'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)
@@ -9,9 +9,7 @@ import { OpenRelay } from '../index.js'
 const TEST_SECRET = 'whsec_testsecretkey1234567890abcdef'
 
 function buildSignature(payload: string, secret: string, timestamp: number): string {
-  const sig = createHmac('sha256', secret)
-    .update(`${timestamp}.${payload}`)
-    .digest('hex')
+  const sig = createHmac('sha256', secret).update(`${timestamp}.${payload}`).digest('hex')
   return `t=${timestamp},v1=${sig}`
 }
 
@@ -49,16 +47,18 @@ describe('Webhooks.verify', () => {
     const payload = '{"id":"evt_bad"}'
     const signature = 'v1=abc123'
 
-    expect(() => client.webhooks.verify(payload, signature, TEST_SECRET))
-      .toThrow('Invalid signature format')
+    expect(() => client.webhooks.verify(payload, signature, TEST_SECRET)).toThrow(
+      'Invalid signature format',
+    )
   })
 
   it('should throw when signature format is invalid (missing v1=)', () => {
     const payload = '{"id":"evt_bad"}'
     const signature = 't=1700000000'
 
-    expect(() => client.webhooks.verify(payload, signature, TEST_SECRET))
-      .toThrow('Invalid signature format')
+    expect(() => client.webhooks.verify(payload, signature, TEST_SECRET)).toThrow(
+      'Invalid signature format',
+    )
   })
 
   it('should throw when HMAC does not match (wrong secret)', () => {
@@ -72,8 +72,9 @@ describe('Webhooks.verify', () => {
     const timestamp = Math.floor(Date.now() / 1000)
     const signature = buildSignature(payload, 'wrong_secret_key_here', timestamp)
 
-    expect(() => client.webhooks.verify(payload, signature, TEST_SECRET))
-      .toThrow('Signature verification failed')
+    expect(() => client.webhooks.verify(payload, signature, TEST_SECRET)).toThrow(
+      'Signature verification failed',
+    )
   })
 
   it('should throw when payload has been tampered with', () => {
@@ -94,8 +95,9 @@ describe('Webhooks.verify', () => {
       data: { amount: 9999999 },
     })
 
-    expect(() => client.webhooks.verify(tamperedPayload, signature, TEST_SECRET))
-      .toThrow('Signature verification failed')
+    expect(() => client.webhooks.verify(tamperedPayload, signature, TEST_SECRET)).toThrow(
+      'Signature verification failed',
+    )
   })
 
   it('should throw when timestamp has been modified', () => {
@@ -115,8 +117,9 @@ describe('Webhooks.verify', () => {
     const fakeTimestamp = realTimestamp + 100
     const signature = `t=${fakeTimestamp},v1=${sig}`
 
-    expect(() => client.webhooks.verify(payload, signature, TEST_SECRET))
-      .toThrow('Signature verification failed')
+    expect(() => client.webhooks.verify(payload, signature, TEST_SECRET)).toThrow(
+      'Signature verification failed',
+    )
   })
 
   it('should verify correctly with different event types', () => {
@@ -148,8 +151,9 @@ describe('Webhooks.verify', () => {
   it('should handle empty string signature', () => {
     const payload = '{"id":"evt_empty"}'
 
-    expect(() => client.webhooks.verify(payload, '', TEST_SECRET))
-      .toThrow('Invalid signature format')
+    expect(() => client.webhooks.verify(payload, '', TEST_SECRET)).toThrow(
+      'Invalid signature format',
+    )
   })
 })
 
@@ -159,16 +163,10 @@ describe('webhook signature construction', () => {
     const timestamp = 1700000000
     const secret = 'test_signing_secret'
 
-    const expectedSig = createHmac('sha256', secret)
-      .update(`${timestamp}.${payload}`)
-      .digest('hex')
+    const expectedSig = createHmac('sha256', secret).update(`${timestamp}.${payload}`).digest('hex')
 
     const signature = `t=${timestamp},v1=${expectedSig}`
-    const event = client.webhooks.verify(
-      payload,
-      signature,
-      secret
-    )
+    const event = client.webhooks.verify(payload, signature, secret)
 
     expect(event).toEqual({ test: 'data' })
   })
@@ -177,9 +175,7 @@ describe('webhook signature construction', () => {
     const payload = '{"id":"evt_hex"}'
     const timestamp = 1700000000
 
-    const sig = createHmac('sha256', TEST_SECRET)
-      .update(`${timestamp}.${payload}`)
-      .digest('hex')
+    const sig = createHmac('sha256', TEST_SECRET).update(`${timestamp}.${payload}`).digest('hex')
 
     expect(sig).toMatch(/^[a-f0-9]{64}$/)
   })
@@ -199,10 +195,10 @@ describe('Webhooks.register', () => {
       json: () => Promise.resolve(mockResponse),
     })
 
-    const result = await client.webhooks.register(
-      'https://example.com/hook',
-      ['payment_intent.settled', 'payment_intent.failed']
-    )
+    const result = await client.webhooks.register('https://example.com/hook', [
+      'payment_intent.settled',
+      'payment_intent.failed',
+    ])
 
     const [url, opts] = mockFetch.mock.calls[0]!
     expect(url).toBe('https://api.test.openrelay.dev/v1/webhooks')
