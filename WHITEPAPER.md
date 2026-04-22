@@ -383,8 +383,10 @@ Si estás evaluando OpenRelay para producción hoy: es viable en modo autoalojad
 - ✅ Verificación on-chain de pagos via viem
 - ✅ Derivación HD wallet para direcciones de pago
 - ✅ CI/CD con GitHub Actions
-- 🔄 Auditoría interna de seguridad
-- ✅ Deploy en Base Sepolia (2026-04-18 — ver `packages/contracts/deployments/sepolia.json`)
+- ✅ Auditoría interna de seguridad (ver [`docs/audits/2026-04-15-internal-snapshot.md`](docs/audits/2026-04-15-internal-snapshot.md); auditoría externa pendiente antes de mainnet)
+- ✅ Deploy en Base Sepolia — última versión 2026-04-21 con los 4 roles (deployer, treasury, guardian, operator) en wallets separadas. Ver [`packages/contracts/deployments/sepolia.json`](packages/contracts/deployments/sepolia.json) para el historial completo.
+- ✅ Primer bootstrap node registrado on-chain y operativo en producción (Fly.io) — `https://nodeit.openrelay.site`
+- ✅ Repositorio público en GitHub bajo `lacasoft/openrelay`
 - 🔄 Primer comercio en producción (autoalojado)
 
 ### Fase 2 — Red (meses 4-10)
