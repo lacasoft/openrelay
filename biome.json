@@ -1,12 +1,49 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.8.0/schema.json",
   "organizeImports": { "enabled": true },
+  "files": {
+    "ignore": [
+      "**/.turbo/**",
+      "**/.next/**",
+      "**/dist/**",
+      "**/node_modules/**",
+      "**/.claude/**",
+      "packages/contracts/out/**",
+      "packages/contracts/cache/**",
+      "packages/contracts/broadcast/**",
+      "packages/sdk-php/vendor/**",
+      "packages/sdk-python/.pytest_cache/**",
+      "packages/sdk-python/__pycache__/**",
+      "coverage/**",
+      "pnpm-lock.yaml"
+    ]
+  },
   "linter": {
     "enabled": true,
     "rules": {
       "recommended": true
     }
   },
+  "overrides": [
+    {
+      "include": ["**/__tests__/**", "**/*.test.ts", "**/*.test.tsx"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off",
+            "noAssignInExpressions": "off"
+          },
+          "style": {
+            "noNonNullAssertion": "off",
+            "noParameterAssign": "off"
+          },
+          "complexity": {
+            "noForEach": "off"
+          }
+        }
+      }
+    }
+  ],
   "formatter": {
     "enabled": true,
     "indentStyle": "space",

@@ -54,11 +54,13 @@ jobs:
       - name: Build protocol
         run: pnpm --filter @openrelay/protocol build
 
+      # Skip @openrelay/contracts here — Solidity tests run in the
+      # dedicated `contracts` job below, which has foundry installed.
       - name: Run tests
-        run: pnpm test
+        run: pnpm --filter=!@openrelay/contracts test
 
       - name: Run tests with coverage
-        run: pnpm test -- --coverage
+        run: pnpm --filter=!@openrelay/contracts test -- --coverage
 
   # ── Smart Contract Tests ────────────────────────────────────
   contracts:

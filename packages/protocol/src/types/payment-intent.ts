@@ -2,9 +2,15 @@ export type Chain = 'base' | 'lightning' | 'polygon' | 'solana'
 export type Currency = 'usdc' | 'btc'
 
 export type PaymentIntentStatus =
-  | 'created' | 'routing' | 'pending_payment'
-  | 'confirming' | 'settled' | 'failed'
-  | 'expired' | 'cancelled' | 'disputed'
+  | 'created'
+  | 'routing'
+  | 'pending_payment'
+  | 'confirming'
+  | 'settled'
+  | 'failed'
+  | 'expired'
+  | 'cancelled'
+  | 'disputed'
 
 export interface PaymentIntent {
   id: string

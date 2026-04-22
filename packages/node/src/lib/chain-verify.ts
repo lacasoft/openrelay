@@ -1,4 +1,4 @@
-import { createPublicClient, http } from 'viem'
+import { http, createPublicClient } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 
 /** Transfer(address,address,uint256) topic0 */
@@ -33,9 +33,8 @@ export async function verifyUsdcTransfer(
 
     // Find USDC Transfer event in logs
     const transferLog = receipt.logs.find(
-      log =>
-        log.address.toLowerCase() === usdcAddress.toLowerCase() &&
-        log.topics[0] === TRANSFER_TOPIC,
+      (log) =>
+        log.address.toLowerCase() === usdcAddress.toLowerCase() && log.topics[0] === TRANSFER_TOPIC,
     )
 
     if (!transferLog) {

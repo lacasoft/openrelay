@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import Fastify, { type FastifyInstance } from 'fastify'
 import { createHmac } from 'node:crypto'
+import Fastify, { type FastifyInstance } from 'fastify'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { type NodeStore, initStore } from '../../lib/store.js'
 import { healthRoute, infoRoute } from '../../routes/health.js'
-import { initStore, type NodeStore } from '../../lib/store.js'
 
 let app: FastifyInstance
 let store: NodeStore
@@ -24,9 +24,7 @@ const mockConfig = {
 
 function authHeaders(): Record<string, string> {
   const timestamp = Math.floor(Date.now() / 1000)
-  const signature = createHmac('sha256', HMAC_SECRET)
-    .update(`${timestamp}.`)
-    .digest('hex')
+  const signature = createHmac('sha256', HMAC_SECRET).update(`${timestamp}.`).digest('hex')
   return {
     'x-openrelay-signature': `sha256=${signature}`,
     'x-openrelay-timestamp': String(timestamp),
@@ -34,7 +32,7 @@ function authHeaders(): Record<string, string> {
 }
 
 beforeAll(async () => {
-  process.env['NODE_HMAC_SECRET'] = HMAC_SECRET
+  process.env.NODE_HMAC_SECRET = HMAC_SECRET
   store = initStore(':memory:')
   app = Fastify({ logger: false })
   app.decorate('config', mockConfig)

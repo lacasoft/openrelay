@@ -1,4 +1,4 @@
-import { createPublicClient, http, parseAbi } from 'viem'
+import { http, createPublicClient, parseAbi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 
 const USDC_TRANSFER_ABI = parseAbi([
@@ -25,7 +25,7 @@ export async function verifyUsdcTransfer(
   client: ChainClient,
   txHash: `0x${string}`,
   expectedTo: string,
-  expectedAmountUnits: number,  // USDC smallest units (6 decimals) — matches rest of the API
+  expectedAmountUnits: number, // USDC smallest units (6 decimals) — matches rest of the API
   usdcAddress: string,
 ): Promise<{ valid: boolean; reason?: string }> {
   try {
@@ -37,9 +37,8 @@ export async function verifyUsdcTransfer(
 
     // Find USDC Transfer event in logs
     const transferLog = receipt.logs.find(
-      log =>
-        log.address.toLowerCase() === usdcAddress.toLowerCase() &&
-        log.topics[0] === TRANSFER_TOPIC,
+      (log) =>
+        log.address.toLowerCase() === usdcAddress.toLowerCase() && log.topics[0] === TRANSFER_TOPIC,
     )
 
     if (!transferLog) {

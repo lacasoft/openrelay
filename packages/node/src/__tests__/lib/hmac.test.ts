@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createHmac } from 'node:crypto'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { signRequest, verifyRequest } from '../../lib/hmac.js'
 
 const TEST_SECRET = 'test-hmac-secret-key-at-least-16'
@@ -12,9 +12,7 @@ describe('signRequest', () => {
     const result = signRequest(body, timestamp, TEST_SECRET)
 
     // Verify it matches a manually computed HMAC
-    const expected = createHmac('sha256', TEST_SECRET)
-      .update(`${timestamp}.${body}`)
-      .digest('hex')
+    const expected = createHmac('sha256', TEST_SECRET).update(`${timestamp}.${body}`).digest('hex')
 
     expect(result).toBe(expected)
   })

@@ -1,9 +1,11 @@
-import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest'
-import Fastify, { type FastifyInstance } from 'fastify'
 import { createHash } from 'node:crypto'
+import Fastify, { type FastifyInstance } from 'fastify'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock fetch globally to prevent triggerRouting from making real HTTP requests
-const mockFetch = vi.fn().mockResolvedValue({ ok: false, status: 503, json: () => Promise.resolve({}) })
+const mockFetch = vi
+  .fn()
+  .mockResolvedValue({ ok: false, status: 503, json: () => Promise.resolve({}) })
 vi.stubGlobal('fetch', mockFetch)
 
 // Mock the auth middleware to avoid the sync preHandler issue with Fastify inject
@@ -22,7 +24,9 @@ vi.mock('../../middleware/auth', () => ({
       req.apiKeyPrefix = 'pk_live_'
       req.isSecretKey = false
     } else {
-      return _reply.status(401).send({ error: { code: 'invalid_api_key', message: 'Unauthorized' } })
+      return _reply
+        .status(401)
+        .send({ error: { code: 'invalid_api_key', message: 'Unauthorized' } })
     }
   }),
   requireSecretKey: vi.fn(async (req: any, reply: any) => {
@@ -48,13 +52,13 @@ vi.mock('../../lib/repository', () => ({
   listPaymentIntents: vi.fn(),
 }))
 
-import { paymentIntentsRoute } from '../../routes/payment-intents.js'
 import {
-  insertPaymentIntent,
   getPaymentIntent,
-  updatePaymentIntentStatus,
+  insertPaymentIntent,
   listPaymentIntents,
+  updatePaymentIntentStatus,
 } from '../../lib/repository.js'
+import { paymentIntentsRoute } from '../../routes/payment-intents.js'
 
 const mockedInsert = vi.mocked(insertPaymentIntent)
 const mockedGet = vi.mocked(getPaymentIntent)

@@ -1,4 +1,4 @@
-import type { PaymentIntent, CreatePaymentIntentParams } from '@openrelay/protocol'
+import type { CreatePaymentIntentParams, PaymentIntent } from '@openrelay/protocol'
 import type { OpenRelayConfig } from '../lib/types'
 import { request } from '../lib/types'
 

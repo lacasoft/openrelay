@@ -16,11 +16,14 @@ export class X402 {
    *   chain: 'base',
    * }))
    */
-  middleware(opts: X402MiddlewareOptions): (req: Request, reply: Response) => Promise<Response | undefined> {
+  middleware(
+    opts: X402MiddlewareOptions,
+  ): (req: Request, reply: Response) => Promise<Response | undefined> {
     return async (req: Request, _reply: Response): Promise<Response | undefined> => {
-      const paymentHeader = req.headers instanceof Headers
-        ? req.headers.get('x-payment')
-        : (req.headers as Record<string, string>)['x-payment']
+      const paymentHeader =
+        req.headers instanceof Headers
+          ? req.headers.get('x-payment')
+          : (req.headers as Record<string, string>)['x-payment']
 
       if (!paymentHeader) {
         const body = this.buildPaymentRequired(opts, req.url)
@@ -54,9 +57,10 @@ export class X402 {
    */
   handler(opts: X402MiddlewareOptions & { handler: (req: Request) => Promise<Response> }) {
     return async (req: Request): Promise<Response> => {
-      const paymentHeader = req.headers instanceof Headers
-        ? req.headers.get('x-payment')
-        : (req.headers as unknown as Record<string, string>)['x-payment']
+      const paymentHeader =
+        req.headers instanceof Headers
+          ? req.headers.get('x-payment')
+          : (req.headers as unknown as Record<string, string>)['x-payment']
 
       if (!paymentHeader) {
         const body = this.buildPaymentRequired(opts, req.url)

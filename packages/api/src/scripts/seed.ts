@@ -4,13 +4,15 @@
  * Run via: docker compose exec api node dist/scripts/seed.js
  * Or:      make seed
  */
-import { randomBytes, createHash } from 'node:crypto'
+import { createHash, randomBytes } from 'node:crypto'
 import { pino } from 'pino'
 import postgres from 'postgres'
 
 const logger = pino({ name: 'seed' })
 
-const db = postgres(process.env['DATABASE_URL'] ?? 'postgresql://openrelay:openrelay@localhost:5432/openrelay')
+const db = postgres(
+  process.env.DATABASE_URL ?? 'postgresql://openrelay:openrelay@localhost:5432/openrelay',
+)
 
 function generateId(prefix: string): string {
   return `${prefix}_${randomBytes(12).toString('hex')}`
@@ -25,15 +27,17 @@ async function seed() {
 
   // Check if already seeded
   const existing = await db`SELECT COUNT(*) as count FROM merchants`
-  if (Number(existing[0]!.count) > 0) {
-    logger.warn('Merchant already exists. Seed has already been executed. To start over: make clean && make up && make seed')
+  if (Number(existing[0]?.count) > 0) {
+    logger.warn(
+      'Merchant already exists. Seed has already been executed. To start over: make clean && make up && make seed',
+    )
     await db.end()
     return
   }
 
   // Generate merchant
   const merchantId = generateId('mid')
-  const walletAddress = process.env['MERCHANT_WALLET'] ?? '0x0000000000000000000000000000000000000000'
+  const walletAddress = process.env.MERCHANT_WALLET ?? '0x0000000000000000000000000000000000000000'
 
   await db`
     INSERT INTO merchants (id, name, email, wallet_address, routing_mode)
@@ -73,12 +77,15 @@ async function seed() {
   }
 
   logger.info({ merchant_id: merchantId, wallet: walletAddress }, 'Merchant created successfully')
-  logger.info({
-    sk_live: skLive,
-    pk_live: pkLive,
-    sk_test: skTest,
-    pk_test: pkTest,
-  }, 'API keys generated (store them now — they will not be shown again)')
+  logger.info(
+    {
+      sk_live: skLive,
+      pk_live: pkLive,
+      sk_test: skTest,
+      pk_test: pkTest,
+    },
+    'API keys generated (store them now — they will not be shown again)',
+  )
   logger.info('Next step: integrate the SDK into your project. Docs: https://docs.openrelay.dev')
 
   await db.end()

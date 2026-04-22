@@ -1,7 +1,7 @@
-import type { FastifyRequest, FastifyReply } from 'fastify'
 import { createHash } from 'node:crypto'
-import { findMerchantByApiKey } from '../lib/repository'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { apiError } from '../lib/errors'
+import { findMerchantByApiKey } from '../lib/repository'
 
 /**
  * Authenticates requests using Bearer API keys.
@@ -12,14 +12,16 @@ import { apiError } from '../lib/errors'
  * app.addHook('preHandler', authenticate)
  */
 export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
-  const auth = req.headers['authorization']
+  const auth = req.headers.authorization
   if (!auth?.startsWith('Bearer ')) {
-    return reply.status(401).send(apiError('invalid_api_key', 'Missing or malformed Authorization header.'))
+    return reply
+      .status(401)
+      .send(apiError('invalid_api_key', 'Missing or malformed Authorization header.'))
   }
 
   const apiKey = auth.slice(7)
   const validPrefixes = ['pk_live_', 'sk_live_', 'pk_test_', 'sk_test_']
-  if (!validPrefixes.some(p => apiKey.startsWith(p))) {
+  if (!validPrefixes.some((p) => apiKey.startsWith(p))) {
     return reply.status(401).send(apiError('invalid_api_key', 'Invalid API key format.'))
   }
 
@@ -31,19 +33,23 @@ export async function authenticate(req: FastifyRequest, reply: FastifyReply) {
     return reply.status(401).send(apiError('invalid_api_key', 'Invalid or revoked API key.'))
   }
 
-  req.merchantId     = result.merchant.id
+  req.merchantId = result.merchant.id
   req.merchantWallet = result.merchant.wallet_address
-  req.apiKeyPrefix   = result.key.key_prefix
-  req.isSecretKey    = result.key.key_prefix.startsWith('sk_')
+  req.apiKeyPrefix = result.key.key_prefix
+  req.isSecretKey = result.key.key_prefix.startsWith('sk_')
 }
 
 export async function requireSecretKey(req: FastifyRequest, reply: FastifyReply) {
   // Must be async (or use the `done` callback) — Fastify hangs forever on a
   // sync preHandler that neither sends a reply nor returns a Promise.
   if (!req.isSecretKey) {
-    return reply.status(403).send(apiError(
-      'insufficient_permissions',
-      'This action requires a secret API key (sk_live_xxx).'
-    ))
+    return reply
+      .status(403)
+      .send(
+        apiError(
+          'insufficient_permissions',
+          'This action requires a secret API key (sk_live_xxx).',
+        ),
+      )
   }
 }

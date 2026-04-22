@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { createHmac } from 'node:crypto'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock postgres to avoid pino dependency resolution
 vi.mock('postgres', () => ({ default: vi.fn() }))
@@ -13,8 +13,8 @@ vi.mock('../../lib/repository', () => ({
 const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)
 
-import { deliverWebhook } from '../../services/webhook.js'
 import { getActiveWebhooksForEvent } from '../../lib/repository.js'
+import { deliverWebhook } from '../../services/webhook.js'
 
 const mockedGetWebhooks = vi.mocked(getActiveWebhooksForEvent)
 
@@ -27,9 +27,9 @@ function createMockRedis() {
       return queue.length
     }),
     rpop: vi.fn().mockImplementation(async () => queue.pop() ?? null),
-    zadd:          vi.fn().mockResolvedValue(1),
+    zadd: vi.fn().mockResolvedValue(1),
     zrangebyscore: vi.fn().mockResolvedValue([]),
-    zrem:          vi.fn().mockResolvedValue(1),
+    zrem: vi.fn().mockResolvedValue(1),
   } as any
 }
 
@@ -38,7 +38,7 @@ let mockRedis: ReturnType<typeof createMockRedis>
 describe('deliverWebhook', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockFetch.mockReset()  // also clears queued mockResolvedValueOnce / mockRejectedValueOnce
+    mockFetch.mockReset() // also clears queued mockResolvedValueOnce / mockRejectedValueOnce
     vi.useFakeTimers()
     mockRedis = createMockRedis()
   })
@@ -89,7 +89,7 @@ describe('deliverWebhook', () => {
           'Content-Type': 'application/json',
           'OpenRelay-Webhook-Id': 'we_001',
         }),
-      })
+      }),
     )
   })
 
@@ -126,12 +126,10 @@ describe('deliverWebhook', () => {
 
     // Extract and verify the HMAC
     const parts = sigHeader.split(',')
-    const ts = parts[0]!.slice(2)
-    const sig = parts[1]!.slice(3)
+    const ts = parts[0]?.slice(2)
+    const sig = parts[1]?.slice(3)
 
-    const expectedSig = createHmac('sha256', webhookSecret)
-      .update(`${ts}.${body}`)
-      .digest('hex')
+    const expectedSig = createHmac('sha256', webhookSecret).update(`${ts}.${body}`).digest('hex')
 
     expect(sig).toBe(expectedSig)
   })

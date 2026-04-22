@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)
 
-import { OpenRelay } from '../../index.js'
 import { USDC_BASE_ADDRESS } from '@openrelay/protocol'
+import { OpenRelay } from '../../index.js'
 
 function mockFetchResponse(data: unknown, status = 200) {
   return {
@@ -51,9 +51,9 @@ describe('X402 middleware', () => {
     const result = await mw(mockReq, undefined as any)
 
     expect(result).toBeInstanceOf(Response)
-    expect(result!.status).toBe(402)
+    expect(result?.status).toBe(402)
 
-    const body = await result!.json() as any
+    const body = (await result?.json()) as any
     expect(body.x402Version).toBe(1)
     expect(body.accepts).toHaveLength(1)
     expect(body.accepts[0].scheme).toBe('exact')
@@ -78,7 +78,7 @@ describe('X402 middleware', () => {
     })
 
     const result = await mw(mockReq, undefined as any)
-    const body = await result!.json() as any
+    const body = (await result?.json()) as any
 
     expect(body.accepts[0].description).toBe('API access')
   })
@@ -97,11 +97,13 @@ describe('X402 middleware', () => {
     })
 
     // Mock the verification API call
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({
-      verified: true,
-      tx_hash: '0xValidTx',
-      amount_received: 1000,
-    }))
+    mockFetch.mockResolvedValueOnce(
+      mockFetchResponse({
+        verified: true,
+        tx_hash: '0xValidTx',
+        amount_received: 1000,
+      }),
+    )
 
     // Simulate a Fastify-style request where headers is a plain object
     const mockReq = {
@@ -133,10 +135,12 @@ describe('X402 middleware', () => {
     })
 
     // Mock the verification API call to fail
-    mockFetch.mockResolvedValueOnce(mockFetchResponse(
-      { error: { code: 'insufficient_payment', message: 'Insufficient payment' } },
-      402
-    ))
+    mockFetch.mockResolvedValueOnce(
+      mockFetchResponse(
+        { error: { code: 'insufficient_payment', message: 'Insufficient payment' } },
+        402,
+      ),
+    )
 
     // Simulate a Fastify-style request where headers is a plain object
     const mockReq = {
@@ -147,8 +151,8 @@ describe('X402 middleware', () => {
     const result = await mw(mockReq, undefined as any)
 
     expect(result).toBeInstanceOf(Response)
-    expect(result!.status).toBe(402)
-    const body = await result!.json() as any
+    expect(result?.status).toBe(402)
+    const body = (await result?.json()) as any
     expect(body.error).toBe('Payment verification failed')
   })
 
@@ -169,7 +173,7 @@ describe('X402 middleware', () => {
     const result = await mw(mockReq, undefined as any)
 
     expect(result).toBeInstanceOf(Response)
-    expect(result!.status).toBe(402)
+    expect(result?.status).toBe(402)
   })
 
   it('should detect x-payment header from standard Web Request via Headers.get()', async () => {
@@ -221,17 +225,19 @@ describe('X402 handler', () => {
     const result = await handler(req)
 
     expect(result.status).toBe(402)
-    const body = await result.json() as any
+    const body = (await result.json()) as any
     expect(body.x402Version).toBe(1)
     expect(body.accepts[0].maxAmountRequired).toBe('2000')
     expect(body.accepts[0].description).toBe('Data endpoint')
   })
 
   it('should call inner handler when payment is verified (Fastify-style request)', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse({
-      verified: true,
-      tx_hash: '0xValidTx',
-    }))
+    mockFetch.mockResolvedValueOnce(
+      mockFetchResponse({
+        verified: true,
+        tx_hash: '0xValidTx',
+      }),
+    )
 
     const innerHandler = vi.fn(async () => Response.json({ data: 'secret_data' }))
 
@@ -252,15 +258,12 @@ describe('X402 handler', () => {
 
     expect(innerHandler).toHaveBeenCalledTimes(1)
     expect(result.status).toBe(200)
-    const body = await result.json() as any
+    const body = (await result.json()) as any
     expect(body.data).toBe('secret_data')
   })
 
   it('should return 402 when payment verification fails in handler (Fastify-style request)', async () => {
-    mockFetch.mockResolvedValueOnce(mockFetchResponse(
-      { error: 'bad' },
-      402
-    ))
+    mockFetch.mockResolvedValueOnce(mockFetchResponse({ error: 'bad' }, 402))
 
     const innerHandler = vi.fn(async () => Response.json({ data: 'nope' }))
 
@@ -293,7 +296,7 @@ describe('X402 handler', () => {
     const req = new Request('https://api.example.com/v1/resource/123', { method: 'GET' })
     const result = await handler(req)
 
-    const body = await result.json() as any
+    const body = (await result.json()) as any
     expect(body.accepts[0].resource).toBe('https://api.example.com/v1/resource/123')
   })
 
@@ -312,7 +315,7 @@ describe('X402 handler', () => {
 
     const req = new Request('https://api.example.com/resource', { method: 'GET' })
     const result = await handler(req)
-    const body = await result.json() as any
+    const body = (await result.json()) as any
 
     expect(body.accepts[0].payTo).toBe('')
   })

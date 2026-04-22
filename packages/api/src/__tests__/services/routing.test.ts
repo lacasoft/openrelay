@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { computeScore } from '../../services/routing.js'
 import type { NodeInfo } from '@openrelay/protocol'
 import { MAX_SETTLEMENT_MS, TARGET_STAKE_USDC } from '@openrelay/protocol'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { computeScore } from '../../services/routing.js'
 
 function makeNode(overrides: Partial<NodeInfo> = {}): NodeInfo {
   return {
@@ -36,7 +36,7 @@ describe('computeScore', () => {
   it('should compute correct individual weight components', () => {
     const node = makeNode({
       uptime_30d: 0.95,
-      avg_settlement_ms: 15000,  // half of MAX_SETTLEMENT_MS (30000)
+      avg_settlement_ms: 15000, // half of MAX_SETTLEMENT_MS (30000)
       stake: TARGET_STAKE_USDC / 2n,
     })
 
@@ -133,8 +133,8 @@ describe('computeScore', () => {
     // All weights at exactly 0.5 for easy math
     const node = makeNode({
       uptime_30d: 0.5,
-      avg_settlement_ms: MAX_SETTLEMENT_MS / 2,    // speed_weight = 0.5
-      stake: TARGET_STAKE_USDC / 2n,               // stake_weight = 0.5
+      avg_settlement_ms: MAX_SETTLEMENT_MS / 2, // speed_weight = 0.5
+      stake: TARGET_STAKE_USDC / 2n, // stake_weight = 0.5
     })
     const result = computeScore(node, 1, 2) // 50% disputes
 
