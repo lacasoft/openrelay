@@ -239,7 +239,7 @@ Maintained by the OpenRelay Foundation. Protocol changes go through public RFCs.
 ## Security
 
 Audit required before mainnet deployment. Reports published at `/audits`.
-Vulnerabilities: **security@openrelay.dev** — responsible disclosure with bounties.
+Vulnerabilities: **lacasoft.proyectos@gmail.com** — responsible disclosure with bounties.
 
 ---
 
@@ -259,7 +259,7 @@ Vulnerabilities: **security@openrelay.dev** — responsible disclosure with boun
 | Discord | discord.openrelay.dev |
 | npm SDK | @openrelay/sdk |
 | x402 spec | x402.org |
-| Security | security@openrelay.dev |
+| Security | lacasoft.proyectos@gmail.com |
 
 ---
 

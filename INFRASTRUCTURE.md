@@ -1291,4 +1291,4 @@ Estas son las propiedades que OpenRelay garantiza a todos los participantes. Deb
 
 *Este documento refleja el estado de OpenRelay en v0.1. Se actualiza con cada decisión arquitectónica significativa.*
 
-*Para preguntas, abre una discusión en GitHub. Para problemas de seguridad, envía un email a security@openrelay.dev.*
+*Para preguntas, abre una discusión en GitHub. Para problemas de seguridad, envía un email a lacasoft.proyectos@gmail.com.*

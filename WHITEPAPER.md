@@ -528,7 +528,7 @@ SCORE_CACHE_TTL          = 60 segundos
 | Discord | discord.openrelay.dev |
 | SDK npm | @openrelay/sdk |
 | Protocolo x402 | x402.org |
-| Seguridad | security@openrelay.dev |
+| Seguridad | lacasoft.proyectos@gmail.com |
 
 ---
 
