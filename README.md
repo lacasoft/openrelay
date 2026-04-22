@@ -4,14 +4,14 @@
 
 OpenRelay es una red de enrutamiento de pagos de código abierto, operada por la comunidad. Ofrece a los desarrolladores la misma experiencia que Stripe — SDK limpio, webhooks, payment intents, dashboard de comercio — sin el 2.9% + $0.30 por transacción. Sin pedirle permiso a nadie. Sin una empresa en medio.
 
-Si corres tu propio nodo, no cuesta nada. Si usas la red comunitaria, pagas fracciones de centavo.
+Si corres tu propio nodeit, no cuesta nada. Si usas la red comunitaria, pagas fracciones de centavo.
 
 ---
 
 ## 🚀 Estado actual
 
 ✅ **Contratos desplegados en Base Sepolia** (testnet) — redeploy 2026-04-21 con
-**separación de roles** (deployer, treasury, guardian y node operator en wallets distintas).
+**separación de roles** (deployer, treasury, guardian y nodeit operator en wallets distintas).
 Código fuente verificado en Basescan · `minStake` inicial: 40 USDC en testnet
 (100 USDC en mainnet; ajustable por guardian, solo incrementos).
 
@@ -27,9 +27,9 @@ Código fuente verificado en Basescan · `minStake` inicial: 40 USDC en testnet
 |---|---|---|
 | Treasury | [`0x05CD...8261`](https://sepolia.basescan.org/address/0x05CDED242AFC9D7e60eC3049bD8bDccbbA078261) | Recibe 20% de fees + stake slashado (**inmutable**) |
 | Guardian | [`0xbB51...7Ddf`](https://sepolia.basescan.org/address/0xbB514Eca8f39d0A3B8092B323282304709d17Ddf) | Pausa de emergencia + `updateMinStake()` (rotable) |
-| Node Operator (bootstrap) | [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) | Stakea USDC + firma HMAC del daemon |
+| Nodeit Operator (bootstrap) | [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) | Stakea USDC + firma HMAC del daemon |
 
-✅ **Primer nodo bootstrap registrado on-chain y operativo en producción** desde 2026-04-21 (bloque 40522829).
+✅ **Primer nodeit bootstrap registrado on-chain y operativo en producción** desde 2026-04-21 (bloque 40522829).
 Operado por el equipo core durante Fase 1 con el operator wallet **separado del deployer**.
 Daemon desplegado en Fly.io (region `dfw`) — prueba rápida: `curl https://nodeit.openrelay.site/health` → `200 OK`.
 
@@ -49,19 +49,21 @@ Fuente canónica de direcciones (para SDKs y dashboards):
 
 ## Qué es OpenRelay
 
-- Un protocolo de enrutamiento de pagos con nodos operados por la comunidad
+> *Sobre la terminología:* el protocolo define una red de **nodos**. **`nodeit`** es la implementación de referencia — el daemon open source de este repo. Cualquier daemon compatible puede registrarse como nodo; el nuestro se llama `nodeit`. En este README uso "nodeit" porque hablo de la implementación concreta; en `PROTOCOL.md` y `INFRASTRUCTURE.md` uso "nodo" porque describen el concepto abstracto del protocolo.
+
+- Un protocolo de enrutamiento de pagos con nodeits operados por la comunidad
 - Un SDK compatible con Stripe para JavaScript, Python y PHP
 - Soporte nativo para x402 — micropagos para agentes de IA
 - Un stack autoalojable con Docker Compose en un solo comando
 - USDC en Base como capa primaria de settlement, Lightning Network para BTC
-- Una capa de smart contracts para registro de nodos, staking y resolución de disputas
+- Una capa de smart contracts para registro de nodeits, staking y resolución de disputas
 - Documentación, comunidad y soporte en español e inglés
 
 ## Qué no es OpenRelay
 
 - **Un banco** — Los fondos van directo del pagador al comercio. OpenRelay nunca custodia dinero.
 - **Un gateway fiat** — No Visa, Mastercard ni ACH. Stripe cubre fiat; usa los dos si los necesitas.
-- **Un proyecto de token** — No hay token RELAY. Los operadores de nodo ganan USDC. Sin especulación.
+- **Un proyecto de token** — No hay token RELAY. Los operadores de nodeit ganan USDC. Sin especulación.
 - **Una alternativa universal a Stripe** — Es una capa de enrutamiento USDC abierta. Úsala junto con las herramientas que ya conoces.
 
 ---
@@ -72,19 +74,19 @@ Fuente canónica de direcciones (para SDKs y dashboards):
 Comercio integra el SDK
         │
         ▼
-Se crea el PaymentIntent → El motor de routing selecciona el mejor nodo
+Se crea el PaymentIntent → El motor de routing selecciona el mejor nodeit
         │                   (top 5 por score, ejecución concurrente)
         ▼
 El pagador envía USDC directo al wallet del comercio en Base
-        │              (el nodo NUNCA custodia fondos)
+        │              (el nodeit NUNCA custodia fondos)
         ▼
-El nodo confirma el settlement on-chain → Se dispara el webhook
+El nodeit confirma el settlement on-chain → Se dispara el webhook
         │
         ▼
-Reputación del nodo actualizada on-chain. Comisión distribuida automáticamente.
+Reputación del nodeit actualizada on-chain. Comisión distribuida automáticamente.
 ```
 
-Los operadores de nodo depositan stake en USDC para unirse. El stake es su garantía económica. Buen enrutamiento construye reputación. Mal enrutamiento pierde stake. Ningún comité decide quién participa — lo hace el protocolo.
+Los operadores de nodeit depositan stake en USDC para unirse. El stake es su garantía económica. Buen enrutamiento construye reputación. Mal enrutamiento pierde stake. Ningún comité decide quién participa — lo hace el protocolo.
 
 ---
 
@@ -149,8 +151,8 @@ Cinco capas con separación estricta de responsabilidades:
 | Capa | Responsabilidad | Tecnología |
 |---|---|---|
 | **Settlement** | Movimiento de fondos on-chain | Base (USDC), Lightning Network |
-| **Protocolo** | Reglas de nodo, stake, disputas | Solidity + Foundry en Base |
-| **Routing** | Descubrimiento y selección de nodos | Daemon en TypeScript |
+| **Protocolo** | Reglas de nodeit, stake, disputas | Solidity + Foundry en Base |
+| **Routing** | Descubrimiento y selección de nodeits | Daemon en TypeScript |
 | **API** | Interfaz del comercio | Fastify + PostgreSQL + Redis |
 | **SDK** | Experiencia del desarrollador | TypeScript · Python · PHP |
 
@@ -161,15 +163,15 @@ Los smart contracts incluyen pausa de emergencia gobernada por multisig 3-de-5 �
 
 ---
 
-## Correr un nodo
+## Correr un nodeit
 
-Cualquiera puede correr un nodo. Sin whitelist. Sin aplicación.
+Cualquiera puede correr un nodeit. Sin whitelist. Sin aplicación.
 
-Requisitos: depositar el `minStake` on-chain (100 USDC en mainnet · 40 USDC en testnet Sepolia; ajustable por guardian, solo incrementos), exponer un endpoint HTTPS, mantener buen uptime. La reputación se computa públicamente. Los nodos malos pierden tráfico de forma natural. Los operadores de nodo ganan el 80% de la comisión del protocolo (0.05%) por cada transacción que enrutan, en USDC, on-chain.
+Requisitos: depositar el `minStake` on-chain (100 USDC en mainnet · 40 USDC en testnet Sepolia; ajustable por guardian, solo incrementos), exponer un endpoint HTTPS, mantener buen uptime. La reputación se computa públicamente. Los nodeits malos pierden tráfico de forma natural. Los operadores de nodeit ganan el 80% de la comisión del protocolo (0.05%) por cada transacción que enrutan, en USDC, on-chain.
 
-Correr un nodo es una forma concreta de participar en la infraestructura. Cada nodo comunitario es una pieza más de una red que nadie controla en solitario.
+Correr un nodeit es una forma concreta de participar en la infraestructura. Cada nodeit comunitario es una pieza más de una red que nadie controla en solitario.
 
-→ [INFRASTRUCTURE.md — Operación de nodo](./INFRASTRUCTURE.md#node-operation)
+→ [INFRASTRUCTURE.md — Operación de nodeit](./INFRASTRUCTURE.md#node-operation)
 
 ---
 
@@ -187,7 +189,7 @@ Correr un nodo es una forma concreta de participar en la infraestructura. Cada n
 
 | Fase | Periodo | Entregables clave |
 |---|---|---|
-| **Fase 1 — Fundación** | Meses 1–4 | ✅ Deploy en Base Sepolia · ✅ SDK JS · ✅ Primer nodo registrado · Primer comercio |
+| **Fase 1 — Fundación** | Meses 1–4 | ✅ Deploy en Base Sepolia · ✅ SDK JS · ✅ Primer nodeit registrado · Primer comercio |
 | **Fase 2 — Red** | Meses 4–10 | Nodos permissionless · SDK Python y PHP · Lightning · WooCommerce · On-ramp SPEI |
 | **Fase 3 — Ecosistema** | Meses 10–18 | Multi-chain · SDK Go · Gobernanza on-chain · Treasury autosustentable |
 
@@ -200,7 +202,7 @@ Correr un nodo es una forma concreta de participar en la infraestructura. Cada n
 Las contribuciones en español son tan bienvenidas como las contribuciones en inglés. Issues, PRs, documentación y discusión comunitaria pueden ser en cualquiera de los dos idiomas.
 
 - **Escribe código** — bugs, features, SDKs, plugins
-- **Corre un nodo** — haz crecer la red, gana comisiones en USDC
+- **Corre un nodeit** — haz crecer la red, gana comisiones en USDC
 - **Escribe documentación** — español, inglés, portugués
 - **Audita** — los smart contracts necesitan más ojos
 - **Difunde** — en comunidades de desarrolladores de LATAM y España

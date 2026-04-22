@@ -30,35 +30,35 @@ The window to build community-owned infrastructure before institutional standard
 
 **Speed over perfection.** The market is being defined now. A working v1 in the hands of real merchants in Mexico City matters more than a perfect v2 in a GitHub repo.
 
-**Community is the moat.** The only durable competitive advantage over institutional alternatives is a community of node operators, contributors, and merchants that no single entity controls. Every roadmap decision must prioritize growing that community.
+**Community is the moat.** The only durable competitive advantage over institutional alternatives is a community of nodeit operators, contributors, and merchants that no single entity controls. Every roadmap decision must prioritize growing that community.
 
 ---
 
 ## Phase 1 — Foundation (Months 1–4)
 
-**Goal:** Working protocol on Base Sepolia testnet. First SDK integration. First merchant. First team-operated bootstrap node. (First community nodes — run by operators outside the team — are Phase 2.)
+**Goal:** Working protocol on Base Sepolia testnet. First SDK integration. First merchant. First team-operated bootstrap nodeit. (First community nodeits — run by operators outside the team — are Phase 2.)
 
 ### Technical Milestones
 
 - [x] Smart contracts: `NodeRegistry.sol`, `StakeManager.sol`, `DisputeResolver.sol`
 - [x] Foundry test suite: 58 tests + fuzz across all three contracts
 - [x] Deploy script: `Deploy.s.sol` ready for Base Sepolia
-- [x] Node daemon: Fastify HTTP API, routes scaffolded
+- [x] Nodeit daemon: Fastify HTTP API, routes scaffolded
 - [x] REST API: payment intents, webhooks, x402 routes scaffolded
 - [x] SDK JS: `@openrelay/sdk` with payment intents, webhooks, x402 middleware
 - [x] Docker Compose: full self-hosted stack in one command
 - [x] GitHub Actions CI: typecheck + test + build + Foundry
 - [x] **Deploy contracts to Base Sepolia** — completed 2026-04-18 (see `packages/contracts/deployments/sepolia.json`)
 - [x] PostgreSQL persistence in API (`packages/api/src/lib/db.ts` + `repository.ts`)
-- [x] HMAC signing in node daemon (`packages/node/src/lib/hmac.ts`, 60s window)
+- [x] HMAC signing in nodeit daemon (`packages/node/src/lib/hmac.ts`, 60s window)
 - [x] Unique payment address per intent (HD wallet derivation)
 - [x] x402 on-chain payment verification + replay protection (atomic Redis `SET NX` + tx_hash in DB)
 - [x] Webhook delivery with Redis-backed retry queue
-- _Note:_ "Routing engine reading nodes from `NodeRegistry.sol` via viem" was moved to Phase 2 — with only one node registered, on-chain discovery yields the same result as the `BOOTSTRAP_NODE_ENDPOINT` fallback. See Phase 2 > Technical Milestones.
+- _Note:_ "Routing engine reading nodeits from `NodeRegistry.sol` via viem" was moved to Phase 2 — with only one nodeit registered, on-chain discovery yields the same result as the `BOOTSTRAP_NODE_ENDPOINT` fallback. See Phase 2 > Technical Milestones.
 
 ### Market Milestones
 
-- [x] First bootstrap node registered on-chain and running in production — team-operated, operator [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) separated from deployer, 40 USDC staked, daemon deployed to Fly.io (region `dfw`) serving live traffic at `https://nodeit.openrelay.site` — 2026-04-21, block 40522829, tx [`0x399c...93ca`](https://sepolia.basescan.org/tx/0x399c077b7cdd19e99658ca69790ca985304be65b2fcc7cbe0aec8b54608893ca).
+- [x] First bootstrap nodeit registered on-chain and running in production — team-operated, operator [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) separated from deployer, 40 USDC staked, daemon deployed to Fly.io (region `dfw`) serving live traffic at `https://nodeit.openrelay.site` — 2026-04-21, block 40522829, tx [`0x399c...93ca`](https://sepolia.basescan.org/tx/0x399c077b7cdd19e99658ca69790ca985304be65b2fcc7cbe0aec8b54608893ca).
 - [ ] First merchant integration (self-hosted, Mexico)
 - [ ] Public testnet announcement in Spanish-language developer communities
 - [x] Repository public on GitHub under `lacasoft` ([github.com/lacasoft/openrelay](https://github.com/lacasoft/openrelay))
@@ -67,19 +67,19 @@ The window to build community-owned infrastructure before institutional standard
 
 - [ ] Discord server open
 - [ ] First external contributor PR merged
-- [ ] Node operator documentation complete in Spanish and English
+- [ ] Nodeit operator documentation complete in Spanish and English
 
 ---
 
 ## Phase 2 — Network (Months 4–10)
 
-**Goal:** Permissionless node registration open to anyone. First community nodes in Mexico and Spain. Lightning Network support. On-ramp for cash users.
+**Goal:** Permissionless nodeit registration open to anyone. First community nodeits in Mexico and Spain. Lightning Network support. On-ramp for cash users.
 
 ### Technical Milestones
 
-- [ ] Permissionless node registration via `NodeRegistry.sol` on Base mainnet
-- [ ] Full routing engine: on-chain node discovery, score caching, parallel racing
-- [ ] Node reputation system: on-chain score visible via `/v1/nodes`
+- [ ] Permissionless nodeit registration via `NodeRegistry.sol` on Base mainnet
+- [ ] Full routing engine: on-chain nodeit discovery, score caching, parallel racing
+- [ ] Nodeit reputation system: on-chain score visible via `/v1/nodeits`
 - [ ] Lightning Network support (BTC micropayments)
 - [ ] Python SDK: `openrelay-python` on PyPI
 - [ ] PHP SDK: `openrelay/openrelay` on Packagist
@@ -93,8 +93,8 @@ The window to build community-owned infrastructure before institutional standard
 
 ### Market Milestones
 
-- [ ] First community node in Mexico (non-team operator)
-- [ ] First community node in Spain
+- [ ] First community nodeit in Mexico (non-team operator)
+- [ ] First community nodeit in Spain
 - [ ] First WooCommerce store using OpenRelay in production
 - [ ] Partnership announcement with at least one Mexican fintech for on-ramp
 
@@ -103,7 +103,7 @@ The window to build community-owned infrastructure before institutional standard
 - [ ] First contributor bounty paid from treasury
 - [ ] 10+ external contributors
 - [ ] Community call cadence established (monthly, in Spanish)
-- [ ] Node operator guide translated: Spanish, English, Portuguese
+- [ ] Nodeit operator guide translated: Spanish, English, Portuguese
 
 ---
 
@@ -128,13 +128,13 @@ The window to build community-owned infrastructure before institutional standard
 - [ ] Public treasury dashboard
   - Real-time fee accumulation visible to anyone
   - Bounty allocation transparent and on-chain
-- [ ] Core team exits bootstrap node operation
-  - All routing handled by community nodes
-  - Bootstrap nodes decommissioned transparently
+- [ ] Core team exits bootstrap nodeit operation
+  - All routing handled by community nodeits
+  - Bootstrap nodeits decommissioned transparently
 
 ### Market Milestones
 
-- [ ] 10+ active community nodes on Base mainnet
+- [ ] 10+ active community nodeits on Base mainnet
 - [ ] 3+ countries in LATAM with production merchants
 - [ ] First institutional partner using OpenRelay as routing layer
 - [ ] v1.0 declared (see criteria below)
@@ -143,7 +143,7 @@ The window to build community-owned infrastructure before institutional standard
 
 - [ ] First governance vote on protocol change
 - [ ] 50+ contributors across all packages
-- [ ] Dedicated community nodes in MX, ES, AR, CO
+- [ ] Dedicated community nodeits in MX, ES, AR, CO
 - [ ] First developer conference talk about OpenRelay in Spanish
 
 ---
@@ -153,7 +153,7 @@ The window to build community-owned infrastructure before institutional standard
 Version 1.0 will be declared when all three conditions are simultaneously true:
 
 1. Smart contracts audited by an independent firm and deployed to Base mainnet
-2. At least 10 independent community nodes active on the network
+2. At least 10 independent community nodeits active on the network
 3. SDK used in at least one production merchant deployment
 
 These are public, verifiable, and non-negotiable. No version inflation.
@@ -164,7 +164,7 @@ These are public, verifiable, and non-negotiable. No version inflation.
 
 **Fiat gateway.** Stripe processes Visa and Mastercard because it has banking licenses in 50 countries. OpenRelay will never have that — and does not need it. Merchants who need fiat should use Stripe for fiat and OpenRelay for crypto. These are complementary, not competitive.
 
-**A protocol token.** There will never be a RELAY token. Node operators earn USDC. Contributors earn reputation and voice. Introducing a speculative token would corrupt the incentive structure and attract the wrong community.
+**A protocol token.** There will never be a RELAY token. Nodeit operators earn USDC. Contributors earn reputation and voice. Introducing a speculative token would corrupt the incentive structure and attract the wrong community.
 
 **Upgradeability in the core contracts.** The three contracts are non-upgradeable by design. Any protocol change that requires contract modification goes through a full audit cycle and a new deployment — not an upgrade. This is a feature, not a limitation.
 
@@ -176,7 +176,7 @@ These are public, verifiable, and non-negotiable. No version inflation.
 
 The institutional positioning described above is not a future threat — it is a present reality. CoinShares is already on Nasdaq. BlackRock is already in Palacio Nacional. Mexico's cash elimination timeline is 2026.
 
-Every month that OpenRelay does not have a working node network and at least one production merchant is a month where the institutional narrative becomes the only one available.
+Every month that OpenRelay does not have a working nodeit network and at least one production merchant is a month where the institutional narrative becomes the only one available.
 
 The community has the technical advantage — open source, zero fees, no gatekeepers. The institutions have the capital advantage — regulation, distribution, government relationships.
 

@@ -10,7 +10,7 @@ La ventana para construir infraestructura de pagos propiedad de la comunidad ant
 
 En abril de 2026, BlackRock entró al gobierno federal de México vinculado a la transición obligatoria de México hacia los pagos digitales. CoinShares se listó en Nasdaq esa misma semana. El posicionamiento institucional está ocurriendo ahora. OpenRelay es la respuesta técnica — y necesita colaboradores ahora, no después de que los estándares estén definidos.
 
-Un nodo que ejecutes hoy en Ciudad de México o Madrid es infraestructura que ninguna institución controla. El código que entregues hoy es la base sobre la que operarán comercios reales en 2026.
+Un nodeit que ejecutes hoy en Ciudad de México o Madrid es infraestructura que ninguna institución controla. El código que entregues hoy es la base sobre la que operarán comercios reales en 2026.
 
 ---
 
@@ -18,7 +18,7 @@ Un nodo que ejecutes hoy en Ciudad de México o Madrid es infraestructura que ni
 
 **Escribir código** — bugs, funcionalidades, SDKs, plugins. Revisa los issues abiertos etiquetados como `good first issue` o `help wanted`.
 
-**Operar un nodo** — haz crecer la red y gana comisiones de enrutamiento en USDC. Cada nodo comunitario en LATAM o España importa. Consulta [INFRASTRUCTURE.md](./INFRASTRUCTURE.md#13-node-operation-guide).
+**Operar un nodeit** — haz crecer la red y gana comisiones de enrutamiento en USDC. Cada nodeit comunitario en LATAM o España importa. Consulta [INFRASTRUCTURE.md](./INFRASTRUCTURE.md#13-node-operation-guide).
 
 **Escribir documentación** — en español, inglés o portugués. La persona desarrolladora que no puede leer la documentación no puede usar el protocolo.
 
@@ -50,7 +50,7 @@ pnpm test
 ```bash
 docker compose -f infra/docker/docker-compose.yml up   # stack completo
 pnpm --filter @openrelay/api dev                        # API en modo watch
-pnpm --filter @openrelay/node dev                       # nodo en modo watch
+pnpm --filter @openrelay/node dev                       # nodeit en modo watch
 cd packages/contracts && forge test -vvv                # tests de Solidity
 ```
 
