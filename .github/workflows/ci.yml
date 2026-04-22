@@ -56,11 +56,13 @@ jobs:
 
       # Skip @openrelay/contracts here — Solidity tests run in the
       # dedicated `contracts` job below, which has foundry installed.
+      # The filter must go to turbo directly; pnpm's --filter only
+      # filters which workspaces pnpm iterates, not what turbo fans out to.
       - name: Run tests
-        run: pnpm --filter=!@openrelay/contracts test
+        run: pnpm exec turbo run test --filter='!@openrelay/contracts'
 
       - name: Run tests with coverage
-        run: pnpm --filter=!@openrelay/contracts test -- --coverage
+        run: pnpm exec turbo run test --filter='!@openrelay/contracts' -- --coverage
 
   # ── Smart Contract Tests ────────────────────────────────────
   contracts:

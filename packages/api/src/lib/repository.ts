@@ -164,25 +164,22 @@ export async function listPaymentIntents(
   limit: number,
   startingAfter?: string,
 ): Promise<{ data: PaymentIntent[]; has_more: boolean }> {
-  let rows: Awaited<ReturnType<typeof db>>
-  if (startingAfter) {
-    rows = await db`
-      SELECT * FROM payment_intents
-      WHERE merchant_id = ${merchantId}
-        AND created_at < (
-          SELECT created_at FROM payment_intents WHERE id = ${startingAfter}
-        )
-      ORDER BY created_at DESC
-      LIMIT ${limit + 1}
-    `
-  } else {
-    rows = await db`
-      SELECT * FROM payment_intents
-      WHERE merchant_id = ${merchantId}
-      ORDER BY created_at DESC
-      LIMIT ${limit + 1}
-    `
-  }
+  const rows: Record<string, unknown>[] = startingAfter
+    ? await db`
+        SELECT * FROM payment_intents
+        WHERE merchant_id = ${merchantId}
+          AND created_at < (
+            SELECT created_at FROM payment_intents WHERE id = ${startingAfter}
+          )
+        ORDER BY created_at DESC
+        LIMIT ${limit + 1}
+      `
+    : await db`
+        SELECT * FROM payment_intents
+        WHERE merchant_id = ${merchantId}
+        ORDER BY created_at DESC
+        LIMIT ${limit + 1}
+      `
   const has_more = rows.length > limit
   const data = rows.slice(0, limit).map(rowToIntent)
   return { data, has_more }
