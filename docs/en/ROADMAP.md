@@ -58,10 +58,10 @@ The window to build community-owned infrastructure before institutional standard
 
 ### Market Milestones
 
-- [x] First bootstrap node registered on-chain (team-operated, operator [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) separated from deployer) — 2026-04-21, block 40522829, tx [`0x399c...93ca`](https://sepolia.basescan.org/tx/0x399c077b7cdd19e99658ca69790ca985304be65b2fcc7cbe0aec8b54608893ca), endpoint `https://nodeit.openrelay.site`, 40 USDC staked. Pending: bring up the daemon and serve real traffic.
+- [x] First bootstrap node registered on-chain and running in production — team-operated, operator [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) separated from deployer, 40 USDC staked, daemon deployed to Fly.io (region `dfw`) serving live traffic at `https://nodeit.openrelay.site` — 2026-04-21, block 40522829, tx [`0x399c...93ca`](https://sepolia.basescan.org/tx/0x399c077b7cdd19e99658ca69790ca985304be65b2fcc7cbe0aec8b54608893ca).
 - [ ] First merchant integration (self-hosted, Mexico)
 - [ ] Public testnet announcement in Spanish-language developer communities
-- [ ] Repository public on GitHub under `lacasoft`
+- [x] Repository public on GitHub under `lacasoft` ([github.com/lacasoft/openrelay](https://github.com/lacasoft/openrelay))
 
 ### Community Milestones
 
