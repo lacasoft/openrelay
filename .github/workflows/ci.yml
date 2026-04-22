@@ -61,8 +61,11 @@ jobs:
       - name: Run tests
         run: pnpm exec turbo run test --filter='!@openrelay/contracts'
 
-      - name: Run tests with coverage
-        run: pnpm exec turbo run test --filter='!@openrelay/contracts' -- --coverage
+      # Coverage step intentionally omitted — re-running the full suite
+      # just for coverage numbers adds CI time without any enforced
+      # threshold, and requires @vitest/coverage-v8 in every test package.
+      # Will be added in a dedicated PR along with coverage thresholds
+      # once the baseline is measured.
 
   # ── Smart Contract Tests ────────────────────────────────────
   contracts:
