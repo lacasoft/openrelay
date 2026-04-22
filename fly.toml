@@ -1,0 +1,62 @@
+# ──────────────────────────────────────────────────────────────────────
+# OpenRelay Bootstrap Node — Fly.io configuration
+#
+# Deploys the @openrelay/node daemon from infra/docker/Dockerfile.node.
+# Public endpoint: https://nodeit.openrelay.site (Phase 1 bootstrap).
+#
+# First-time setup:
+#   fly apps create openrelay-node-bootstrap
+#   fly volumes create node_data --region dfw --size 1 --yes
+#   fly secrets set \
+#     NODE_OPERATOR_PRIVATE_KEY=0x... \
+#     NODE_HMAC_SECRET=... \
+#     BASE_RPC_URL=https://base-sepolia.g.alchemy.com/v2/...
+#   fly deploy
+#   fly certs add nodeit.openrelay.site
+#
+# Re-deploy after code changes:
+#   fly deploy
+# ──────────────────────────────────────────────────────────────────────
+
+app = "openrelay-node-bootstrap"
+primary_region = "dfw"
+
+[build]
+  dockerfile = "infra/docker/Dockerfile.node"
+
+[env]
+  # Non-sensitive config — matches .env.example for the bootstrap node.
+  # Sensitive values (private key, HMAC, Alchemy RPC URL) come from `fly secrets`.
+  NODE_ENV              = "production"
+  LOG_LEVEL             = "info"
+  NODE_OPERATOR_ADDRESS = "0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4"
+  NODE_ENDPOINT         = "https://nodeit.openrelay.site"
+  NODE_REGISTRY_ADDRESS = "0x2dFdF6151d6BF0156D28976F23823d3f1f9CB106"
+  STAKE_MANAGER_ADDRESS = "0xFf4e68652BC8C6b8de18a79C4D2FDDe0c9C9F517"
+  USDC_ADDRESS          = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+  DB_PATH               = "/data/node.db"
+
+# Persistent volume for SQLite database — survives deploys and restarts.
+[[mounts]]
+  source      = "node_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 4000
+  force_https   = true
+  auto_stop_machines  = "off"   # Bootstrap node must stay up 24/7 for reputation
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval     = "30s"
+    method       = "GET"
+    path         = "/health"
+    protocol     = "http"
+    timeout      = "5s"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus     = 1
+  memory   = "512mb"
