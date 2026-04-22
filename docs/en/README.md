@@ -4,14 +4,14 @@
 
 OpenRelay is an open-source, community-operated payment routing network. It gives developers the same experience as Stripe — a clean SDK, webhooks, payment intents, a merchant dashboard — without the 2.9% + $0.30 per transaction. Without asking anyone for permission. Without a company in the middle.
 
-If you run your own node, it costs nothing. If you use the community network, you pay fractions of a cent.
+If you run your own nodeit, it costs nothing. If you use the community network, you pay fractions of a cent.
 
 ---
 
 ## 🚀 Current status
 
 ✅ **Contracts deployed on Base Sepolia** (testnet) — redeployed 2026-04-21 with
-**role separation** (deployer, treasury, guardian, and node operator on distinct wallets).
+**role separation** (deployer, treasury, guardian, and nodeit operator on distinct wallets).
 Source code verified on Basescan · initial `minStake`: 40 USDC on testnet
 (100 USDC on mainnet; adjustable by guardian, increase-only).
 
@@ -27,9 +27,9 @@ Source code verified on Basescan · initial `minStake`: 40 USDC on testnet
 |---|---|---|
 | Treasury | [`0x05CD...8261`](https://sepolia.basescan.org/address/0x05CDED242AFC9D7e60eC3049bD8bDccbbA078261) | Receives 20% of fees + slashed stake (**immutable**) |
 | Guardian | [`0xbB51...7Ddf`](https://sepolia.basescan.org/address/0xbB514Eca8f39d0A3B8092B323282304709d17Ddf) | Emergency pause + `updateMinStake()` (rotatable) |
-| Node Operator (bootstrap) | [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) | Stakes USDC + signs daemon HMAC |
+| Nodeit Operator (bootstrap) | [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) | Stakes USDC + signs daemon HMAC |
 
-✅ **First bootstrap node registered on-chain and running in production** since 2026-04-21 (block 40522829).
+✅ **First bootstrap nodeit registered on-chain and running in production** since 2026-04-21 (block 40522829).
 Operated by the core team during Phase 1 with the operator wallet **separated from the deployer**.
 Daemon deployed on Fly.io (region `dfw`) — quick check: `curl https://nodeit.openrelay.site/health` → `200 OK`.
 
@@ -62,7 +62,7 @@ OpenRelay is the community's answer to that positioning. Not in opposition — i
 > *"La pregunta no es si México se digitaliza. Eso ya está pasando.*
 > *La pregunta es quién va a ser dueño de esa infraestructura."*
 
-OpenRelay's answer: the community. Or no one. Depending on who runs nodes.
+OpenRelay's answer: the community. Or no one. Depending on who runs nodeits.
 
 → Full context: [SOVEREIGNTY.md](./SOVEREIGNTY.md)
 
@@ -70,19 +70,21 @@ OpenRelay's answer: the community. Or no one. Depending on who runs nodes.
 
 ## What OpenRelay Is
 
-- A payment routing protocol with community-operated nodes
+> *On terminology:* the protocol defines a network of **nodes**. **`nodeit`** is the reference implementation — the open-source daemon shipped from this repo. Any compliant daemon can register as a node; ours is called `nodeit`. In this README I use "nodeit" because I'm talking about the concrete implementation; in `PROTOCOL.md` and `INFRASTRUCTURE.md` I use "node" because they describe the abstract protocol concept.
+
+- A payment routing protocol with community-operated nodeits
 - A Stripe-compatible SDK for JavaScript, Python, and PHP
 - First-class support for x402 — native micropayments for AI agents
 - A self-hostable stack with Docker Compose in one command
 - USDC on Base as the primary settlement layer, Lightning Network for BTC
-- A smart contract layer for node registration, staking, and dispute resolution
+- A smart contract layer for nodeit registration, staking, and dispute resolution
 - Built for LATAM — documentation, community, and support in Spanish and English
 
 ## What OpenRelay Is Not
 
 - **A bank** — Funds go payer-to-merchant directly. OpenRelay never holds money.
 - **A fiat gateway** — No Visa, Mastercard, or ACH. Stripe covers fiat; use both.
-- **A token project** — No RELAY token. Node operators earn USDC. No speculation.
+- **A token project** — No RELAY token. Nodeit operators earn USDC. No speculation.
 - **Competition with institutions** — OpenRelay operates beneath institutional products as the routing layer no one controls.
 
 ---
@@ -93,19 +95,19 @@ OpenRelay's answer: the community. Or no one. Depending on who runs nodes.
 Merchant integrates SDK
         │
         ▼
-PaymentIntent created → Routing engine selects optimal node
+PaymentIntent created → Routing engine selects optimal nodeit
         │                (top 5 by score, concurrent race)
         ▼
 Payer sends USDC directly to merchant wallet on Base
-        │              (node NEVER holds funds)
+        │              (nodeit NEVER holds funds)
         ▼
-Node confirms on-chain settlement → Webhook fires
+Nodeit confirms on-chain settlement → Webhook fires
         │
         ▼
-Node reputation updated on-chain. Fee distributed automatically.
+Nodeit reputation updated on-chain. Fee distributed automatically.
 ```
 
-Node operators stake USDC to join. Stake is their skin in the game. Good routing builds reputation. Bad routing loses stake. No committee decides who stays — the protocol does.
+Nodeit operators stake USDC to join. Stake is their skin in the game. Good routing builds reputation. Bad routing loses stake. No committee decides who stays — the protocol does.
 
 ---
 
@@ -170,8 +172,8 @@ Five layers with strict separation of concerns:
 | Layer | Responsibility | Technology |
 |---|---|---|
 | **Settlement** | On-chain money movement | Base (USDC), Lightning Network |
-| **Protocol** | Node rules, stake, disputes | Solidity + Foundry on Base |
-| **Routing** | Node discovery and selection | TypeScript daemon |
+| **Protocol** | Nodeit rules, stake, disputes | Solidity + Foundry on Base |
+| **Routing** | Nodeit discovery and selection | TypeScript daemon |
 | **API** | Merchant interface | Fastify + PostgreSQL + Redis |
 | **SDK** | Developer experience | TypeScript · Python · PHP |
 
@@ -182,15 +184,15 @@ Smart contracts are non-upgradeable. They include an emergency-pause function go
 
 ---
 
-## Running a Node
+## Running a Nodeit
 
-Anyone can run a node. No whitelist. No application.
+Anyone can run a nodeit. No whitelist. No application.
 
-Requirements: stake the current `minStake` on-chain (100 USDC on mainnet · 40 USDC on Sepolia testnet; adjustable by guardian, increase-only), expose an HTTPS endpoint, maintain uptime. Reputation is computed publicly. Bad nodes lose routing naturally. Node operators earn 80% of the 0.05% protocol fee on every transaction they route, in USDC, on-chain.
+Requirements: stake the current `minStake` on-chain (100 USDC on mainnet · 40 USDC on Sepolia testnet; adjustable by guardian, increase-only), expose an HTTPS endpoint, maintain uptime. Reputation is computed publicly. Bad nodeits lose routing naturally. Nodeit operators earn 80% of the 0.05% protocol fee on every transaction they route, in USDC, on-chain.
 
-**Running a node in Mexico or Spain is a political act as much as a technical one.** Every community node is infrastructure that no institution controls.
+**Running a nodeit in Mexico or Spain is a political act as much as a technical one.** Every community nodeit is infrastructure that no institution controls.
 
-→ [INFRASTRUCTURE.md — Node Operation](./INFRASTRUCTURE.md#node-operation)
+→ [INFRASTRUCTURE.md — Nodeit Operation](./INFRASTRUCTURE.md#node-operation)
 
 ---
 
@@ -208,8 +210,8 @@ Requirements: stake the current `minStake` on-chain (100 USDC on mainnet · 40 U
 
 | Phase | Timeline | Key Deliverables |
 |---|---|---|
-| **Phase 1 — Foundation** | Months 1–4 | ✅ Base Sepolia deploy · ✅ JS SDK · ✅ First node registered · First merchant |
-| **Phase 2 — Network** | Months 4–10 | Permissionless nodes · Python + PHP SDKs · Lightning · WooCommerce · SPEI on-ramp |
+| **Phase 1 — Foundation** | Months 1–4 | ✅ Base Sepolia deploy · ✅ JS SDK · ✅ First nodeit registered · First merchant |
+| **Phase 2 — Network** | Months 4–10 | Permissionless nodeits · Python + PHP SDKs · Lightning · WooCommerce · SPEI on-ramp |
 | **Phase 3 — Ecosystem** | Months 10–18 | Multi-chain · Go SDK · Institutional layer · On-chain governance |
 
 → Full roadmap with milestones: [ROADMAP.md](./ROADMAP.md)
@@ -221,7 +223,7 @@ Requirements: stake the current `minStake` on-chain (100 USDC on mainnet · 40 U
 Contributions in Spanish are welcomed equally to contributions in English. Issues, PRs, documentation, and community discussion can be in either language.
 
 - **Ship code** — bugs, features, SDKs, plugins
-- **Run a node** — grow the network, earn fees in USDC
+- **Run a nodeit** — grow the network, earn fees in USDC
 - **Write docs** — Spanish, English, Portuguese
 - **Audit** — smart contracts need eyes
 - **Spread the word** — in LATAM developer communities

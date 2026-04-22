@@ -10,7 +10,7 @@ The window for building community-owned payment infrastructure before institutio
 
 In April 2026, BlackRock entered Mexico's federal government tied to Mexico's mandatory digital payment transition. CoinShares listed on Nasdaq the same week. The institutional positioning is happening now. OpenRelay is the technical response — and it needs contributors now, not after the standards are defined.
 
-A node you run today in Mexico City or Madrid is infrastructure that no institution controls. Code you ship today is the foundation that real merchants in 2026 will run on.
+A nodeit you run today in Mexico City or Madrid is infrastructure that no institution controls. Code you ship today is the foundation that real merchants in 2026 will run on.
 
 ---
 
@@ -18,7 +18,7 @@ A node you run today in Mexico City or Madrid is infrastructure that no institut
 
 **Ship code** — bugs, features, SDKs, plugins. Check open issues labeled `good first issue` or `help wanted`.
 
-**Run a node** — grow the network and earn routing fees in USDC. Every community node in LATAM or Spain matters. See [INFRASTRUCTURE.md](./INFRASTRUCTURE.md#13-node-operation-guide).
+**Run a nodeit** — grow the network and earn routing fees in USDC. Every community nodeit in LATAM or Spain matters. See [INFRASTRUCTURE.md](./INFRASTRUCTURE.md#13-nodeit-operation-guide).
 
 **Write documentation** — in Spanish, English, or Portuguese. The developer who can't read the docs can't use the protocol.
 
@@ -50,7 +50,7 @@ pnpm test
 ```bash
 docker compose -f infra/docker/docker-compose.yml up   # full stack
 pnpm --filter @openrelay/api dev                        # API watch mode
-pnpm --filter @openrelay/node dev                       # node watch mode
+pnpm --filter @openrelay/node dev                       # nodeit watch mode
 cd packages/contracts && forge test -vvv                # Solidity tests
 ```
 
@@ -67,7 +67,7 @@ cd packages/contracts && forge test -vvv                # Solidity tests
 
 ```
 feat(sdk): add x402 middleware for Next.js
-fix(routing): handle node rejection correctly
+fix(routing): handle nodeit rejection correctly
 feat(sdk): agregar soporte para middleware de Fastify
 fix(api): corregir manejo de errores en webhooks
 ```

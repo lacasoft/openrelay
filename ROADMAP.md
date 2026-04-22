@@ -10,7 +10,7 @@
 
 América Latina está viviendo una transición acelerada hacia los pagos digitales. México, Colombia, Chile, Argentina y Brasil tienen políticas activas para reducir el uso de efectivo. Esto abre una ventana única para construir infraestructura abierta antes de que los estándares se consoliden alrededor de opciones cerradas.
 
-Las plataformas existentes —Stripe, Mercado Pago, Clip, Conekta— funcionan, pero cobran comisiones que hacen inviable a los comercios de margen pequeño y dejan fuera a quienes no tienen acceso bancario. No existe una opción que sea código abierto, con comisiones casi cero, fácil de integrar y con una red comunitaria de nodos que hable español como ciudadano de primera clase.
+Las plataformas existentes —Stripe, Mercado Pago, Clip, Conekta— funcionan, pero cobran comisiones que hacen inviable a los comercios de margen pequeño y dejan fuera a quienes no tienen acceso bancario. No existe una opción que sea código abierto, con comisiones casi cero, fácil de integrar y con una red comunitaria de nodeits que hable español como ciudadano de primera clase.
 
 Esa es la oportunidad que persigue OpenRelay. La ventana para construir infraestructura de propiedad comunitaria antes de que los estándares de mercado se vuelvan el default no se mide en años, se mide en meses.
 
@@ -24,35 +24,35 @@ Esa es la oportunidad que persigue OpenRelay. La ventana para construir infraest
 
 **Velocidad sobre perfección.** El mercado se está definiendo ahora. Un v1 funcionando en manos de comercios reales en Ciudad de México vale más que un v2 perfecto en un repositorio de GitHub.
 
-**La comunidad es el diferenciador.** La única ventaja competitiva durable frente a alternativas cerradas es una comunidad de operadores de nodo, contribuidores y comercios que ninguna entidad controla. Cada decisión en esta hoja de ruta debe priorizar el crecimiento de esa comunidad.
+**La comunidad es el diferenciador.** La única ventaja competitiva durable frente a alternativas cerradas es una comunidad de operadores de nodeit, contribuidores y comercios que ninguna entidad controla. Cada decisión en esta hoja de ruta debe priorizar el crecimiento de esa comunidad.
 
 ---
 
 ## Fase 1 — Fundación (Meses 1–4)
 
-**Objetivo:** Protocolo funcionando en Base Sepolia testnet. Primera integración con SDK. Primer comercio. Primer bootstrap node operado por el equipo. (Los primeros nodos comunitarios — operadores ajenos al equipo — son Fase 2.)
+**Objetivo:** Protocolo funcionando en Base Sepolia testnet. Primera integración con SDK. Primer comercio. Primer bootstrap nodeit operado por el equipo. (Los primeros nodeits comunitarios — operadores ajenos al equipo — son Fase 2.)
 
 ### Hitos Técnicos
 
 - [x] Contratos inteligentes: `NodeRegistry.sol`, `StakeManager.sol`, `DisputeResolver.sol`
 - [x] Suite de tests Foundry: 58 tests + fuzz en los tres contratos
 - [x] Script de deploy: `Deploy.s.sol` listo para Base Sepolia
-- [x] Daemon del nodo: API HTTP con Fastify, rutas estructuradas
+- [x] Daemon del nodeit: API HTTP con Fastify, rutas estructuradas
 - [x] API REST: payment intents, webhooks, rutas x402 estructuradas
 - [x] SDK JS: `@openrelay/sdk` con payment intents, webhooks, middleware x402
 - [x] Docker Compose: stack autoalojado completo en un solo comando
 - [x] CI con GitHub Actions: typecheck + test + build + Foundry
 - [x] **Deploy de contratos a Base Sepolia** — completado 2026-04-18 (ver `packages/contracts/deployments/sepolia.json`)
 - [x] Persistencia en PostgreSQL en la API (`packages/api/src/lib/db.ts` + `repository.ts`)
-- [x] Firma HMAC en el daemon del nodo (`packages/node/src/lib/hmac.ts`, ventana 60s)
+- [x] Firma HMAC en el daemon del nodeit (`packages/node/src/lib/hmac.ts`, ventana 60s)
 - [x] Dirección de pago única por intent (derivación HD wallet)
 - [x] Verificación on-chain de pagos x402 + protección contra replay (atomic `SET NX` en Redis + tx_hash en DB)
 - [x] Entrega de webhooks con cola de reintentos en Redis
-- _Nota:_ "Motor de routing leyendo nodos desde `NodeRegistry.sol` via viem" se movió a Fase 2 — con un solo nodo registrado el descubrimiento on-chain da el mismo resultado que el fallback de `BOOTSTRAP_NODE_ENDPOINT`. Ver Fase 2 > Hitos Técnicos.
+- _Nota:_ "Motor de routing leyendo nodeits desde `NodeRegistry.sol` via viem" se movió a Fase 2 — con un solo nodeit registrado el descubrimiento on-chain da el mismo resultado que el fallback de `BOOTSTRAP_NODE_ENDPOINT`. Ver Fase 2 > Hitos Técnicos.
 
 ### Hitos de Mercado
 
-- [x] Primer bootstrap node registrado on-chain y operativo en producción — operator [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) separado del deployer, 40 USDC stakeados, daemon desplegado en Fly.io (region `dfw`) sirviendo tráfico real en `https://nodeit.openrelay.site` — 2026-04-21, bloque 40522829, tx [`0x399c...93ca`](https://sepolia.basescan.org/tx/0x399c077b7cdd19e99658ca69790ca985304be65b2fcc7cbe0aec8b54608893ca).
+- [x] Primer bootstrap nodeit registrado on-chain y operativo en producción — operator [`0xf73e...5da4`](https://sepolia.basescan.org/address/0xf73e2E5a4493d8a4C28e6f88c14a396C82395da4) separado del deployer, 40 USDC stakeados, daemon desplegado en Fly.io (region `dfw`) sirviendo tráfico real en `https://nodeit.openrelay.site` — 2026-04-21, bloque 40522829, tx [`0x399c...93ca`](https://sepolia.basescan.org/tx/0x399c077b7cdd19e99658ca69790ca985304be65b2fcc7cbe0aec8b54608893ca).
 - [ ] Primera integración con un comercio (autoalojado, México)
 - [ ] Anuncio público de testnet en comunidades de desarrolladores hispanohablantes
 - [x] Repositorio público en GitHub bajo `lacasoft` ([github.com/lacasoft/openrelay](https://github.com/lacasoft/openrelay))
@@ -61,19 +61,19 @@ Esa es la oportunidad que persigue OpenRelay. La ventana para construir infraest
 
 - [ ] Servidor de Discord abierto
 - [ ] Primer PR externo mergeado
-- [ ] Documentación para operadores de nodo completa en español e inglés
+- [ ] Documentación para operadores de nodeit completa en español e inglés
 
 ---
 
 ## Fase 2 — Red (Meses 4–10)
 
-**Objetivo:** Registro de nodos permissionless abierto a cualquiera. Primeros nodos comunitarios en México y España. Soporte para Lightning Network. On-ramp para usuarios que pagan en efectivo.
+**Objetivo:** Registro de nodeits permissionless abierto a cualquiera. Primeros nodeits comunitarios en México y España. Soporte para Lightning Network. On-ramp para usuarios que pagan en efectivo.
 
 ### Hitos Técnicos
 
-- [ ] Registro permissionless de nodos via `NodeRegistry.sol` en Base mainnet
-- [ ] Motor de routing completo: descubrimiento de nodos on-chain, cache de score, racing paralelo
-- [ ] Sistema de reputación de nodos: score on-chain visible via `/v1/nodes`
+- [ ] Registro permissionless de nodeits via `NodeRegistry.sol` en Base mainnet
+- [ ] Motor de routing completo: descubrimiento de nodeits on-chain, cache de score, racing paralelo
+- [ ] Sistema de reputación de nodeits: score on-chain visible via `/v1/nodes`
 - [ ] Soporte para Lightning Network (micropagos en BTC)
 - [ ] SDK Python: `openrelay-python` en PyPI
 - [ ] SDK PHP: `openrelay/openrelay` en Packagist
@@ -87,8 +87,8 @@ Esa es la oportunidad que persigue OpenRelay. La ventana para construir infraest
 
 ### Hitos de Mercado
 
-- [ ] Primer nodo comunitario en México (operador ajeno al equipo)
-- [ ] Primer nodo comunitario en España
+- [ ] Primer nodeit comunitario en México (operador ajeno al equipo)
+- [ ] Primer nodeit comunitario en España
 - [ ] Primera tienda WooCommerce usando OpenRelay en producción
 - [ ] Anuncio de alianza con al menos una fintech mexicana para on-ramp
 
@@ -97,7 +97,7 @@ Esa es la oportunidad que persigue OpenRelay. La ventana para construir infraest
 - [ ] Primer bounty de contribuidor pagado desde el treasury
 - [ ] 10+ contribuidores externos
 - [ ] Cadencia de llamadas comunitarias establecida (mensuales, en español)
-- [ ] Guía para operadores de nodo traducida: español, inglés, portugués
+- [ ] Guía para operadores de nodeit traducida: español, inglés, portugués
 
 ---
 
@@ -122,13 +122,13 @@ Esa es la oportunidad que persigue OpenRelay. La ventana para construir infraest
 - [ ] Dashboard público del treasury
   - Acumulación de fees visible en tiempo real para cualquiera
   - Asignación de bounties transparente y on-chain
-- [ ] El equipo core sale de la operación de bootstrap nodes
-  - Todo el routing es manejado por nodos comunitarios
-  - Los bootstrap nodes se apagan de forma transparente
+- [ ] El equipo core sale de la operación de bootstrap nodeitits
+  - Todo el routing es manejado por nodeits comunitarios
+  - Los bootstrap nodeitits se apagan de forma transparente
 
 ### Hitos de Mercado
 
-- [ ] 10+ nodos comunitarios activos en Base mainnet
+- [ ] 10+ nodeits comunitarios activos en Base mainnet
 - [ ] 3+ países de LATAM con comercios en producción
 - [ ] Primer socio integrador grande usando OpenRelay como capa de enrutamiento
 - [ ] v1.0 declarado (ver criterios abajo)
@@ -137,7 +137,7 @@ Esa es la oportunidad que persigue OpenRelay. La ventana para construir infraest
 
 - [ ] Primera votación de gobernanza sobre cambio al protocolo
 - [ ] 50+ contribuidores en todos los paquetes
-- [ ] Nodos comunitarios dedicados en MX, ES, AR, CO
+- [ ] Nodeits comunitarios dedicados en MX, ES, AR, CO
 - [ ] Primera charla sobre OpenRelay en una conferencia de desarrolladores en español
 
 ---
@@ -147,7 +147,7 @@ Esa es la oportunidad que persigue OpenRelay. La ventana para construir infraest
 La versión 1.0 se declarará cuando las tres condiciones se cumplan simultáneamente:
 
 1. Contratos inteligentes auditados por una firma independiente y desplegados en Base mainnet
-2. Al menos 10 nodos comunitarios independientes activos en la red
+2. Al menos 10 nodeits comunitarios independientes activos en la red
 3. SDK usado en al menos un deployment de comercio en producción
 
 Estos criterios son públicos, verificables y no negociables. No hay inflación de versiones.
@@ -158,7 +158,7 @@ Estos criterios son públicos, verificables y no negociables. No hay inflación 
 
 **Gateway de fiat.** Stripe procesa Visa y Mastercard porque tiene licencias bancarias en 50 países. OpenRelay nunca va a tener eso — y no lo necesita. Los comercios que necesiten fiat deberían usar Stripe para fiat y OpenRelay para cripto. Son complementarios, no competidores.
 
-**Un token del protocolo.** Nunca va a existir un token RELAY. Los operadores de nodo ganan USDC. Los contribuidores ganan reputación y voz. Introducir un token especulativo corrompería la estructura de incentivos y atraería a la comunidad equivocada.
+**Un token del protocolo.** Nunca va a existir un token RELAY. Los operadores de nodeit ganan USDC. Los contribuidores ganan reputación y voz. Introducir un token especulativo corrompería la estructura de incentivos y atraería a la comunidad equivocada.
 
 **Upgradeabilidad en los contratos core.** Los tres contratos son no-upgradeable por diseño. Cualquier cambio al protocolo que requiera modificar contratos pasa por un ciclo completo de auditoría y un deploy nuevo — no por un upgrade. Esto es una característica, no una limitación.
 
@@ -168,7 +168,7 @@ Estos criterios son públicos, verificables y no negociables. No hay inflación 
 
 ## El sentido de urgencia
 
-La ventana para construir alternativas comunitarias es real y finita. Cada mes que OpenRelay no tenga una red de nodos funcionando y al menos un comercio en producción es un mes en el que las opciones cerradas consolidan su ventaja.
+La ventana para construir alternativas comunitarias es real y finita. Cada mes que OpenRelay no tenga una red de nodeits funcionando y al menos un comercio en producción es un mes en el que las opciones cerradas consolidan su ventaja.
 
 La comunidad tiene la ventaja técnica: código abierto, comisiones casi cero, sin gatekeepers. La única manera de convertir esa ventaja técnica en ventaja de adopción es moviéndonos rápido.
 

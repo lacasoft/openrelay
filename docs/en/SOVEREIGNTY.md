@@ -63,16 +63,16 @@ This is the same relationship that exists between Linux and the enterprises that
 
 ---
 
-## The Node as Political Unit
+## The Nodeit as Political Unit
 
-Every OpenRelay node is a small act of infrastructure sovereignty.
+Every OpenRelay nodeit is a small act of infrastructure sovereignty.
 
-A developer in Guadalajara running a node on a $20/month VPS is contributing to a network that no single entity controls. The USDC they earn as routing fees is compensation for real work — keeping infrastructure running, settling transactions, maintaining uptime. Their stake is real skin in the game. Their reputation is computed publicly on a blockchain that no government or institution controls.
+A developer in Guadalajara running a nodeit on a $20/month VPS is contributing to a network that no single entity controls. The USDC they earn as routing fees is compensation for real work — keeping infrastructure running, settling transactions, maintaining uptime. Their stake is real skin in the game. Their reputation is computed publicly on a blockchain that no government or institution controls.
 
 This is not a romantic notion. It is a technical description of what decentralized infrastructure actually means when implemented correctly:
 
-- The node operator in Mexico cannot be pressured by a US regulator to delist a merchant
-- The node operator in Spain cannot be acquired by an asset manager and repriced
+- The nodeit operator in Mexico cannot be pressured by a US regulator to delist a merchant
+- The nodeit operator in Spain cannot be acquired by an asset manager and repriced
 - The routing algorithm cannot be modified to favor certain merchants over others without a public RFC and community consensus
 - The smart contracts cannot be paused or modified by any individual or organization
 
@@ -94,7 +94,7 @@ Multiplied across the merchants that Mexico's digital transition will create, th
 
 ## The Responsibility
 
-OpenRelay's community — everyone who runs a node, contributes code, writes documentation, or spreads the word in developer communities — carries a responsibility that most open-source projects do not.
+OpenRelay's community — everyone who runs a nodeit, contributes code, writes documentation, or spreads the word in developer communities — carries a responsibility that most open-source projects do not.
 
 The technical work is real and must be excellent. Sloppy code does not protect anyone's economic sovereignty. A routing engine with bugs loses merchant funds. A smart contract with a vulnerability is worse than a centralized alternative. Security audits are not bureaucracy — they are the prerequisite for trust.
 
@@ -108,9 +108,9 @@ This is why the roadmap is compressed. This is why Mexico and Spain are explicit
 
 The question is who will own the digital payment infrastructure of LATAM.
 
-The honest answer is: we do not know yet. It depends on who builds, who ships, who runs nodes, and who convinces merchants to integrate before the defaults are set.
+The honest answer is: we do not know yet. It depends on who builds, who ships, who runs nodeits, and who convinces merchants to integrate before the defaults are set.
 
-OpenRelay is the technical bet that the community can build fast enough and well enough to be a real option. Not the only option — but a real one. One where the merchant in Oaxaca, the developer in Bogotá, and the node operator in Madrid are participants in infrastructure that serves them, not participants in infrastructure that extracts from them.
+OpenRelay is the technical bet that the community can build fast enough and well enough to be a real option. Not the only option — but a real one. One where the merchant in Oaxaca, the developer in Bogotá, and the nodeit operator in Madrid are participants in infrastructure that serves them, not participants in infrastructure that extracts from them.
 
 That is worth building. That is why this exists.
 
@@ -118,4 +118,4 @@ That is worth building. That is why this exists.
 
 *OpenRelay is open source under the Apache License 2.0.*
 *Contribute at: github.com/lacasoft/openrelay*
-*Run a node. Build the alternative.*
+*Run a nodeit. Build the alternative.*

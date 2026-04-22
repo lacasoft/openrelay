@@ -20,14 +20,14 @@ Si eres dueño de un comercio pequeño o mediano en LATAM, tienes básicamente e
 
 - **Stripe:** funciona bien, pero cobra ~2.9% + $0.30 por transacción. Para un comercio que mueve $50,000/mes, eso son ~$1,480 mensuales en comisiones. No llega a todos los países de la región con la misma calidad.
 - **Mercado Pago, Clip, Conekta, OpenPay:** mejor cobertura local, pero comisiones similares y ecosistemas cerrados. Cambiar de proveedor implica rehacer integración.
-- **BTCPay Server u otras soluciones cripto auto-alojadas:** excelentes para BTC, pero sin red de nodos, sin SDKs modernos y con una experiencia de desarrollo más pesada.
+- **BTCPay Server u otras soluciones cripto auto-alojadas:** excelentes para BTC, pero sin red de nodeits, sin SDKs modernos y con una experiencia de desarrollo más pesada.
 
 No existe una opción que combine todo esto a la vez:
 
 - Código abierto
 - Comisiones casi cero
 - Tan fácil de integrar como Stripe
-- Con una red comunitaria de nodos
+- Con una red comunitaria de nodeits
 - Que trate al español como ciudadano de primera clase
 - Con soporte nativo para pagos máquina→máquina (x402) para agentes de IA
 
@@ -53,23 +53,23 @@ OpenRelay es una capa de enrutamiento de pagos en USDC sobre Base L2. No custodi
 
 Tiene tres piezas:
 
-1. **Contratos on-chain** que llevan el registro de nodos, stake y disputas.
-2. **Nodos comunitarios** que cualquiera puede correr en un VPS de ~$20/mes y ganan USDC por enrutar pagos.
+1. **Contratos on-chain** que llevan el registro de nodeits, stake y disputas.
+2. **Nodeits comunitarios** que cualquiera puede correr en un VPS de ~$20/mes y ganan USDC por enrutar pagos.
 3. **SDKs y API** que dan a los desarrolladores una experiencia tipo Stripe: payment intents, webhooks, retries, idempotencia.
 
 Es análogo a lo que pasó con Linux frente al software propietario, o con WordPress frente a las plataformas cerradas de blogging: una base abierta sobre la que cualquiera puede construir, sin pedirle permiso a nadie.
 
 ---
 
-## ¿Por qué un nodo comunitario?
+## ¿Por qué un nodeit comunitario?
 
 Porque la red es más robusta, más barata y más confiable cuando la operan muchas manos.
 
-Un desarrollador en Monterrey corriendo un nodo en un VPS de $20/mes está contribuyendo a una red que ninguna entidad sola controla. Gana USDC como compensación por trabajo real: mantener la infraestructura arriba, confirmar transacciones, responder rápido. Su stake es piel en el juego. Su reputación se calcula públicamente on-chain.
+Un desarrollador en Monterrey corriendo un nodeit en un VPS de $20/mes está contribuyendo a una red que ninguna entidad sola controla. Gana USDC como compensación por trabajo real: mantener la infraestructura arriba, confirmar transacciones, responder rápido. Su stake es piel en el juego. Su reputación se calcula públicamente on-chain.
 
 Esto tiene consecuencias prácticas:
 
-- Un operador de nodo no puede ser presionado por una entidad externa para bloquear a un comercio sin que el resto de la red lo note.
+- Un operador de nodeit no puede ser presionado por una entidad externa para bloquear a un comercio sin que el resto de la red lo note.
 - El algoritmo de routing no se puede modificar para favorecer a ciertos comercios sin un RFC público y consenso comunitario.
 - Los contratos core no son upgradeables por una sola persona u organización.
 
@@ -134,7 +134,7 @@ La calidad técnica no es negociable. La velocidad tampoco. Las dos van juntas.
 Si llegaste hasta aquí, probablemente te interesa participar de alguna forma. Hay varias:
 
 - **Como desarrollador:** integra OpenRelay en un comercio real. El feedback de un usuario real vale más que mil issues de GitHub.
-- **Como operador de nodo:** corre un nodo en un VPS. Ganas USDC y contribuyes a la descentralización de la red.
+- **Como operador de nodeit:** corre un nodeit en un VPS. Ganas USDC y contribuyes a la descentralización de la red.
 - **Como contribuidor:** código, documentación, traducciones, ejemplos. Todo suma.
 - **Como comunicador:** escribe sobre OpenRelay en tu idioma, en tu comunidad local, en el contexto que conozcas mejor.
 
@@ -148,7 +148,7 @@ La apuesta es que una comunidad de desarrolladores, operadores y comercios en el
 
 No es la única alternativa. No es la definitiva. Pero es una opción real, y creemos que vale la pena construirla.
 
-El comercio en Oaxaca, el desarrollador en Bogotá, el operador de nodo en Madrid — todos pueden ser participantes de una infraestructura que los sirve, en lugar de extraer valor de ellos.
+El comercio en Oaxaca, el desarrollador en Bogotá, el operador de nodeit en Madrid — todos pueden ser participantes de una infraestructura que los sirve, en lugar de extraer valor de ellos.
 
 Por eso existe OpenRelay.
 
@@ -156,4 +156,4 @@ Por eso existe OpenRelay.
 
 *OpenRelay es código abierto bajo Apache License 2.0.*
 *Contribuye en: github.com/lacasoft/openrelay*
-*Corre un nodo. Construye la alternativa.*
+*Corre un nodeit. Construye la alternativa.*

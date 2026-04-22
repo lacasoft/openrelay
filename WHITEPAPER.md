@@ -10,7 +10,7 @@ _Abril 2026_
 
 ## Resumen Ejecutivo
 
-OpenRelay es una red de enrutamiento de pagos de código abierto. Cualquiera puede operar un nodo, cualquier comercio puede recibir pagos en USDC con cero comisiones, y los desarrolladores tienen una experiencia similar a Stripe: SDK limpios, webhooks, payment intents.
+OpenRelay es una red de enrutamiento de pagos de código abierto. Cualquiera puede operar un nodeit, cualquier comercio puede recibir pagos en USDC con cero comisiones, y los desarrolladores tienen una experiencia similar a Stripe: SDK limpios, webhooks, payment intents.
 
 Lo que ofrecemos:
 
@@ -35,14 +35,14 @@ Pero hoy las opciones son limitadas:
 |----------|----------|
 | Stripe | 2.9% + $0.30, no llega a todo LATAM |
 | Mercado Pago, Clip, Conekta | Comisiones similares, ecosistemas cerrados |
-| BTCPay Server | Excelente pero solo BTC, sin red de nodos, DX más pesada |
+| BTCPay Server | Excelente pero solo BTC, sin red de nodeits, DX más pesada |
 
 No existe una opción que sea todo esto a la vez:
 
 - Código abierto
 - Comisiones casi cero
 - Fácil de integrar como Stripe
-- Con una red comunitaria de nodos
+- Con una red comunitaria de nodeits
 - Que hable español como ciudadano de primera clase
 
 Esa es la razón de OpenRelay.
@@ -51,7 +51,7 @@ Esa es la razón de OpenRelay.
 
 - **Comercios** que quieren dejar de pagar 3% por cada venta
 - **Desarrolladores** que quieren integrar pagos en minutos, no semanas
-- **Operadores de nodo** que quieren ganar USDC enrutando transacciones
+- **Operadores de nodeit** que quieren ganar USDC enrutando transacciones
 - **Proyectos de IA** que necesitan micropagos máquina→máquina
 - **Comunidades crypto** que quieren participar en infraestructura real
 
@@ -61,6 +61,8 @@ No necesitas ser experto en blockchain. Si sabes usar Stripe, sabes usar OpenRel
 
 ## 2. Qué hace OpenRelay
 
+> **Sobre la terminología:** El protocolo OpenRelay define una red de **nodos** — servidores que facilitan el enrutamiento de pagos entre cliente y comercio. **`nodeit`** es la implementación de referencia: el daemon open source que estoy desarrollando. Cualquier daemon compatible con el protocolo puede registrarse en el `NodeRegistry`; el mío se llama `nodeit`. En el resto de este documento uso **nodeit** cuando hablo de una instancia concreta del software de referencia, y reservo *nodo* para las especificaciones técnicas del protocolo (ver `PROTOCOL.md`).
+
 ### 2.1 Modelo de pagos
 
 OpenRelay es una capa de enrutamiento. No es un banco, no es un gateway fiat, no custodia dinero.
@@ -69,29 +71,29 @@ OpenRelay es una capa de enrutamiento. No es un banco, no es un gateway fiat, no
 Cliente → (paga USDC directo) → Comercio
               ↑
               │
-         Nodo OpenRelay
+         Nodeit OpenRelay
     (observa, confirma, cobra fee)
 ```
 
-El nodo nunca toca los fondos. Solo confirma que la transacción ocurrió y avisa al comercio via webhook.
+El nodeit nunca toca los fondos. Solo confirma que la transacción ocurrió y avisa al comercio via webhook.
 
 ### 2.2 Dos formas de usarlo
 
 **Autoalojado (0% comisión)**
 
-- Corres tu propio nodo + API
+- Corres tu propio nodeit + API
 - Costo: ~$20-40/mes de VPS
 - Ideal si mueves >$5,000/mes
 
 **Red comunitaria (0.05% comisión)**
 
-- Usas los nodos de otros operadores
+- Usas los nodeits de otros operadores
 - Pagas 50 centavos por cada $1,000
 - Ideal para empezar sin operar infraestructura
 
-### 2.3 Incentivos para operadores de nodo
+### 2.3 Incentivos para operadores de nodeit
 
-Cualquiera puede operar un nodo. Solo necesitas:
+Cualquiera puede operar un nodeit. Solo necesitas:
 
 1. Depositar el `minStake` on-chain (**100 USDC en mainnet · 40 USDC en Sepolia testnet**). El stake es recuperable vía `StakeManager.withdraw()` con timelock de 7 días. El guardian puede aumentar `minStake` conforme la red madura — nunca reducirlo — sin afectar a operadores ya registrados.
 2. Correr el software en un VPS (~$20/mes)
@@ -129,9 +131,9 @@ No hay token. No hay mining. Solo trabajo real por pago real.
 
 Tres contratos en Base:
 
-- **NodeRegistry:** registro público de nodos, cualquiera se registra con stake ≥ `minStake` (100 USDC mainnet · 40 USDC testnet; ajustable por guardian, solo incrementos)
+- **NodeRegistry:** registro público de nodeits, cualquiera se registra con stake ≥ `minStake` (100 USDC mainnet · 40 USDC testnet; ajustable por guardian, solo incrementos)
 - **StakeManager:** depósitos, retiros con timelock 7 días, slashing por disputas
-- **DisputeResolver:** si un nodo no responde en 48 horas, pierde stake automático. Árbitros gestionados por multisig 3-de-5
+- **DisputeResolver:** si un nodeit no responde en 48 horas, pierde stake automático. Árbitros gestionados por multisig 3-de-5
 
 Los tres contratos incluyen:
 - Guardian con capacidad de pausa de emergencia (ver sección 5.2)
@@ -150,22 +152,22 @@ const intent = await openrelay.paymentIntents.create({
   webhookUrl: 'https://micomercio.com/webhook'
 })
 
-// 2. El motor asigna los 5 mejores nodos según score
+// 2. El motor asigna los 5 mejores nodeits según score
 //    (uptime, velocidad, stake, historial)
 
 // 3. El cliente paga directo al wallet del comercio
-//    (el nodo nunca intercepta los fondos)
+//    (el nodeit nunca intercepta los fondos)
 
-// 4. El nodo detecta la confirmación on-chain via viem
+// 4. El nodeit detecta la confirmación on-chain via viem
 
 // 5. Webhook al comercio: status = 'settled'
 
-// 6. El nodo cobra su fee (0.04%), el treasury recibe 0.01%
+// 6. El nodeit cobra su fee (0.04%), el treasury recibe 0.01%
 ```
 
 ### 3.4 Sistema de scoring
 
-Cada nodo tiene un score público:
+Cada nodeit tiene un score público:
 
 ```
 Score = (uptime_30d × 0.30)
@@ -174,7 +176,7 @@ Score = (uptime_30d × 0.30)
       + (ratio_disputes_ganados × 0.20)
 ```
 
-Un nodo con mal comportamiento pierde tráfico orgánicamente — sin que nadie lo expulse. Un nodo con excelente historial gana más tráfico y más fees.
+Un nodeit con mal comportamiento pierde tráfico orgánicamente — sin que nadie lo expulse. Un nodeit con excelente historial gana más tráfico y más fees.
 
 ### 3.5 x402 — Pagos para agentes de IA
 
@@ -229,7 +231,7 @@ Stripe no puede hacer micropagos de $0.001 (el fee mínimo lo hace inviable). No
 
 Distribución del 0.05%:
 
-- **80%** → operador del nodo (USDC)
+- **80%** → operador del nodeit (USDC)
 - **20%** → treasury del protocolo
 
 ### 4.2 Economía del operador
@@ -241,7 +243,7 @@ Los ingresos del operador escalan con el volumen de la red. Dos escenarios:
 ```
 Volumen mensual  = 1 comercio mediano × $50,000
 Fee total        = $50,000 × 0.0005 = $25
-Ingreso del nodo = $25 × 0.80 = $20/mes en USDC
+Ingreso del nodeit = $25 × 0.80 = $20/mes en USDC
 
 Resultado: cubre el VPS, no te hace rico. Es un experimento.
 ```
@@ -251,7 +253,7 @@ Resultado: cubre el VPS, no te hace rico. Es un experimento.
 ```
 Volumen mensual  = 1,000 tx/día × $50 promedio × 30 días = $1,500,000
 Fee total        = $1,500,000 × 0.0005 = $750
-Ingreso del nodo = $750 × 0.80 = $600/mes en USDC
+Ingreso del nodeit = $750 × 0.80 = $600/mes en USDC
 
 Resultado: ingreso real, no sueldo completo.
 ```
@@ -295,19 +297,19 @@ En Fase 3, el treasury se gestiona por gobernanza on-chain.
 
 | Amenaza | Mitigación |
 |---------|------------|
-| Nodo roba fondos | Imposible — los fondos nunca pasan por nodos |
-| Nodo cobra sin liquidar | Disputa + slashing del stake |
+| Nodeit roba fondos | Imposible — los fondos nunca pasan por nodeits |
+| Nodeit cobra sin liquidar | Disputa + slashing del stake |
 | Ataque Sybil | Stake mínimo 100 USDC |
 | Exit scam | Timelock 7 días para retirar stake |
 | Replay de pagos x402 | Redis `SET NX` + hash de tx en DB |
 | Double-spend | Confirmación on-chain requerida |
-| Llave HMAC comprometida | Por-nodo, rotable sin downtime |
+| Llave HMAC comprometida | Por-nodeit, rotable sin downtime |
 
 ### 5.2 Mecanismos de protección
 
 - **Pausa de emergencia:** Guardian puede pausar contratos si se detecta un exploit
 - **Multisig para gobernanza:** Agregar árbitros requiere 3-de-5 aprobaciones
-- **HMAC-SHA256:** Comunicación API↔Node firmada con ventana de 60 segundos
+- **HMAC-SHA256:** Comunicación API↔Nodeit firmada con ventana de 60 segundos
 - **Replay atómico:** Redis `SET NX` previene doble uso de transacciones x402
 - **Rate limiting:** 100 req/min por API key con Redis
 - **SSRF protection:** URLs de webhooks validadas contra rangos IP privados
@@ -318,7 +320,7 @@ En Fase 3, el treasury se gestiona por gobernanza on-chain.
 Antes de mainnet:
 
 1. Tres contratos inteligentes — firma independiente
-2. Daemon del nodo — revisión HMAC e implementación de llaves
+2. Daemon del nodeit — revisión HMAC e implementación de llaves
 3. API — penetration test de autenticación y webhooks
 
 Los reportes se publicarán en el repositorio público.
@@ -351,7 +353,7 @@ Los reportes se publicarán en el repositorio público.
 - **Deploy en Base Sepolia live** con contratos verificados en Basescan (ver `packages/contracts/deployments/sepolia.json`)
 - SDK JS/Python/PHP publicables, con tests
 - REST API completa (payment intents, webhooks, x402) con 60+ tests
-- Daemon del nodo con verificación on-chain real via viem
+- Daemon del nodeit con verificación on-chain real via viem
 - Derivación HD wallet para direcciones de pago únicas por intent
 - Webhook queue persistente en Redis (tolerante a crashes)
 - Docker Compose levanta el stack completo en un comando
@@ -366,7 +368,7 @@ Seamos honestos:
 - **Solo USDC en Base.** No hay BTC/Lightning, ni Polygon, ni Solana hasta Fase 2+.
 - **Sin on-ramps fiat.** SPEI y Oxxo Pay son Fase 2. Hoy el merchant necesita que el cliente ya tenga USDC.
 - **Dashboard de merchant es placeholder.** En Fase 1 se opera via SDK y CLI. UI web viene en Fase 2.
-- **Red comunitaria no existe aún.** En Fase 1 corres tu propio nodo. La red permissionless abre en Fase 2.
+- **Red comunitaria no existe aún.** En Fase 1 corres tu propio nodeit. La red permissionless abre en Fase 2.
 - **Routing engine incompleto.** El scoring está especificado pero en Fase 1 se usa un bootstrap node simple.
 
 Si estás evaluando OpenRelay para producción hoy: es viable en modo autoalojado para comercios técnicos que quieran pagos USDC directos, no para un reemplazo de Stripe todavía.
@@ -391,11 +393,11 @@ Si estás evaluando OpenRelay para producción hoy: es viable en modo autoalojad
 
 ### Fase 2 — Red (meses 4-10)
 
-- Registro permissionless de nodos en Base mainnet
+- Registro permissionless de nodeits en Base mainnet
 - Motor de routing con reputación on-chain
 - Plugin WooCommerce
 - Dashboard de comercio (Next.js)
-- Primeros nodos comunitarios (México, España, Argentina)
+- Primeros nodeits comunitarios (México, España, Argentina)
 - Integración SPEI / Oxxo Pay (efectivo → USDC)
 - Lightning Network (BTC)
 
@@ -409,7 +411,7 @@ Si estás evaluando OpenRelay para producción hoy: es viable en modo autoalojad
 ### Criterios para v1.0
 
 1. Auditoría completa desplegada en Base mainnet
-2. ≥10 nodos comunitarios independientes activos
+2. ≥10 nodeits comunitarios independientes activos
 3. SDK en producción en al menos un comercio real
 
 ---
@@ -436,10 +438,10 @@ const intent = await client.paymentIntents.create({
 })
 ```
 
-### Operadores de nodo
+### Operadores de nodeit
 
 ```bash
-# Registrar nodo on-chain (stake >= minStake: 100 USDC mainnet · 40 USDC testnet)
+# Registrar nodeit on-chain (stake >= minStake: 100 USDC mainnet · 40 USDC testnet)
 # Correr el daemon
 npm run node:start
 ```
@@ -484,7 +486,7 @@ minStake (Sepolia)       =  40,000,000   ( 40 USDC) — initial value at deploy
                            adjustable by guardian via NodeRegistry.updateMinStake(),
                            increase-only (never reduced).
 PROTOCOL_FEE_BPS         = 50            (0.05%)
-NODE_FEE_SHARE           = 0.80          (80% al nodo)
+NODE_FEE_SHARE           = 0.80          (80% al nodeit)
 TREASURY_FEE_SHARE       = 0.20          (20% al treasury)
 DEFAULT_INTENT_TTL       = 1800          (30 minutos)
 DISPUTE_WINDOW_DAYS      = 7
@@ -501,9 +503,11 @@ SCORE_CACHE_TTL          = 60 segundos
 
 **Payment Intent** — La unidad fundamental de OpenRelay. Representa una intención de pago con un ciclo de vida definido: `created → routing → pending_payment → confirming → settled`.
 
-**Nodo** — Servidor registrado on-chain que facilita el enrutamiento de pagos. Observa transacciones y confirma settlements. Nunca custodia fondos.
+**Nodo** — Concepto del protocolo: servidor registrado on-chain que facilita el enrutamiento de pagos. Observa transacciones y confirma settlements. Nunca custodia fondos. Ver `PROTOCOL.md` para la especificación técnica.
 
-**Stake** — USDC depositado por un operador de nodo como garantía económica de buen comportamiento.
+**Nodeit** — La implementación de referencia de un nodo OpenRelay. El daemon open source distribuido por este proyecto. Cualquier daemon compatible con el protocolo puede actuar como nodo; nuestro daemon se llama `nodeit` (ver `packages/node/` en el repo).
+
+**Stake** — USDC depositado por un operador de nodeit como garantía económica de buen comportamiento.
 
 **Slashing** — Reducción forzada del stake como consecuencia de perder un dispute.
 
